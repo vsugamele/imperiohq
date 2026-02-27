@@ -2211,8 +2211,33 @@
           <span class="badge"
             style="background:rgba(0,255,200,.12);color:#00ffc8;font-size:9px;padding:1px 6px">8</span>
         </div>
+        <div class="nav-item" id="nav-cron" onclick="showCron()">
+          <span class="icon">⏱️</span> Cron Jobs
+          <span class="badge" id="cron-fail-badge"
+            style="background:rgba(224,92,92,.2);color:#e05c5c;display:none">!</span>
+        </div>
+        <div class="nav-item" id="nav-skills" onclick="showSkills()">
+          <span class="icon">🔧</span> Skills
+        </div>
       </div>
     </div>
+
+    <!-- CRON VIEW -->
+<div id="view-cron" class="panel" style="height:100%;overflow-y:auto;padding:20px">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+    <div style="font-size:18px;font-weight:700;color:var(--text)">⏱️ Cron Jobs</div>
+    <button onclick="renderCron()" style="background:rgba(212,175,55,.1);color:var(--gold);border:1px solid rgba(212,175,55,.3);padding:4px 12px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer">↻ Refresh</button>
+  </div>
+  <div style="font-size:12px;color:var(--text3);margin-bottom:16px">Automações agendadas — status em tempo real</div>
+  <div id="cron-body"></div>
+</div>
+
+<!-- SKILLS VIEW -->
+<div id="view-skills" class="panel" style="height:100%;overflow-y:auto;padding:20px">
+  <div style="font-size:18px;font-weight:700;color:var(--text);margin-bottom:4px">🔧 Skills</div>
+  <div style="font-size:12px;color:var(--text3);margin-bottom:16px">Skills disponíveis no OpenClaw — capacidades da IA</div>
+  <div id="skills-body"></div>
+</div>
 
     <!-- MAIN -->
     <div id="main">
@@ -4010,6 +4035,36 @@
         assets: []
       },
       {
+        id: 'jonathan', icon: '🎰', categoria: 'iGaming', vertical_color: 'var(--red-bright)',
+        nome: 'Jonathan', produto: 'iGaming / Jonathan', preco: '', status: 'Ativo', vende: false,
+        objetivo: 'Escala em iGaming', orcamento_trafego: 'A definir',
+        links: { site: '', ads: '', analytics: '', criativos: '' }, contexto: '',
+        avatar: { externo: '', interno: '', dores_superficiais: [], dores_profundas: [], medos: [], objecoes: [], inimigo: '', resultado_sonhado: '', trigger_event: '', fase_consciencia: '', sub_avatares: [], storyboard: [] },
+        pipeline: { avatar: 0, funil: 0, copy: 0, prompts: 0, design: 0, trafego: 0 },
+        branding: { arquetipo: '', manifesto: '', mecanismo_key: '', inimigo_comum: '', linguagem: { usa: [], evita: [] }, cores: '', personalidade: '' },
+        kpis: { thumbstop: null, ctr: null, cpm: null, cpc: null, roas: null, ltv: null, cac: null, cvr: null, meta: { roas_target: null, cpa_target: null } }, assets: []
+      },
+      {
+        id: 'pedro', icon: '🎰', categoria: 'iGaming', vertical_color: 'var(--red-bright)',
+        nome: 'Pedro', produto: 'iGaming / Pedro', preco: '', status: 'Ativo', vende: false,
+        objetivo: 'Escala em iGaming', orcamento_trafego: 'A definir',
+        links: { site: '', ads: '', analytics: '', criativos: '' }, contexto: '',
+        avatar: { externo: '', interno: '', dores_superficiais: [], dores_profundas: [], medos: [], objecoes: [], inimigo: '', resultado_sonhado: '', trigger_event: '', fase_consciencia: '', sub_avatares: [], storyboard: [] },
+        pipeline: { avatar: 0, funil: 0, copy: 0, prompts: 0, design: 0, trafego: 0 },
+        branding: { arquetipo: '', manifesto: '', mecanismo_key: '', inimigo_comum: '', linguagem: { usa: [], evita: [] }, cores: '', personalidade: '' },
+        kpis: { thumbstop: null, ctr: null, cpm: null, cpc: null, roas: null, ltv: null, cac: null, cvr: null, meta: { roas_target: null, cpa_target: null } }, assets: []
+      },
+      {
+        id: 'theo', icon: '🎰', categoria: 'iGaming', vertical_color: 'var(--red-bright)',
+        nome: 'Theo', produto: 'iGaming / Theo', preco: '', status: 'Ativo', vende: false,
+        objetivo: 'Escala em iGaming', orcamento_trafego: 'A definir',
+        links: { site: '', ads: '', analytics: '', criativos: '' }, contexto: '',
+        avatar: { externo: '', interno: '', dores_superficiais: [], dores_profundas: [], medos: [], objecoes: [], inimigo: '', resultado_sonhado: '', trigger_event: '', fase_consciencia: '', sub_avatares: [], storyboard: [] },
+        pipeline: { avatar: 0, funil: 0, copy: 0, prompts: 0, design: 0, trafego: 0 },
+        branding: { arquetipo: '', manifesto: '', mecanismo_key: '', inimigo_comum: '', linguagem: { usa: [], evita: [] }, cores: '', personalidade: '' },
+        kpis: { thumbstop: null, ctr: null, cpm: null, cpc: null, roas: null, ltv: null, cac: null, cvr: null, meta: { roas_target: null, cpa_target: null } }, assets: []
+      },
+      {
         id: 'vinicius_v', icon: '🎰', categoria: 'iGaming', vertical_color: 'var(--red-bright)',
         nome: 'Vinicius Vieira — Aviator', produto: 'Afiliada Aviator', preco: 'Comissão', status: 'Ativo',
         vende: false, objetivo: 'Meta Ads + TikTok/Instagram para captação de afiliados Aviator',
@@ -4402,12 +4457,16 @@
       const saved = localStorage.getItem('imperio_projects_custom');
       if (saved) {
         const custom = JSON.parse(saved);
-        return [...PROJECTS_SEED, ...custom];
+        const map = new Map();
+        [...PROJECTS_SEED, ...custom].forEach(p => map.set(p.id, p));
+        return Array.from(map.values());
       }
       return [...PROJECTS_SEED];
     }
     function projectsSaveCustom(customArr) {
       localStorage.setItem('imperio_projects_custom', JSON.stringify(customArr));
+      PROJECTS = projectsLoad();
+      window.projects = PROJECTS;
     }
     function projectsGetCustom() {
       return JSON.parse(localStorage.getItem('imperio_projects_custom') || '[]');
@@ -5440,6 +5499,7 @@ Analise e retorne:
         html += '<div style="display:flex;flex-direction:column;gap:8px">';
         p.assets.forEach((a, i) => {
           const statusColor = a.status === 'Aprovado' ? 'var(--green-bright)' : a.status === 'Rodando' ? 'var(--gold)' : 'var(--text3)';
+          const relDoc = (DOCS || []).find(d => d.project === p.nome && (d.title || '').trim().toLowerCase() === (a.nome || '').trim().toLowerCase());
           html += `<div class="asset-card">
             <div class="asset-icon">${a.icon || '📄'}</div>
             <div class="asset-info">
@@ -5450,6 +5510,7 @@ Analise e retorne:
             <div class="asset-actions">
               <span style="font-size:10px;padding:2px 8px;border-radius:10px;color:${statusColor};border:1px solid ${statusColor}">${a.status}</span>
               ${a.url ? `<a href="${a.url}" target="_blank" class="btn btn-sm btn-outline" style="margin-left:4px;text-decoration:none">Abrir</a>` : ''}
+              ${!a.url && relDoc ? `<button class="btn btn-sm btn-outline" style="margin-left:4px" onclick="openDocModal(null,'${relDoc.id}')">Abrir Doc</button>` : ''}
               <button class="btn btn-sm btn-outline" style="color:#e05c5c;border-color:#e05c5c;margin-left:4px" onclick="removeAsset(${i})">✕</button>
             </div>
           </div>`;
@@ -5987,8 +6048,9 @@ Analise e retorne:
 
     function knUid() { return Math.random().toString(36).slice(2, 10); }
     function knLoad() {
+      // Evita semear cards locais fake; Supabase é a fonte principal.
       let d = JSON.parse(localStorage.getItem('imperio_kanban') || 'null');
-      if (!d) { d = knSeed(); knSave(d); }
+      if (!d) d = [];
       return d;
     }
     let knCards = knLoad();
@@ -6288,6 +6350,7 @@ Analise e retorne:
         { id: docsUid(), title: 'Copy — Anúncios Fundo de Funil', cat: 'Copy', project: '', tags: ['copy', 'anúncio', 'conversão'], body: `# Templates de Copy — Fundo de Funil\n\n## Template 1 — Prova Social\n"[Nome] saiu de R$0 para R$[valor] em [tempo] usando [método]. Sem [objeção]. Clica e vê como funciona."\n\n## Template 2 — Urgência\n"Última vez que abrimos em [ano], esgotou em [X] horas. Estamos abrindo [X] vagas agora. Não garanto que vai estar disponível amanhã."\n\n## Template 3 — Inversão de Risco\n"Entra, aplica, e se em [prazo] não funcionar, eu devolvo cada centavo. Sem perguntas. Sem burocracia."\n\n## Template 4 — Dor Direta\n"Você ainda está [situação dolorosa]? Isso não é falta de esforço. É falta de [solução]. É exatamente isso que o [produto] resolve."`, created: now, updated: now },
 
         // ── GUIAS GLOBAIS ─────────────────────────────────────────
+        { id: docsUid(), title: 'Império X OS — Arquitetura Completa', cat: 'Framework', project: '', tags: ['sistema', 'os', 'arquitetura'], body: `<iframe src="imperio-x-os.html" style="width:100%; height:80vh; border:none; border-radius:12px;"></iframe>`, created: now, updated: now },
         { id: docsUid(), title: 'Império OS — Guia de Operação', cat: 'Framework', project: '', tags: ['sistema', 'os', 'agentes', 'ia'], body: `# ⚡ Império OS — Guia de Operação\n\n## O que é o Império OS\nO Império OS é um sistema operacional para negócios digitais. Organiza projetos, avatares, agentes de IA, documentação e tarefas em uma interface unificada.\n\n## Arquitetura\n\n\'\'\'\nPROJETOS → cada negócio / produto / campanha\n  ├── Briefing     → objetivo, produto, links, contexto\n  ├── Avatar       → psicologia completa do cliente\n  ├── Branding     → arquétipo, tom de voz, mecanismo\n  ├── KPIs         → métricas de performance\n  ├── Pipeline     → % de evolução por área\n  ├── Assets       → biblioteca de criativos\n  ├── Docs         → SOPs, roteiros, guias do projeto\n  └── Kanban       → tarefas ativas\n\nKNOWLEDGE BASE → conhecimento estático da empresa\nDOCS GLOBAIS   → referências que transcendem projetos\nCONTEXTO IA   → gera prompt estruturado\n\'\'\'\n\n## Fluxo de Execução por Agente\n1. Recebe task com nome do projeto\n2. Lê Briefing → entende o negócio\n3. Lê Avatar → entende para quem fala\n4. Lê Branding → entende como falar\n5. Consulta Docs do projeto (SOPs, roteiros)\n6. Consulta KB (frameworks, métodos)\n7. Executa a task\n8. Documenta output nos Docs\n9. Atualiza Kanban\n\n## Regras de Ouro\n- Nunca crie copy sem ler o avatar completo\n- Sempre use o tom de voz do branding como filtro\n- Consulte SOPs antes de executar processos recorrentes\n- Documente tudo — o sistema cresce com uso\n- O Kanban reflete a realidade — atualize sempre\n\n## Hierarquia de Prioridade\n1. Projetos Vendendo → manter e escalar\n2. Projetos Ativo → acelerar pipeline\n3. Projetos Em Construção → completar foundation\n4. Projetos Pausado → reavaliar ou arquivar`, created: now, updated: now },
 
         { id: docsUid(), title: 'Fórmula Mágica de Avatar — Template', cat: 'Avatar', project: '', tags: ['avatar', 'formula', 'dores', 'desejos', 'interno', 'externo'], body: `# 👤 Fórmula Mágica de Avatar\n\n> Use este template para mapear qualquer avatar. Preencha do externo para o interno.\n\n---\n\n## 🎯 Desejo Externo\n*O que o avatar diz em voz alta que quer.*\n\n[Ex: "Quero ganhar dinheiro na internet sem depender de chefe"]\n\n---\n\n## ❤️ Desejo Interno\n*O que ele quer SENTIR. Identidade, status, liberdade, aprovação.*\n\n[Ex: "Quero provar para minha família que sou capaz"]\n\n---\n\n## 😤 Dores Superficiais\n*O que ele descreve quando você pergunta qual é o problema.*\n\n- [Dor 1]\n- [Dor 2]\n\n---\n\n## 🩸 Dores Profundas\n*Vergonha, medo de julgamento, medos existenciais. Raramente dito em voz alta.*\n\n- [Dor profunda 1]\n- [Dor profunda 2]\n\n---\n\n## 😱 Medos\n*O cenário que paralisa.*\n\n- [Medo 1]\n- [Medo 2]\n\n---\n\n## 🤔 Objeções\n*Os "mas e se..." na cabeça dele. Por que ele ainda não agiu.*\n\n- [Objeção 1]\n- [Objeção 2]\n\n---\n\n## 👹 Inimigo Externo\n*Quem ou o quê está bloqueando o resultado. Use para criar "nós vs eles".*\n\n[Ex: O sistema financeiro que fecha portas para quem não tem diploma]\n\n---\n\n## 🌟 Resultado Sonhado\n*A transformação completa. O "depois". Seja específico: número, tempo, sensação.*\n\n[Ex: R$10k/mês, 4h/dia, de onde quiser, sem chefe]\n\n---\n\n## ⚡ Trigger Event\n*O que aconteceu que fez ele buscar solução AGORA.*\n\n[Ex: Demissão, discussão, conta no vermelho, amigo que conseguiu]\n\n---\n\n## 🧠 Fase de Consciência\n- [ ] Inconsciente do problema\n- [ ] Consciente do problema, não da solução\n- [ ] Consciente da solução, não do produto\n- [ ] Consciente do produto\n- [ ] Mais consciente / pronto para comprar\n\n---\n\n## 👥 Sub-Avatares\n| Nome | Descrição | Urgência (1-10) | Poder de Compra (1-10) |\n|------|-----------|-----------------|------------------------|\n| [Nome] | [Desc] | | |\n\n---\n\n## 📖 Storyboard\n**Antes:** [Situação inicial]\n\n**Trigger:** [O momento que muda tudo]\n\n**Busca:** [Como ele pesquisa — o que vê, o que compara]\n\n**Decisão:** [Por que escolhe você e não o concorrente]`, created: now, updated: now },
@@ -7574,6 +7637,7 @@ Registre aqui o que funcionou e o que não funcionou. Este é o CÉREBRO ESTRAT�
       renderSidebar();
     }
     function renderSidebar() {
+      window.projects = PROJECTS;
       const cats = {};
       // Separate root projects and subprojects
       const rootProjects = PROJECTS.filter(p => !p.parent_id);
@@ -8005,6 +8069,9 @@ Registre aqui o que funcionou e o que não funcionou. Este é o CÉREBRO ESTRAT�
             ${!item.url.match(/\.(jpg|jpeg|png|gif|webp|svg|avif)/i) ? `<div style="height:80px;display:flex;align-items:center;justify-content:center;font-size:28px">${icon}</div>` : ''}
             <div style="padding:8px">
               <div style="font-size:11px;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${item.legenda || item.url}</div>
+              <div style="display:flex;gap:6px;margin-top:6px">
+                <a href="${item.url}" target="_blank" class="btn btn-sm btn-outline" style="font-size:10px;text-decoration:none">Abrir</a>
+              </div>
             </div>
             <button onclick="removeMidia('${key}',${i})" style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,.7);border:none;color:#e05c5c;border-radius:4px;cursor:pointer;font-size:11px;padding:2px 7px">✕</button>
           </div>`).join('');
@@ -8059,10 +8126,30 @@ Registre aqui o que funcionou e o que não funcionou. Este é o CÉREBRO ESTRAT�
     // ═══════════════════════════════════════════════════════
     //  EQUIPE
     // ═══════════════════════════════════════════════════════
-    let EQUIPE = JSON.parse(localStorage.getItem('imperio_equipe') || '[]');
+    const EQUIPE_SEED = [
+      { id: 'mb_vinicius', emoji: '⚡', nome: 'Vinicius', cargo: 'Founder / Operações', foto: '', email: '', whatsapp: '', especialidade: 'Estratégia e operação', status: 'Ativo' },
+      { id: 'mb_bruno', emoji: '🧠', nome: 'Bruno', cargo: 'Operações', foto: '', email: '', whatsapp: '', especialidade: 'Execução operacional', status: 'Ativo' },
+      { id: 'mb_taisa', emoji: '🎯', nome: 'Taísa', cargo: 'Marketing', foto: '', email: '', whatsapp: '', especialidade: 'Conteúdo e gestão', status: 'Ativo' },
+      { id: 'mb_wagner', emoji: '🛠️', nome: 'Wagner', cargo: 'Tech / Suporte', foto: '', email: '', whatsapp: '', especialidade: 'Integrações e suporte', status: 'Ativo' },
+      { id: 'mb_arthur', emoji: '🚀', nome: 'Arthur', cargo: 'Growth', foto: '', email: '', whatsapp: '', especialidade: 'Growth e performance', status: 'Ativo' },
+      { id: 'mb_alessandra', emoji: '📋', nome: 'Alessandra', cargo: 'Projetos', foto: '', email: '', whatsapp: '', especialidade: 'Coordenação de projetos', status: 'Ativo' }
+    ];
+
+    function mergeEquipeSeed(existing) {
+      const out = Array.isArray(existing) ? [...existing] : [];
+      const norm = (s) => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+      const byName = new Set(out.map(m => norm(m.nome)));
+      EQUIPE_SEED.forEach(seed => {
+        if (!byName.has(norm(seed.nome))) out.push(seed);
+      });
+      return out;
+    }
+
+    let EQUIPE = mergeEquipeSeed(JSON.parse(localStorage.getItem('imperio_equipe') || '[]'));
     let editingMembroIdx = -1;
 
     function saveEquipe() { localStorage.setItem('imperio_equipe', JSON.stringify(EQUIPE)); }
+    saveEquipe();
 
     function showEquipe() {
       showSection('equipe');
@@ -8224,6 +8311,111 @@ Registre aqui o que funcionou e o que não funcionou. Este é o CÉREBRO ESTRAT�
       renderOCStep();
     }
 
+    // ═══════════════════════════════════════════════════════
+    //  CRON JOBS
+    // ═══════════════════════════════════════════════════════
+    const CRON_JOBS = [
+      { id: 'igaming_schedule', name: 'iGaming — Agendamento D+1', schedule: '07:05 BRT diário', scripts: ['scripts/schedule-next-day.js teo', 'schedule-next-day.js jonathan', 'schedule-next-day.js laise', 'schedule-next-day.js pedro'], desc: '24 posts/dia para 4 perfis iGaming', project: 'laise', icon: '🎰' },
+      { id: 'petselect_schedule', name: 'PetSelectUK — Agendamento D+1', schedule: '07:15 BRT diário', scripts: ['scripts/petselect-schedule-next-day.js'], desc: '3 posts/dia — carousel, image, reels (London)', project: 'petselect', icon: '🛍️' },
+      { id: 'jp_schedule', name: 'JP Vídeo — Agendamento', schedule: '07:20 BRT diário', scripts: ['scripts/jp-schedule-next-day.js'], desc: '1 vídeo/dia JP Freitas', project: 'jp_freitas', icon: '🚀' },
+      { id: 'backup_drive', name: 'Backup → Drive', schedule: '07:30 BRT diário', scripts: ['scripts/backup-ops-to-drive.js'], desc: 'Backup IGAMING_OPS para Google Drive', project: 'automacao_black', icon: '☁️' },
+      { id: 'poll_upload', name: 'Poll Upload-Post + Supabase', schedule: '09:00 e 21:00 BRT', scripts: ['scripts/poll-upload-status.js 50', 'scripts/import-posting-log-to-supabase.js --limit 5000'], desc: 'Checa status de posts e sincroniza CSV → Supabase', project: 'automacao_black', icon: '📊' },
+      { id: 'autopilot', name: 'Ops Autopilot', schedule: 'A cada 6h', scripts: ['ops-dashboard/scripts/autopilot.ps1'], desc: 'Avalia doing/blocked, puxa backlog, atualiza Kanban', project: 'automacao_black', icon: '🤖' },
+      { id: 'heartbeat', name: 'Heartbeat (OpenClaw)', schedule: 'A cada 1h', scripts: ['heartbeat interno'], desc: 'Check de agenda, email, alertas e memória', project: 'automacao_black', icon: '💓' },
+    ];
+
+    function showCron() {
+      showSection('cron');
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      const nav = document.getElementById('nav-cron');
+      if (nav) nav.classList.add('active');
+      renderCron();
+    }
+
+    function renderCron() {
+      const el = document.getElementById('cron-body');
+      if (!el) return;
+      const now = new Date();
+      const statusColor = { ok: '#52b788', warn: 'var(--gold)', fail: '#e05c5c', unknown: 'var(--text3)' };
+
+      let html = `<div style="display:flex;flex-direction:column;gap:10px">`;
+      CRON_JOBS.forEach(job => {
+        const st = 'ok';
+        const col = statusColor[st];
+        html += `<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;display:flex;gap:14px;align-items:flex-start">
+          <div style="font-size:24px;flex-shrink:0">${job.icon}</div>
+          <div style="flex:1;min-width:0">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+              <div style="font-size:13px;font-weight:700;color:var(--text)">${job.name}</div>
+              <span style="font-size:10px;padding:2px 8px;border-radius:8px;color:${col};border:1px solid ${col}">● ${st.toUpperCase()}</span>
+            </div>
+            <div style="font-size:11px;color:var(--text3);margin-bottom:6px">${job.desc}</div>
+            <div style="display:flex;gap:12px;flex-wrap:wrap">
+              <span style="font-size:10px;color:var(--text3)">⏰ ${job.schedule}</span>
+              ${job.scripts.map(s => `<span style="font-size:10px;background:var(--surface2);color:var(--text3);padding:2px 8px;border-radius:4px;font-family:monospace">${s}</span>`).join('')}
+            </div>
+          </div>
+        </div>`;
+      });
+      html += `</div>`;
+      el.innerHTML = html;
+    }
+
+    // ═══════════════════════════════════════════════════════
+    //  SKILLS
+    // ═══════════════════════════════════════════════════════
+    const SKILLS_LIST = [
+      { id: 'coding-agent', name: 'Coding Agent', icon: '💻', desc: 'Delega tarefas de código para Codex, Claude Code ou Pi. Builds, refactors, PRs.', tags: ['código', 'automação', 'deploy'], status: 'ativo' },
+      { id: 'gemini', name: 'Gemini', icon: '✨', desc: 'Q&A, resumo e geração one-shot via Gemini CLI.', tags: ['ia', 'geração', 'texto'], status: 'ativo' },
+      { id: 'gh-issues', name: 'GitHub Issues', icon: '🐙', desc: 'Fetch issues, spawna agentes para fixes, abre PRs e monitora reviews.', tags: ['github', 'código', 'pr'], status: 'ativo' },
+      { id: 'github', name: 'GitHub CLI', icon: '📦', desc: 'Operações GitHub: issues, PRs, CI, logs via gh CLI.', tags: ['github', 'ci'], status: 'ativo' },
+      { id: 'google-sheets', name: 'Google Sheets', icon: '📊', desc: 'Lê e escreve planilhas Google Sheets via OAuth.', tags: ['sheets', 'dados'], status: 'ativo' },
+      { id: 'image-vision', name: 'Image Vision', icon: '👁️', desc: 'Analisa e descreve imagens com Gemini 2.0 Flash Vision.', tags: ['imagem', 'ia', 'análise'], status: 'ativo' },
+      { id: 'nano-banana-pro', name: 'Nano Banana Pro', icon: '🎨', desc: 'Gera/edita imagens via Gemini 3 Pro Image.', tags: ['imagem', 'geração'], status: 'ativo' },
+      { id: 'openai-image-gen', name: 'OpenAI Image Gen', icon: '🖼️', desc: 'Geração em lote de imagens via OpenAI Images API.', tags: ['imagem', 'openai'], status: 'ativo' },
+      { id: 'openai-whisper-api', name: 'Whisper API', icon: '🎙️', desc: 'Transcrição de áudio via OpenAI Whisper API.', tags: ['áudio', 'transcrição'], status: 'ativo' },
+      { id: 'remotion', name: 'Remotion', icon: '🎬', desc: 'Boas práticas para criação de vídeos com React/Remotion.', tags: ['vídeo', 'react'], status: 'ativo' },
+      { id: 'telegram-bot', name: 'Telegram Bot', icon: '📱', desc: 'Envia mensagens, alertas e interage via Telegram.', tags: ['telegram', 'mensagens'], status: 'ativo' },
+      { id: 'video-frames', name: 'Video Frames', icon: '🎞️', desc: 'Extrai frames e clipes de vídeos com ffmpeg.', tags: ['vídeo', 'ffmpeg'], status: 'ativo' },
+      { id: 'weather', name: 'Weather', icon: '🌤️', desc: 'Clima atual e previsão via wttr.in / Open-Meteo.', tags: ['clima'], status: 'ativo' },
+      { id: 'youtube', name: 'YouTube', icon: '▶️', desc: 'Resumo, transcrição e análise de vídeos YouTube.', tags: ['youtube', 'vídeo'], status: 'ativo' },
+      { id: 'skill-creator', name: 'Skill Creator', icon: '🛠️', desc: 'Cria e atualiza AgentSkills com scripts e assets.', tags: ['skills', 'dev'], status: 'ativo' },
+      { id: 'healthcheck', name: 'Healthcheck', icon: '🔒', desc: 'Auditoria de segurança e hardening do host OpenClaw.', tags: ['segurança', 'ops'], status: 'ativo' },
+    ];
+
+    function showSkills() {
+      showSection('skills');
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      const nav = document.getElementById('nav-skills');
+      if (nav) nav.classList.add('active');
+      renderSkills();
+    }
+
+    function renderSkills() {
+      const el = document.getElementById('skills-body');
+      if (!el) return;
+      const tagColor = 'rgba(212,175,55,.12)';
+      let html = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px">`;
+      SKILLS_LIST.forEach(skill => {
+        const col = skill.status === 'ativo' ? '#52b788' : '#e05c5c';
+        html += `<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="font-size:22px">${skill.icon}</span>
+            <div style="flex:1">
+              <div style="font-size:13px;font-weight:700;color:var(--text)">${skill.name}</div>
+              <span style="font-size:10px;color:${col}">● ${skill.status}</span>
+            </div>
+          </div>
+          <div style="font-size:11px;color:var(--text3);line-height:1.5">${skill.desc}</div>
+          <div style="display:flex;gap:4px;flex-wrap:wrap">
+            ${skill.tags.map(t => `<span style="font-size:10px;background:${tagColor};color:var(--gold);padding:2px 7px;border-radius:8px">${t}</span>`).join('')}
+          </div>
+        </div>`;
+      });
+      html += `</div>`;
+      el.innerHTML = html;
+    }
+
     function showWhatsApp() {
       showSection('whatsapp');
       document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -8271,7 +8463,7 @@ Registre aqui o que funcionou e o que não funcionou. Este é o CÉREBRO ESTRAT�
 
       if (ocCurrentStep === 1) {
         // Step 1 — Select Project
-        const projectOptions = (window.projects || []).map(p => `<option value="${p.id}" ${ocData.projectId === p.id ? 'selected' : ''}>${p.icon} ${p.nome}</option>`).join('');
+        const projectOptions = (window.projects || PROJECTS || []).map(p => `<option value="${p.id}" ${ocData.projectId === p.id ? 'selected' : ''}>${p.icon} ${p.nome}</option>`).join('');
         el.innerHTML = `
           <div class="card" style="margin-bottom:12px">
             <div class="card-title">📁 Selecionar Projeto</div>
@@ -8357,7 +8549,7 @@ Registre aqui o que funcionou e o que não funcionou. Este é o CÉREBRO ESTRAT�
             <div style="font-size:11px;color:var(--text3);margin-bottom:10px">Após gerar na OpenClaw, cole as URLs dos criativos abaixo para salvar diretamente no projeto.</div>
             <div class="brief-field"><div class="brief-label">Projeto destino</div>
               <select id="oc-save-proj" class="brief-input">
-                ${(window.projects || []).map(p => `<option value="${p.id}" ${ocData.projectId === p.id ? 'selected' : ''}>${p.icon} ${p.nome}</option>`).join('')}
+                ${(window.projects || PROJECTS || []).map(p => `<option value="${p.id}" ${ocData.projectId === p.id ? 'selected' : ''}>${p.icon} ${p.nome}</option>`).join('')}
               </select>
             </div>
             <div class="brief-field"><div class="brief-label">URLs dos Criativos (1 por linha)</div>
@@ -8374,7 +8566,7 @@ Registre aqui o que funcionou e o que não funcionou. Este é o CÉREBRO ESTRAT�
 
     function ocSelectProject(id, update = true) {
       if (update) ocData.projectId = id;
-      const p = (window.projects || []).find(x => x.id === id);
+      const p = (window.projects || PROJECTS || []).find(x => x.id === id);
       const el = document.getElementById('oc-proj-preview');
       if (!el) return;
       if (!p) { el.innerHTML = ''; return; }
@@ -8412,7 +8604,7 @@ Registre aqui o que funcionou e o que não funcionou. Este é o CÉREBRO ESTRAT�
     }
 
     function generateOCPrompt() {
-      const p = (window.projects || []).find(x => x.id === ocData.projectId);
+      const p = (window.projects || PROJECTS || []).find(x => x.id === ocData.projectId);
       const refs = JSON.parse(localStorage.getItem('imperio_referencias') || '[]');
       const selectedRefs = ocData.selectedRefs.map(i => refs[i]).filter(Boolean);
       const ex = p?.expert || {};
@@ -8472,7 +8664,7 @@ Gerado por Imperio HQ às ${new Date().toLocaleString('pt-BR')}`;
       if (!projId) { alert('Selecione um projeto'); return; }
       if (!urls.length) { alert('Cole ao menos uma URL de resultado'); return; }
 
-      const p = (window.projects || []).find(x => x.id === projId);
+      const p = (window.projects || PROJECTS || []).find(x => x.id === projId);
       if (!p) { alert('Projeto não encontrado'); return; }
       if (!p.assets) p.assets = [];
 
@@ -9023,8 +9215,8 @@ TOM: Analítico. Prático. Orientado a resultados. Sem romantismo sobre o que n�
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script>
     // ── Config ──────────────────────────────────────────
-    const SUPA_URL = 'https://tkbivipqiewkfnhktmqq.supabase.co';
-    const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRrYml2aXBxaWV3a2ZuaGt0bXFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg0NzY4NDgsImV4cCI6MjA1NDA1Mjg0OH0.2TnLj4lriG7eoPQWDo0mV8u8YHor6bd5ItZCHYhkym0';
+    const SUPA_URL = localStorage.getItem('imphq_supa_url') || 'https://tkbivipqiewkfnhktmqq.supabase.co';
+    const SUPA_KEY = localStorage.getItem('imphq_supa_anon') || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRrYml2aXBxaWV3a2ZuaGt0bXFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg0NzY4NDgsImV4cCI6MjA1NDA1Mjg0OH0.2TnLj4lriG7eoPQWDo0mV8u8YHor6bd5ItZCHYhkym0';
     const _sb = supabase.createClient(SUPA_URL, SUPA_KEY);
 
     // ── Helpers ─────────────────────────────────────────
@@ -9053,8 +9245,6 @@ TOM: Analítico. Prático. Orientado a resultados. Sem romantismo sobre o que n�
         const { data, error } = await _sb.from('imphq_projects').select('*').order('created_at');
         if (error) { console.warn('[SB] loadProjects', error); return; }
         if (!data || !data.length) return;
-        const existing = typeof projectsGetCustom === 'function' ? projectsGetCustom() : [];
-        const supaIds = data.map(r => r.id);
         const fromSupa = data.map(r => {
           const rich = r.data || {};
           return {
@@ -9075,8 +9265,8 @@ TOM: Analítico. Prático. Orientado a resultados. Sem romantismo sobre o que n�
             assets: rich.assets || []
           };
         });
-        const merged = [...existing.filter(p => !supaIds.includes(p.id)), ...fromSupa];
-        if (typeof projectsSaveCustom === 'function') projectsSaveCustom(merged);
+        // Supabase é a fonte da verdade para evitar duplicatas por resquício local
+        if (typeof projectsSaveCustom === 'function') projectsSaveCustom(fromSupa);
       },
       async upsertProject(proj) {
         if (!proj._custom) return;
@@ -9109,22 +9299,87 @@ TOM: Analítico. Prático. Orientado a resultados. Sem romantismo sobre o que n�
       async loadKanban() {
         const { data, error } = await _sb.from('imphq_kanban').select('*').order('order_idx');
         if (error) { console.warn('[SB] loadKanban', error); return; }
-        if (!data || !data.length) return;
         if (typeof knCards !== 'undefined' && Array.isArray(knCards)) {
-          const supaIds = data.map(r => r.id);
-          const local = knCards.filter(c => !supaIds.includes(c.id));
-          const fromSupa = data.map(r => ({ id: r.id, project: r.project_id, title: r.title, description: r.description, status: r.status || 'todo', priority: r.priority || 'normal', owner: r.assignee, deadline: r.due_date, tags: r.tags || [] }));
+          const fromSupa = (data || []).map(r => {
+            const proj = (typeof PROJECTS !== 'undefined' && Array.isArray(PROJECTS))
+              ? PROJECTS.find(p => p.id === r.project_id)
+              : null;
+            return {
+              id: r.id,
+              project: proj?.nome || proj?.name || r.project_id,
+              title: r.title,
+              description: r.description,
+              notes: r.description || '',
+              status: r.status || 'backlog',
+              priority: r.priority || 'media',
+              owner: r.assignee,
+              deadline: r.due_date,
+              tags: r.tags || []
+            };
+          });
+          // Supabase substitui completamente o local para evitar divergência.
           knCards.length = 0;
-          [...local, ...fromSupa].forEach(c => knCards.push(c));
+          fromSupa.forEach(c => knCards.push(c));
           const _orig = localStorage.setItem.bind(localStorage);
-          _orig('knCards', JSON.stringify(knCards));
+          _orig('imperio_kanban', JSON.stringify(knCards));
         }
       },
       async upsertCard(card) {
-        if (!card || !card.id || !card.project) return;
-        const row = { id: card.id, project_id: card.project, title: card.title, description: card.description || null, status: card.status || 'todo', priority: card.priority || 'normal', assignee: card.owner || null, due_date: card.deadline || null, tags: card.tags || [], order_idx: 0, updated_at: new Date().toISOString() };
+        if (!card || !card.id) return;
+        const projectRef = card.project || null;
+        let projectId = projectRef;
+        if (projectRef && typeof PROJECTS !== 'undefined' && Array.isArray(PROJECTS)) {
+          const byName = PROJECTS.find(p => p?.nome === projectRef || p?.name === projectRef);
+          if (byName?.id) projectId = byName.id;
+
+          if (!projectId && typeof projectRef === 'string') {
+            const slug = projectRef
+              .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+              .toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '')
+              .slice(0, 28) || ('proj_' + Date.now());
+            const autoProject = {
+              id: slug,
+              nome: projectRef,
+              categoria: 'Operação',
+              vertical_color: '#d4af37',
+              icon: '📁',
+              _custom: true,
+              status: 'Ativo',
+              vende: false,
+              produto: '',
+              preco: '',
+              objetivo: '',
+              contexto: '',
+              orcamento_trafego: 'A definir',
+              links: { site: '', ads: '', analytics: '', criativos: '' },
+              avatar: { externo: '', interno: '', dores_superficiais: [], dores_profundas: [], medos: [], objecoes: [], inimigo: '', resultado_sonhado: '', trigger_event: '', fase_consciencia: '', sub_avatares: [], storyboard: [] },
+              pipeline: { avatar: 0, funil: 0, copy: 0, prompts: 0, design: 0, trafego: 0 },
+              branding: { arquetipo: '', manifesto: '', mecanismo_key: '', inimigo_comum: '', linguagem: { usa: [], evita: [] }, cores: '', personalidade: '' },
+              kpis: { thumbstop: null, ctr: null, cpm: null, cpc: null, roas: null, ltv: null, cac: null, cvr: null, meta: { roas_target: null, cpa_target: null } },
+              assets: []
+            };
+            await SB.upsertProject(autoProject);
+            PROJECTS.push(autoProject);
+            projectId = autoProject.id;
+          }
+        }
+        if (!projectId) return;
+
+        const row = {
+          id: card.id,
+          project_id: projectId,
+          title: card.title,
+          description: card.description || card.notes || null,
+          status: card.status || 'backlog',
+          priority: card.priority || 'media',
+          assignee: card.owner || null,
+          due_date: card.deadline || null,
+          tags: card.tags || [],
+          order_idx: 0,
+          updated_at: new Date().toISOString()
+        };
         const { error } = await _sb.from('imphq_kanban').upsert(row, { onConflict: 'id' });
-        if (error) console.warn('[SB] upsertCard', error);
+        if (error) console.warn('[SB] upsertCard', error, row);
       },
       async deleteCard(id) {
         const { error } = await _sb.from('imphq_kanban').delete().eq('id', id);
@@ -9195,9 +9450,35 @@ TOM: Analítico. Prático. Orientado a resultados. Sem romantismo sobre o que n�
         if (data && data.length) localStorage.setItem('imphq_empresa', JSON.stringify(data));
       },
 
+      // ── BOOTSTRAP (seed inicial quando tabelas estão vazias) ──────
+      async _countTable(table) {
+        const { count, error } = await _sb.from(table).select('*', { count: 'exact', head: true });
+        if (error) { console.warn('[SB] countTable', table, error); return null; }
+        return count || 0;
+      },
+      async bootstrapCoreData() {
+        const [projectsCount, kanbanCount] = await Promise.all([
+          SB._countTable('imphq_projects'),
+          SB._countTable('imphq_kanban')
+        ]);
+
+        if (projectsCount === 0 && typeof PROJECTS !== 'undefined' && Array.isArray(PROJECTS)) {
+          for (const p of PROJECTS) {
+            await SB.upsertProject({ ...p, _custom: true });
+          }
+          console.log('[SB] 🌱 Seed inicial de projetos concluído');
+        }
+
+        // Kanban seed desativado para evitar cards de exemplo/fake em produção.
+        // Os cards reais devem vir do fluxo operacional (Ops/CRM/ações do time).
+      },
+
       // ── INIT ──────────────────────────────────────────────────────
       async init() {
         console.log('[SB] 🔄 Sincronizado com Supabase…');
+        // Limpa cache local legado do Kanban para evitar cards fantasma.
+        localStorage.removeItem('knCards');
+        await SB.bootstrapCoreData();
         await Promise.all([SB.loadLinks(), SB.loadProjects(), SB.loadKanban(), SB.loadKB(), SB.loadDocs(), SB.loadEmpresa()]);
         console.log('[SB] ✅ Sincronização concluída');
         if (typeof renderSidebar === 'function') renderSidebar();
@@ -9261,7 +9542,7 @@ TOM: Analítico. Prático. Orientado a resultados. Sem romantismo sobre o que n�
     localStorage.setItem = function (key, value) {
       _origSetItem(key, value);
 
-      if (key === 'knCards') {
+      if (key === 'knCards' || key === 'imperio_kanban') {
         clearTimeout(SB._kanbanTimer);
         SB._kanbanTimer = setTimeout(() => {
           try {
