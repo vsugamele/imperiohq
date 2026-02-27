@@ -1,0 +1,1786 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IMPÉRIO X OS — Arquitetura Completa</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080810;
+    --surface: #0e0e1a;
+    --surface2: #13131f;
+    --border: rgba(255,255,255,0.07);
+    --accent-purple: #7c3aed;
+    --accent-green: #10b981;
+    --accent-orange: #f59e0b;
+    --accent-blue: #3b82f6;
+    --accent-pink: #ec4899;
+    --accent-red: #ef4444;
+    --text: #f1f0f5;
+    --text-muted: #6b7280;
+    --text-dim: #9ca3af;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* NOISE OVERLAY */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 100;
+    opacity: 0.4;
+  }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    padding: 60px 40px;
+  }
+
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 0%, rgba(124,58,237,0.15) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 40% at 80% 80%, rgba(16,185,129,0.08) 0%, transparent 50%),
+      radial-gradient(ellipse 30% 30% at 20% 70%, rgba(245,158,11,0.06) 0%, transparent 50%);
+  }
+
+  .hero-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+
+  .hero-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    color: var(--accent-purple);
+    text-transform: uppercase;
+    margin-bottom: 24px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 0.2s forwards;
+  }
+
+  .hero-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(48px, 8vw, 100px);
+    font-weight: 800;
+    line-height: 0.95;
+    text-align: center;
+    letter-spacing: -0.03em;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 0.4s forwards;
+  }
+
+  .hero-title span {
+    background: linear-gradient(135deg, #a78bfa 0%, #7c3aed 40%, #ec4899 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-sub {
+    font-size: 16px;
+    color: var(--text-dim);
+    text-align: center;
+    margin-top: 24px;
+    max-width: 560px;
+    letter-spacing: 0.01em;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 0.6s forwards;
+  }
+
+  .hero-pills {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 36px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 0.8s forwards;
+  }
+
+  .pill {
+    padding: 8px 18px;
+    border-radius: 100px;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    border: 1px solid;
+  }
+
+  .pill-purple { border-color: var(--accent-purple); color: #a78bfa; background: rgba(124,58,237,0.1); }
+  .pill-green  { border-color: var(--accent-green);  color: #34d399; background: rgba(16,185,129,0.1); }
+  .pill-orange { border-color: var(--accent-orange); color: #fbbf24; background: rgba(245,158,11,0.1); }
+  .pill-blue   { border-color: var(--accent-blue);   color: #60a5fa; background: rgba(59,130,246,0.1); }
+  .pill-pink   { border-color: var(--accent-pink);   color: #f472b6; background: rgba(236,72,153,0.1); }
+
+  /* SECTIONS */
+  .page { max-width: 1200px; margin: 0 auto; padding: 40px 40px 100px; }
+
+  .section-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--accent-purple);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(28px, 4vw, 48px);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-bottom: 8px;
+  }
+
+  .section-desc {
+    color: var(--text-dim);
+    font-size: 15px;
+    margin-bottom: 48px;
+    max-width: 600px;
+  }
+
+  /* CARDS */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s, transform 0.3s;
+  }
+
+  .card:hover {
+    transform: translateY(-2px);
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+  }
+
+  .card-purple::before { background: linear-gradient(90deg, transparent, var(--accent-purple), transparent); }
+  .card-green::before  { background: linear-gradient(90deg, transparent, var(--accent-green), transparent); }
+  .card-orange::before { background: linear-gradient(90deg, transparent, var(--accent-orange), transparent); }
+  .card-blue::before   { background: linear-gradient(90deg, transparent, var(--accent-blue), transparent); }
+  .card-pink::before   { background: linear-gradient(90deg, transparent, var(--accent-pink), transparent); }
+  .card-red::before    { background: linear-gradient(90deg, transparent, var(--accent-red), transparent); }
+
+  .card-purple:hover { border-color: rgba(124,58,237,0.4); }
+  .card-green:hover  { border-color: rgba(16,185,129,0.4); }
+  .card-orange:hover { border-color: rgba(245,158,11,0.4); }
+  .card-blue:hover   { border-color: rgba(59,130,246,0.4); }
+  .card-pink:hover   { border-color: rgba(236,72,153,0.4); }
+
+  .card-icon {
+    font-size: 28px;
+    margin-bottom: 12px;
+  }
+
+  .card-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  .card-body {
+    font-size: 13.5px;
+    color: var(--text-dim);
+    line-height: 1.7;
+  }
+
+  /* GRIDS */
+  .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+
+  @media (max-width: 900px) {
+    .grid-3, .grid-4 { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 600px) {
+    .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+  }
+
+  /* AVATAR FULL SECTION */
+  .avatar-mega {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+
+  .avatar-header {
+    padding: 32px 36px;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(135deg, rgba(124,58,237,0.08) 0%, transparent 60%);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .avatar-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 64px;
+    font-weight: 800;
+    color: rgba(124,58,237,0.2);
+    line-height: 1;
+  }
+
+  .avatar-header-info h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+  }
+
+  .avatar-header-info p {
+    color: var(--text-dim);
+    font-size: 14px;
+  }
+
+  .avatar-body {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+  }
+
+  .avatar-cell {
+    padding: 28px 32px;
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .avatar-cell:nth-child(3n) { border-right: none; }
+  .avatar-cell:nth-last-child(-n+3) { border-bottom: none; }
+
+  .avatar-cell-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .avatar-cell-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+
+  .avatar-cell ul {
+    list-style: none;
+    font-size: 13px;
+    color: var(--text-dim);
+  }
+
+  .avatar-cell ul li {
+    padding: 4px 0;
+    padding-left: 14px;
+    position: relative;
+  }
+
+  .avatar-cell ul li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: var(--accent-purple);
+    font-size: 11px;
+  }
+
+  /* DESIRE SPLIT */
+  .desire-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    background: var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+
+  .desire-internal {
+    background: var(--surface);
+    padding: 36px;
+    position: relative;
+  }
+
+  .desire-external {
+    background: var(--surface2);
+    padding: 36px;
+    position: relative;
+  }
+
+  .desire-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    display: inline-block;
+    padding: 6px 14px;
+    border-radius: 100px;
+    border: 1px solid;
+  }
+
+  .desire-tag-internal { color: #a78bfa; border-color: rgba(124,58,237,0.4); background: rgba(124,58,237,0.1); }
+  .desire-tag-external { color: #34d399; border-color: rgba(16,185,129,0.4); background: rgba(16,185,129,0.1); }
+
+  .desire-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    margin-bottom: 12px;
+  }
+
+  .desire-items {
+    list-style: none;
+    font-size: 14px;
+    color: var(--text-dim);
+  }
+
+  .desire-items li {
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .desire-items li:last-child { border-bottom: none; }
+
+  .desire-items li span {
+    font-size: 16px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  /* SQUAD CARDS */
+  .squad-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  .squad-header {
+    padding: 24px 28px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .squad-emoji {
+    font-size: 32px;
+    width: 52px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255,255,255,0.04);
+    border-radius: 12px;
+    flex-shrink: 0;
+  }
+
+  .squad-header-info h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+  }
+
+  .squad-header-info p {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  .squad-body { padding: 20px 28px; }
+
+  .squad-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 14px;
+    align-items: flex-start;
+  }
+
+  .squad-row-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    width: 80px;
+    flex-shrink: 0;
+    padding-top: 2px;
+  }
+
+  .squad-row-val {
+    font-size: 13px;
+    color: var(--text-dim);
+    flex: 1;
+    line-height: 1.6;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 100px;
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.05em;
+    margin: 2px;
+  }
+
+  .badge-purple { background: rgba(124,58,237,0.15); color: #a78bfa; border: 1px solid rgba(124,58,237,0.3); }
+  .badge-green  { background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
+  .badge-orange { background: rgba(245,158,11,0.15); color: #fbbf24; border: 1px solid rgba(245,158,11,0.3); }
+  .badge-blue   { background: rgba(59,130,246,0.15); color: #60a5fa; border: 1px solid rgba(59,130,246,0.3); }
+  .badge-pink   { background: rgba(236,72,153,0.15); color: #f472b6; border: 1px solid rgba(236,72,153,0.3); }
+  .badge-red    { background: rgba(239,68,68,0.15);  color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
+
+  /* MENTES TABLE */
+  .minds-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .minds-table th {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 12px 20px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    font-weight: 400;
+  }
+
+  .minds-table td {
+    padding: 14px 20px;
+    font-size: 13px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+
+  .minds-table tr:last-child td { border-bottom: none; }
+
+  .minds-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+  .mind-name {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+  }
+
+  /* FLOW */
+  .flow {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    overflow-x: auto;
+    padding: 8px 0 20px;
+  }
+
+  .flow-step {
+    flex-shrink: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 20px;
+    text-align: center;
+    min-width: 120px;
+  }
+
+  .flow-step-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    color: var(--accent-purple);
+    letter-spacing: 0.2em;
+    margin-bottom: 6px;
+  }
+
+  .flow-step-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .flow-arrow {
+    color: var(--text-muted);
+    font-size: 18px;
+    padding: 0 8px;
+    flex-shrink: 0;
+  }
+
+  /* INTEGRATIONS */
+  .integration-row {
+    display: flex;
+    align-items: center;
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--border);
+    gap: 20px;
+  }
+
+  .integration-row:last-child { border-bottom: none; }
+
+  .integration-icon {
+    font-size: 24px;
+    width: 44px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  .integration-name {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    width: 200px;
+    flex-shrink: 0;
+  }
+
+  .integration-desc {
+    font-size: 13px;
+    color: var(--text-dim);
+    flex: 1;
+  }
+
+  .integration-status {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    padding: 5px 12px;
+    border-radius: 100px;
+    flex-shrink: 0;
+  }
+
+  .status-core { background: rgba(124,58,237,0.15); color: #a78bfa; border: 1px solid rgba(124,58,237,0.3); }
+  .status-data { background: rgba(59,130,246,0.15); color: #60a5fa; border: 1px solid rgba(59,130,246,0.3); }
+  .status-dist { background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
+
+  /* DIVIDER */
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 80px 0;
+    position: relative;
+  }
+
+  .divider::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    top: -1px;
+    width: 200px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent-purple), transparent);
+  }
+
+  /* PIPELINE STEPS */
+  .pipeline-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .pipeline-step {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .pipeline-step::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+
+  .phase-fundacao   .pipeline-step::before { background: var(--accent-purple); }
+  .phase-diferenciacao .pipeline-step::before { background: var(--accent-blue); }
+  .phase-monetizacao .pipeline-step::before { background: var(--accent-green); }
+  .phase-ativacao   .pipeline-step::before { background: var(--accent-orange); }
+  .phase-conteudo   .pipeline-step::before { background: var(--accent-pink); }
+
+  .ps-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+    letter-spacing: 0.15em;
+  }
+
+  .ps-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 4px;
+    line-height: 1.3;
+  }
+
+  .ps-guru {
+    font-size: 10px;
+    color: var(--text-muted);
+  }
+
+  .phase-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    margin-top: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .phase-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* FOOTER */
+  footer {
+    text-align: center;
+    padding: 60px 40px;
+    border-top: 1px solid var(--border);
+  }
+
+  footer .logo {
+    font-family: 'Syne', sans-serif;
+    font-size: 32px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #a78bfa 0%, #7c3aed 40%, #ec4899 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 8px;
+  }
+
+  footer p {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+  }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .fade-in {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+
+  .fade-in.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* CHART-LIKE VISUAL */
+  .funnel-visual {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 32px;
+  }
+
+  .funnel-layer {
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.05em;
+    transition: transform 0.2s;
+    cursor: default;
+  }
+
+  .funnel-layer:hover { transform: scaleX(1.02); }
+
+  /* CONCORRENTE */
+  .comp-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+  }
+
+  .comp-table th {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 14px 18px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    font-weight: 400;
+  }
+
+  .comp-table td {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-dim);
+    vertical-align: top;
+  }
+
+  .comp-table tr:hover td { background: rgba(255,255,255,0.02); }
+  .comp-table tr:last-child td { border-bottom: none; }
+
+  .comp-name { color: var(--text); font-weight: 600; }
+  .comp-gap { color: #34d399; font-size: 12px; }
+
+  /* SCROLL CUE */
+  .scroll-cue {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    opacity: 0;
+    animation: fadeUp 1s ease 1.2s forwards;
+  }
+
+  .scroll-cue span {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .scroll-line {
+    width: 1px;
+    height: 40px;
+    background: linear-gradient(to bottom, var(--text-muted), transparent);
+    animation: scrollPulse 2s ease infinite;
+  }
+
+  @keyframes scrollPulse {
+    0%, 100% { opacity: 0.3; transform: scaleY(0.8); }
+    50% { opacity: 1; transform: scaleY(1); }
+  }
+
+  .highlight-box {
+    background: rgba(124,58,237,0.06);
+    border: 1px solid rgba(124,58,237,0.2);
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 20px;
+  }
+
+  .highlight-box p {
+    font-size: 14px;
+    color: var(--text-dim);
+    line-height: 1.7;
+  }
+
+  .highlight-box strong {
+    color: #a78bfa;
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-tag">Sistema Operacional de Marketing</div>
+  <h1 class="hero-title">IMPÉRIO<br><span>X OS</span></h1>
+  <p class="hero-sub">Arquitetura completa para executar automaticamente o que há de melhor no marketing digital — do avatar à escala.</p>
+  <div class="hero-pills">
+    <span class="pill pill-purple">📁 Projetos</span>
+    <span class="pill pill-blue">🧠 Mentes</span>
+    <span class="pill pill-green">⚡ Squads</span>
+    <span class="pill pill-orange">🔌 Integrações</span>
+    <span class="pill pill-pink">🔄 Pipeline</span>
+  </div>
+  <div class="scroll-cue">
+    <span>Scroll</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<div class="page">
+
+  <!-- =========================================================== -->
+  <!-- CAMADA 1: PROJETO -->
+  <!-- =========================================================== -->
+  <div class="divider"></div>
+
+  <div class="section-label fade-in">01 — Estrutura de Projeto</div>
+  <h2 class="section-title fade-in">Anatomia de um<br>Projeto Completo</h2>
+  <p class="section-desc fade-in">Cada projeto no Império X é um sistema autocontido com identidade, estratégia e execução mapeadas.</p>
+
+  <!-- IDENTIDADE DO PRODUTO -->
+  <div class="avatar-mega fade-in">
+    <div class="avatar-header">
+      <div class="avatar-num">01</div>
+      <div class="avatar-header-info">
+        <h2>🎯 Produto & Expert</h2>
+        <p>O que se vende, para quem, e a voz que vende</p>
+      </div>
+    </div>
+    <div class="avatar-body" style="grid-template-columns: repeat(3,1fr);">
+      <div class="avatar-cell">
+        <div class="avatar-cell-label" style="color: #a78bfa;">Produto</div>
+        <div class="avatar-cell-title">O que é</div>
+        <ul>
+          <li>Formato (curso, mentoria, SaaS, físico)</li>
+          <li>Transformação prometida</li>
+          <li>Nome do método / mecanismo único</li>
+          <li>Ticket e estrutura de oferta</li>
+          <li>Provas e resultados</li>
+        </ul>
+      </div>
+      <div class="avatar-cell">
+        <div class="avatar-cell-label" style="color: #60a5fa;">Expert</div>
+        <div class="avatar-cell-title">Quem vende</div>
+        <ul>
+          <li>História de origem e virada</li>
+          <li>Credenciais e autoridade</li>
+          <li>Posicionamento no nicho</li>
+          <li>Voz e linguagem única</li>
+          <li>Audiência atual e tamanho</li>
+        </ul>
+      </div>
+      <div class="avatar-cell">
+        <div class="avatar-cell-label" style="color: #34d399;">Mecanismo</div>
+        <div class="avatar-cell-title">Por que funciona</div>
+        <ul>
+          <li>Diferença da abordagem tradicional</li>
+          <li>Nome proprietário do método</li>
+          <li>Lógica de funcionamento</li>
+          <li>Por que só esse produto tem isso</li>
+          <li>Prova de conceito</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- AVATAR PRINCIPAL -->
+  <div class="avatar-mega fade-in">
+    <div class="avatar-header">
+      <div class="avatar-num">02</div>
+      <div class="avatar-header-info">
+        <h2>👤 Avatar Principal</h2>
+        <p>O perfil completo de quem compra — demografico, psicografic e comportamental</p>
+      </div>
+    </div>
+    <div class="avatar-body">
+      <div class="avatar-cell">
+        <div class="avatar-cell-label" style="color: #a78bfa;">Perfil</div>
+        <div class="avatar-cell-title">Quem é</div>
+        <ul>
+          <li>Idade, gênero, localização</li>
+          <li>Profissão e renda</li>
+          <li>Nível de consciência (0-5)</li>
+          <li>Sofisticação de mercado</li>
+          <li>Plataformas que usa</li>
+        </ul>
+      </div>
+      <div class="avatar-cell">
+        <div class="avatar-cell-label" style="color: #f59e0b;">Dores</div>
+        <div class="avatar-cell-title">O que o machuca</div>
+        <ul>
+          <li>Problema principal (#1)</li>
+          <li>Frustrações recorrentes</li>
+          <li>O que já tentou e falhou</li>
+          <li>Medos e inseguranças</li>
+          <li>O que o mantém acordado</li>
+        </ul>
+      </div>
+      <div class="avatar-cell">
+        <div class="avatar-cell-label" style="color: #34d399;">Linguagem</div>
+        <div class="avatar-cell-title">Como fala</div>
+        <ul>
+          <li>Palavras exatas que usa</li>
+          <li>Expressões do nicho</li>
+          <li>Como descreve o problema</li>
+          <li>O que pesquisa no Google</li>
+          <li>Criadores que consome</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- DESEJO INTERNO / EXTERNO -->
+  <div class="section-label fade-in" style="margin-top: 48px;">02.a — Mapeamento de Desejo</div>
+  <div class="desire-split fade-in">
+    <div class="desire-internal">
+      <span class="desire-tag desire-tag-internal">🔮 Desejo Interno</span>
+      <div class="desire-title">O que ele realmente<br>quer sentir</div>
+      <ul class="desire-items">
+        <li><span>💪</span> Sentir-se capaz e no controle</li>
+        <li><span>🫂</span> Pertencer a um grupo de sucesso</li>
+        <li><span>🏆</span> Ser reconhecido e respeitado</li>
+        <li><span>🔓</span> Liberdade real — tempo, dinheiro, local</li>
+        <li><span>✨</span> Provar para si mesmo que consegue</li>
+        <li><span>🛡️</span> Segurança e estabilidade para a família</li>
+      </ul>
+      <div style="margin-top: 20px; padding: 14px; background: rgba(124,58,237,0.08); border-radius: 10px; font-size: 12px; color: #a78bfa; font-style: italic;">
+        "O desejo interno é o combustível real. O desejo externo é o que ele diz que quer."
+      </div>
+    </div>
+    <div class="desire-external">
+      <span class="desire-tag desire-tag-external">🎯 Desejo Externo</span>
+      <div class="desire-title">O que ele diz<br>que quer</div>
+      <ul class="desire-items">
+        <li><span>💰</span> Ganhar X por mês / por venda</li>
+        <li><span>📈</span> Escalar o negócio digital</li>
+        <li><span>🏠</span> Comprar a casa / o carro</li>
+        <li><span>⏱️</span> Trabalhar menos horas</li>
+        <li><span>📱</span> Ter audiência e seguidores</li>
+        <li><span>🚀</span> Lançar e vender no piloto automático</li>
+      </ul>
+      <div style="margin-top: 20px; padding: 14px; background: rgba(16,185,129,0.08); border-radius: 10px; font-size: 12px; color: #34d399; font-style: italic;">
+        "Venda o externo na headline. Entregue o interno na transformação."
+      </div>
+    </div>
+  </div>
+
+  <!-- MULTIDÃO FAMINTA -->
+  <div class="avatar-mega fade-in">
+    <div class="avatar-header" style="background: linear-gradient(135deg, rgba(245,158,11,0.08) 0%, transparent 60%);">
+      <div class="avatar-num" style="color: rgba(245,158,11,0.2);">03</div>
+      <div class="avatar-header-info">
+        <h2>🔥 Multidão Faminta</h2>
+        <p>Onde estão, o que ativam e como chegam até a oferta — a lógica de Eugene Schwartz e Gary Halbert</p>
+      </div>
+    </div>
+    <div class="avatar-body">
+      <div class="avatar-cell">
+        <div class="avatar-cell-label" style="color: #fbbf24;">Onde estão</div>
+        <div class="avatar-cell-title">Pontos de concentração</div>
+        <ul>
+          <li>Grupos de Facebook / WhatsApp</li>
+          <li>Canais do YouTube que seguem</li>
+          <li>Hashtags e perfis do Instagram</li>
+          <li>Comunidades e fóruns</li>
+          <li>Eventos e cursos que fazem</li>
+        </ul>
+      </div>
+      <div class="avatar-cell">
+        <div class="avatar-cell-label" style="color: #fbbf24;">Nível de consciência</div>
+        <div class="avatar-cell-title">O que já sabe</div>
+        <ul>
+          <li>Nível 0 — Alheio ao problema</li>
+          <li>Nível 1 — Sente a dor</li>
+          <li>Nível 2 — Busca solução</li>
+          <li>Nível 3 — Conhece o produto</li>
+          <li>Nível 4 — Só precisa do push</li>
+        </ul>
+      </div>
+      <div class="avatar-cell">
+        <div class="avatar-cell-label" style="color: #fbbf24;">O que ativa</div>
+        <div class="avatar-cell-title">Gatilhos de ação</div>
+        <ul>
+          <li>Evento de vida (demissão, filho)</li>
+          <li>Comparação social ("fulano conseguiu")</li>
+          <li>Urgência de prazo ou oportunidade</li>
+          <li>Prova irrefutável de resultado</li>
+          <li>Autoridade de referência confiada</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUB-AVATARES -->
+  <div class="section-label fade-in" style="margin-top: 48px;">02.b — Sub-Avatares</div>
+  <p class="section-desc fade-in">Dentro de uma multidão faminta existem perfis com jornadas e gatilhos diferentes. Mapeie cada um.</p>
+  <div class="grid-3 fade-in" style="margin-bottom: 48px;">
+    <div class="card card-purple">
+      <div class="card-icon">🌱</div>
+      <div class="card-title">Iniciante Motivado</div>
+      <div class="card-body">Nunca tentou, mas está pronto para começar. Alta energia, baixo conhecimento. Compra por inspiração e promessa de resultado rápido. <br><br><strong style="color:#a78bfa;">Hook:</strong> "Mesmo começando do zero..."</div>
+    </div>
+    <div class="card card-orange">
+      <div class="card-icon">🔄</div>
+      <div class="card-title">Frustrado Recorrente</div>
+      <div class="card-body">Tentou várias vezes, não conseguiu. Alta ceticismo. Compra quando entende POR QUE os outros métodos falharam e como esse é diferente. <br><br><strong style="color:#fbbf24;">Hook:</strong> "Por que tudo que você tentou não funcionou..."</div>
+    </div>
+    <div class="card card-green">
+      <div class="card-icon">⚡</div>
+      <div class="card-title">Avançado em Escala</div>
+      <div class="card-body">Já tem resultado, quer mais. Baixa tolerância para básico. Compra por especificidade, dados e acesso a nível superior. <br><br><strong style="color:#34d399;">Hook:</strong> "Para quem já fatura X e quer dobrar..."</div>
+    </div>
+  </div>
+
+  <!-- CONCORRENTES -->
+  <div class="avatar-mega fade-in">
+    <div class="avatar-header" style="background: linear-gradient(135deg, rgba(239,68,68,0.08) 0%, transparent 60%);">
+      <div class="avatar-num" style="color: rgba(239,68,68,0.2);">04</div>
+      <div class="avatar-header-info">
+        <h2>🔍 Análise de Concorrentes</h2>
+        <p>O que já existe no mercado, onde estão as falhas, e onde está a brecha para dominar</p>
+      </div>
+    </div>
+    <div style="overflow: hidden;">
+      <table class="comp-table">
+        <thead>
+          <tr>
+            <th>Concorrente</th>
+            <th>Posicionamento</th>
+            <th>Oferta / Ticket</th>
+            <th>Ponto fraco</th>
+            <th>Nossa vantagem</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><div class="comp-name">Concorrente A</div><div style="font-size:11px;color:var(--text-muted)">Líder de mercado</div></td>
+            <td>Resultado genérico para todos</td>
+            <td>R$ 997 — curso gravado</td>
+            <td class="comp-gap">Suporte zero, conteúdo desatualizado</td>
+            <td>Acompanhamento + método atual</td>
+          </tr>
+          <tr>
+            <td><div class="comp-name">Concorrente B</div><div style="font-size:11px;color:var(--text-muted)">Forte em orgânico</div></td>
+            <td>Jornada longa, branding forte</td>
+            <td>R$ 2.997 — mentoria</td>
+            <td class="comp-gap">Ticket alto demais, sem lowticket</td>
+            <td>Funil completo, entrada acessível</td>
+          </tr>
+          <tr>
+            <td><div class="comp-name">Concorrente C</div><div style="font-size:11px;color:var(--text-muted)">Tráfego pago pesado</div></td>
+            <td>Promessa agressiva de resultado</td>
+            <td>R$ 497 — produto único</td>
+            <td class="comp-gap">Sem continuidade, alta taxa de chargeback</td>
+            <td>Jornada completa + LTV alto</td>
+          </tr>
+          <tr>
+            <td><div class="comp-name">GAP identificado</div><div style="font-size:11px;color:#34d399;">Nossa oportunidade</div></td>
+            <td colspan="3" style="color: #34d399; font-size: 13px; line-height: 1.6;">Ninguém no mercado combina [mecanismo único] com [resultado específico] para [sub-avatar específico]. A brecha está em [ângulo de diferenciação].</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- =========================================================== -->
+  <!-- SQUADS -->
+  <!-- =========================================================== -->
+  <div class="divider"></div>
+
+  <div class="section-label fade-in">02 — Squads</div>
+  <h2 class="section-title fade-in">Times Especializados</h2>
+  <p class="section-desc fade-in">Cada squad tem uma missão clara, framework próprio e sabe exatamente o que não faz.</p>
+
+  <div class="grid-2 fade-in" style="margin-bottom: 20px;">
+
+    <!-- COPY CHIEF -->
+    <div class="squad-card">
+      <div class="squad-header">
+        <div class="squad-emoji">📝</div>
+        <div class="squad-header-info">
+          <h3>COPY CHIEF</h3>
+          <p>A voz que transforma dor em venda</p>
+        </div>
+      </div>
+      <div class="squad-body">
+        <div class="squad-row"><div class="squad-row-label">É</div><div class="squad-row-val">A voz do projeto. Traduz dores do avatar em palavras que vendem.</div></div>
+        <div class="squad-row"><div class="squad-row-label">Não é</div><div class="squad-row-val">Designer, estrategista de tráfego, editor de vídeo.</div></div>
+        <div class="squad-row"><div class="squad-row-label">Framework</div><div class="squad-row-val">Avatar → Promessa → Prova → Oferta → CTA</div></div>
+        <div class="squad-row"><div class="squad-row-label">Entrega</div><div class="squad-row-val">Headlines · VSL script · Email sequence · Página de vendas · Anúncios</div></div>
+        <div class="squad-row"><div class="squad-row-label">Mentes</div><div class="squad-row-val">
+          <span class="badge badge-purple">Kennedy</span>
+          <span class="badge badge-purple">Halbert</span>
+          <span class="badge badge-purple">Carlton</span>
+          <span class="badge badge-purple">Bencivenga</span>
+          <span class="badge badge-purple">Makepeace</span>
+          <span class="badge badge-purple">Cialdini</span>
+        </div></div>
+      </div>
+    </div>
+
+    <!-- STORY CHIEF -->
+    <div class="squad-card">
+      <div class="squad-header">
+        <div class="squad-emoji">🎬</div>
+        <div class="squad-header-info">
+          <h3>STORY CHIEF</h3>
+          <p>Narrativa audiovisual que prende e converte</p>
+        </div>
+      </div>
+      <div class="squad-body">
+        <div class="squad-row"><div class="squad-row-label">É</div><div class="squad-row-val">Diretor de narrativa. Transforma copy em roteiro audiovisual.</div></div>
+        <div class="squad-row"><div class="squad-row-label">Não é</div><div class="squad-row-val">Editor de vídeo, designer, copywriter, gestor de tráfego.</div></div>
+        <div class="squad-row"><div class="squad-row-label">Framework</div><div class="squad-row-val">Hook (0-3s) → Problema → Agitação → Virada → Mecanismo → Prova → Oferta → CTA</div></div>
+        <div class="squad-row"><div class="squad-row-label">Entrega</div><div class="squad-row-val">VSL completo · Roteiros 15/30/60s · YouTube · Reels · Carrossel</div></div>
+        <div class="squad-row"><div class="squad-row-label">Mentes</div><div class="squad-row-val">
+          <span class="badge badge-blue">Brunson</span>
+          <span class="badge badge-blue">Carlton</span>
+          <span class="badge badge-blue">Kennedy</span>
+        </div></div>
+      </div>
+    </div>
+
+    <!-- TRAFFIC MASTERS -->
+    <div class="squad-card">
+      <div class="squad-header">
+        <div class="squad-emoji">🚦</div>
+        <div class="squad-header-info">
+          <h3>TRAFFIC MASTERS</h3>
+          <p>Criativo certo, pessoa certa, hora certa</p>
+        </div>
+      </div>
+      <div class="squad-body">
+        <div class="squad-row"><div class="squad-row-label">É</div><div class="squad-row-val">Gestor de distribuição paga. Faz o criativo chegar na pessoa certa.</div></div>
+        <div class="squad-row"><div class="squad-row-label">Não é</div><div class="squad-row-val">Criativo, copywriter, analista de dados, desenvolvedor.</div></div>
+        <div class="squad-row"><div class="squad-row-label">Framework</div><div class="squad-row-val">Cold → Warm → Hot → Escala 20% / Regras automáticas</div></div>
+        <div class="squad-row"><div class="squad-row-label">Entrega</div><div class="squad-row-val">Setup de campanha · Conjuntos · Regras automáticas · Relatório de otimização</div></div>
+        <div class="squad-row"><div class="squad-row-label">Mentes</div><div class="squad-row-val">
+          <span class="badge badge-orange">Hormozi</span>
+          <span class="badge badge-orange">Kennedy</span>
+          <span class="badge badge-orange">Schwartz</span>
+        </div></div>
+      </div>
+    </div>
+
+    <!-- DESIGN CHIEF -->
+    <div class="squad-card">
+      <div class="squad-header">
+        <div class="squad-emoji">🎨</div>
+        <div class="squad-header-info">
+          <h3>DESIGN CHIEF</h3>
+          <p>Como o projeto é percebido antes de ser lido</p>
+        </div>
+      </div>
+      <div class="squad-body">
+        <div class="squad-row"><div class="squad-row-label">É</div><div class="squad-row-val">Diretor criativo visual. Cria briefs. Não executa o criativo.</div></div>
+        <div class="squad-row"><div class="squad-row-label">Não é</div><div class="squad-row-val">Editor, motion designer, copywriter, desenvolvedor.</div></div>
+        <div class="squad-row"><div class="squad-row-label">Framework</div><div class="squad-row-val">Hook Visual (0.1s) → Hierarquia → Contraste → Emoção sem som → CTA</div></div>
+        <div class="squad-row"><div class="squad-row-label">Entrega</div><div class="squad-row-val">Briefs de criativo · Thumbnails · Identidade visual · Prompt IA para imagem</div></div>
+        <div class="squad-row"><div class="squad-row-label">Mentes</div><div class="squad-row-val">
+          <span class="badge badge-pink">Ogilvy</span>
+          <span class="badge badge-pink">Sugarman</span>
+        </div></div>
+      </div>
+    </div>
+
+    <!-- DATA CHIEF -->
+    <div class="squad-card">
+      <div class="squad-header">
+        <div class="squad-emoji">📊</div>
+        <div class="squad-header-info">
+          <h3>DATA CHIEF</h3>
+          <p>Números viram decisões. Decisões viram escala.</p>
+        </div>
+      </div>
+      <div class="squad-body">
+        <div class="squad-row"><div class="squad-row-label">É</div><div class="squad-row-val">Cérebro analítico. Transforma dados em ação.</div></div>
+        <div class="squad-row"><div class="squad-row-label">Não é</div><div class="squad-row-val">Gestor de tráfego, desenvolvedor, copywriter.</div></div>
+        <div class="squad-row"><div class="squad-row-label">Framework</div><div class="squad-row-val">Coleta → Dashboard → Diagnóstico → Decisão → Loop Semanal</div></div>
+        <div class="squad-row"><div class="squad-row-label">Entrega</div><div class="squad-row-val">Dashboard KPIs · Relatório diário 5 linhas · Árvore de decisão · Protocolo de escala</div></div>
+        <div class="squad-row"><div class="squad-row-label">Mentes</div><div class="squad-row-val">
+          <span class="badge badge-green">Yoshitani</span>
+          <span class="badge badge-green">Schwartz</span>
+          <span class="badge badge-green">Hopkins</span>
+        </div></div>
+      </div>
+    </div>
+
+    <!-- TECH SQUAD -->
+    <div class="squad-card">
+      <div class="squad-header">
+        <div class="squad-emoji">⚙️</div>
+        <div class="squad-header-info">
+          <h3>TECH SQUAD</h3>
+          <p>A espinha dorsal que conecta tudo</p>
+        </div>
+      </div>
+      <div class="squad-body">
+        <div class="squad-row"><div class="squad-row-label">É</div><div class="squad-row-val">Infraestrutura técnica. Conecta todos os sistemas, APIs e automações.</div></div>
+        <div class="squad-row"><div class="squad-row-label">Não é</div><div class="squad-row-val">Designer, copywriter, gestor de tráfego, analista de dados.</div></div>
+        <div class="squad-row"><div class="squad-row-label">Framework</div><div class="squad-row-val">Captura → CRM → Trigger → Automação → Relatório → Loop</div></div>
+        <div class="squad-row"><div class="squad-row-label">Entrega</div><div class="squad-row-val">Meta CAPI · Google Tag · CRM flows · Webhooks · Supabase sync</div></div>
+        <div class="squad-row"><div class="squad-row-label">Ferramentas</div><div class="squad-row-val">
+          <span class="badge badge-blue">n8n</span>
+          <span class="badge badge-blue">Supabase</span>
+          <span class="badge badge-blue">GTM</span>
+          <span class="badge badge-blue">GHL</span>
+          <span class="badge badge-blue">WhatsApp API</span>
+        </div></div>
+      </div>
+    </div>
+
+    <!-- INTEL SQUAD -->
+    <div class="squad-card">
+      <div class="squad-header">
+        <div class="squad-emoji">🔬</div>
+        <div class="squad-header-info">
+          <h3>INTEL SQUAD</h3>
+          <p>O que está vencendo lá fora, trazido pra dentro</p>
+        </div>
+      </div>
+      <div class="squad-body">
+        <div class="squad-row"><div class="squad-row-label">É</div><div class="squad-row-val">Inteligência competitiva. Monitora o mercado e entrega padrões vencedores.</div></div>
+        <div class="squad-row"><div class="squad-row-label">Não é</div><div class="squad-row-val">Executor de nada. É o olho externo do sistema.</div></div>
+        <div class="squad-row"><div class="squad-row-label">Framework</div><div class="squad-row-val">Benchmark → Spy → Padrão vencedor → Adaptação → Briefing</div></div>
+        <div class="squad-row"><div class="squad-row-label">Entrega</div><div class="squad-row-val">Relatório de concorrentes · Swipe file · Análise de oferta · Tendências</div></div>
+        <div class="squad-row"><div class="squad-row-label">Ferramentas</div><div class="squad-row-val">
+          <span class="badge badge-red">AdSpy</span>
+          <span class="badge badge-red">Meta Ad Library</span>
+          <span class="badge badge-red">SimilarWeb</span>
+          <span class="badge badge-red">Semrush</span>
+        </div></div>
+      </div>
+    </div>
+
+    <!-- QA SQUAD -->
+    <div class="squad-card">
+      <div class="squad-header">
+        <div class="squad-emoji">✅</div>
+        <div class="squad-header-info">
+          <h3>QA SQUAD</h3>
+          <p>O último filtro antes de ir ao ar</p>
+        </div>
+      </div>
+      <div class="squad-body">
+        <div class="squad-row"><div class="squad-row-label">É</div><div class="squad-row-val">Revisor e aprovador. Garante que tudo converte e nada quebra.</div></div>
+        <div class="squad-row"><div class="squad-row-label">Não é</div><div class="squad-row-val">Executor. Não cria, não edita. Apenas avalia com critério.</div></div>
+        <div class="squad-row"><div class="squad-row-label">Framework</div><div class="squad-row-val">Checklist → Teste → Score → Aprovação ou Reprovação com motivo</div></div>
+        <div class="squad-row"><div class="squad-row-label">Critérios</div><div class="squad-row-val">Hook Score ≥7 · Clareza ≥8 · Prova ≥7 · CTA único · Pixel funcionando · UTMs corretos</div></div>
+        <div class="squad-row"><div class="squad-row-label">Cobre</div><div class="squad-row-val">
+          <span class="badge badge-purple">Copy</span>
+          <span class="badge badge-pink">Design</span>
+          <span class="badge badge-blue">Técnico</span>
+          <span class="badge badge-green">Funil</span>
+          <span class="badge badge-orange">Oferta</span>
+        </div></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- LAUNCH SQUAD - DESTACADO -->
+  <div class="card card-orange fade-in" style="margin-bottom: 48px;">
+    <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 20px;">
+      <div style="font-size: 40px;">🚀</div>
+      <div>
+        <div class="card-title" style="font-size: 22px;">LAUNCH SQUAD — O Maestro</div>
+        <div style="color: var(--text-muted); font-size: 13px;">Orquestra todos os squads em sequência durante um lançamento</div>
+      </div>
+    </div>
+    <div class="grid-4" style="gap: 12px;">
+      <div style="background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.2); border-radius: 10px; padding: 14px;">
+        <div style="font-family: 'Space Mono', monospace; font-size: 9px; color: #fbbf24; letter-spacing: 0.2em; margin-bottom: 8px;">FASE 01</div>
+        <div style="font-weight: 700; font-size: 14px; margin-bottom: 6px;">Pré-Lançamento</div>
+        <div style="font-size: 12px; color: var(--text-muted);">CPL, aquecimento, conteúdo de valor, story de bastidores</div>
+      </div>
+      <div style="background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.2); border-radius: 10px; padding: 14px;">
+        <div style="font-family: 'Space Mono', monospace; font-size: 9px; color: #fbbf24; letter-spacing: 0.2em; margin-bottom: 8px;">FASE 02</div>
+        <div style="font-weight: 700; font-size: 14px; margin-bottom: 6px;">Abertura</div>
+        <div style="font-size: 12px; color: var(--text-muted);">Email + WhatsApp + Stories + Anúncio de remarketing</div>
+      </div>
+      <div style="background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.2); border-radius: 10px; padding: 14px;">
+        <div style="font-family: 'Space Mono', monospace; font-size: 9px; color: #fbbf24; letter-spacing: 0.2em; margin-bottom: 8px;">FASE 03</div>
+        <div style="font-weight: 700; font-size: 14px; margin-bottom: 6px;">Urgência</div>
+        <div style="font-size: 12px; color: var(--text-muted);">Quebra de objeção, prova social, contagem regressiva</div>
+      </div>
+      <div style="background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.2); border-radius: 10px; padding: 14px;">
+        <div style="font-family: 'Space Mono', monospace; font-size: 9px; color: #fbbf24; letter-spacing: 0.2em; margin-bottom: 8px;">FASE 04</div>
+        <div style="font-weight: 700; font-size: 14px; margin-bottom: 6px;">Pós-venda</div>
+        <div style="font-size: 12px; color: var(--text-muted);">Upsell, bump, sequência de boas-vindas, ascensão de ticket</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================== -->
+  <!-- MENTES SINTÉTICAS -->
+  <!-- =========================================================== -->
+  <div class="divider"></div>
+
+  <div class="section-label fade-in">03 — Mentes Sintéticas</div>
+  <h2 class="section-title fade-in">17 Referências<br>de Elite</h2>
+  <p class="section-desc fade-in">Cada mente é um sistema de pensamento completo, ativado no momento certo do pipeline.</p>
+
+  <div class="avatar-mega fade-in">
+    <div style="overflow-x: auto;">
+      <table class="minds-table">
+        <thead>
+          <tr>
+            <th>Mente / Guru</th>
+            <th>Especialidade Core</th>
+            <th>Ativado em</th>
+            <th>Heurística principal</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><div class="mind-name">🎯 Dan Kennedy</div></td>
+            <td><span class="badge badge-purple">Oferta</span> <span class="badge badge-purple">Funil</span> <span class="badge badge-purple">Estratégia</span></td>
+            <td>Steps 01, 06, 07, 08 · Launch · Copy</td>
+            <td style="color: var(--text-dim); font-size: 12px;">"Quem você serve define tudo. A oferta certa para a multidão certa."</td>
+          </tr>
+          <tr>
+            <td><div class="mind-name">📰 Gary Halbert</div></td>
+            <td><span class="badge badge-orange">Avatar</span> <span class="badge badge-orange">Copy Direto</span></td>
+            <td>Step 00, 02 · Copy · Intel</td>
+            <td style="color: var(--text-dim); font-size: 12px;">"Encontre a multidão faminta. Depois venda o que ela já quer comprar."</td>
+          </tr>
+          <tr>
+            <td><div class="mind-name">😱 Gary Carlton</div></td>
+            <td><span class="badge badge-red">Emoção</span> <span class="badge badge-red">Medo</span> <span class="badge badge-red">Problema</span></td>
+            <td>Steps 03, 04 · VSL · Copy emocional</td>
+            <td style="color: var(--text-dim); font-size: 12px;">"Mergulhe tão fundo na dor que o prospect pense que você leu sua mente."</td>
+          </tr>
+          <tr>
+            <td><div class="mind-name">🔭 Joe Sugarman</div></td>
+            <td><span class="badge badge-blue">Mecanismo</span> <span class="badge badge-blue">Curiosidade</span></td>
+            <td>Step 05 · Design brief · Copy técnico</td>
+            <td style="color: var(--text-dim); font-size: 12px;">"Cada frase tem um único propósito: fazer o leitor ler a próxima."</td>
+          </tr>
+          <tr>
+            <td><div class="mind-name">🖊️ Gene Bencivenga</div></td>
+            <td><span class="badge badge-purple">Filosófico</span> <span class="badge badge-purple">Profundidade</span></td>
+            <td>Revisão geral · Email · Copy longa</td>
+            <td style="color: var(--text-dim); font-size: 12px;">"A copy mais persuasiva nunca parece vender. Ela apenas esclarece."</td>
+          </tr>
+          <tr>
+            <td><div class="mind-name">💊 Clayton Makepeace</div></td>
+            <td><span class="badge badge-green">Saúde</span> <span class="badge badge-green">Transformação</span></td>
+            <td>Projetos de saúde e nutraceuticos</td>
+            <td style="color: var(--text-dim); font-size: 12px;">"Venda a visão do futuro que o prospect ainda não acredita ser possível."</td>
+          </tr>
+          <tr>
+            <td><div class="mind-name">🔮 Fascinations</div></td>
+            <td><span class="badge badge-pink">Bullets</span> <span class="badge badge-pink">Curiosidade</span></td>
+            <td>Step 00b · Email subject · Headlines</td>
+            <td style="color: var(--text-dim); font-size: 12px;">"Um bom bullet revela o suficiente para criar desejo, esconde o suficiente para criar ação."</td>
+          </tr>
+          <tr>
+            <td><div class="mind-name">🧠 Yoshitani</div></td>
+            <td><span class="badge badge-blue">Psicologia</span> <span class="badge badge-blue">Análise</span></td>
+            <td>Step 00 · Data Chief · QA de copy</td>
+            <td style="color: var(--text-dim); font-size: 12px;">"O que o avatar diz que quer e o que ele realmente quer são coisas diferentes."</td>
+          </tr>
+          <tr>
+            <td><div class="mind-name">🚀 Russell Brunson</div></td>
+            <td><span class="badge badge-orange">VSL</span> <span class="badge badge-orange">Funil</span> <span class="badge badge-orange">Epiphany Bridge</span></td>
+            <td>Story Chief · Launch · Funil completo</td>
+            <td style="color: var(--text-dim); font-size: 12px;">"As pessoas não compram produtos. Elas compram histórias que as tornam heróis."</td>
+          </tr>
+          <tr>
+            <td><div class="mind-name">💰 Alex Hormozi</div></td>
+            <td><span class="badge badge-green">Pricing</span> <span class="badge badge-green">Grand Slam</span> <span class="badge badge-green">LTV</span></td>
+            <td>Step 07 · Estratégia de oferta · Escala</td>
+            <td style="color: var(--text-dim); font-size: 12px;">"Faça a oferta tão boa que as pessoas se sintam estúpidas de não comprar."</td>
+          </tr>
+          <tr>
+            <td><div class="mind-name">🧩 Eugene Schwartz</div></td>
+            <td><span class="badge badge-purple">Awareness</span> <span class="badge badge-purple">Desejo de massa</span></td>
+            <td>Copy · Tráfego · Segmentação</td>
+            <td style="color: var(--text-dim); font-size: 12px;">"Você não cria desejo. Você canaliza o desejo que já existe para o seu produto."</td>
+          </tr>
+          <tr>
+            <td><div class="mind-name">📧 Frank Kern</div></td>
+            <td><span class="badge badge-blue">Email</span> <span class="badge badge-blue">Follow-up</span> <span class="badge badge-blue">LTV</span></td>
+            <td>CRM · Email sequence · Pós-venda</td>
+            <td style="color: var(--text-dim); font-size: 12px;">"A venda não termina na compra. Ela começa com a compra."</td>
+          </tr>
+          <tr>
+            <td><div class="mind-name">🔬 Claude Hopkins</div></td>
+            <td><span class="badge badge-orange">Teste</span> <span class="badge badge-orange">Fundamentos</span></td>
+            <td>QA · Data Chief · Otimização</td>
+            <td style="color: var(--text-dim); font-size: 12px;">"Teste tudo. A opinião mais irrelevante é a sua. Os dados têm a resposta."</td>
+          </tr>
+          <tr>
+            <td><div class="mind-name">🤝 Robert Cialdini</div></td>
+            <td><span class="badge badge-red">Persuasão</span> <span class="badge badge-red">Influência</span> <span class="badge badge-red">Gatilhos</span></td>
+            <td>Copy · Funil todo · QA de persuasão</td>
+            <td style="color: var(--text-dim); font-size: 12px;">"Prova social, autoridade, escassez, urgência — gatilhos são atalhos cognitivos reais."</td>
+          </tr>
+          <tr>
+            <td><div class="mind-name">📊 David Ogilvy</div></td>
+            <td><span class="badge badge-pink">Pesquisa</span> <span class="badge badge-pink">Branding</span> <span class="badge badge-pink">Headlines</span></td>
+            <td>Intel · Design · Copy de marca</td>
+            <td style="color: var(--text-dim); font-size: 12px;">"O consumidor não é estúpido. Ele é sua esposa. Não o insulte com copy medíocre."</td>
+          </tr>
+          <tr>
+            <td><div class="mind-name">🧬 Perry Marshall</div></td>
+            <td><span class="badge badge-green">80/20</span> <span class="badge badge-green">Google Ads</span> <span class="badge badge-green">Segmentação</span></td>
+            <td>Traffic · Intel · Estratégia de budget</td>
+            <td style="color: var(--text-dim); font-size: 12px;">"20% dos seus clientes geram 80% da receita. Concentre tudo neles."</td>
+          </tr>
+          <tr>
+            <td><div class="mind-name">⚡ Todd Brown</div></td>
+            <td><span class="badge badge-blue">Marketing Funnel</span> <span class="badge badge-blue">Mecanismo</span></td>
+            <td>Step 05 · Copy de funil · Lançamento</td>
+            <td style="color: var(--text-dim); font-size: 12px;">"Sem mecanismo único, você é mais um no mercado. Com ele, você é a única opção."</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- =========================================================== -->
+  <!-- INTEGRAÇÕES -->
+  <!-- =========================================================== -->
+  <div class="divider"></div>
+
+  <div class="section-label fade-in">04 — Integrações</div>
+  <h2 class="section-title fade-in">O Sistema<br>Conectado</h2>
+  <p class="section-desc fade-in">CRM, Meta, Google, Email, WhatsApp — tudo falando entre si em tempo real.</p>
+
+  <div class="grid-2 fade-in">
+    <div class="avatar-mega">
+      <div class="avatar-header" style="background: linear-gradient(135deg, rgba(59,130,246,0.1) 0%, transparent 60%); padding: 20px 24px;">
+        <div style="font-family: 'Syne', sans-serif; font-weight: 800; font-size: 16px;">📥 Coleta de Dados</div>
+      </div>
+      <div class="integration-row">
+        <div class="integration-icon">🎯</div>
+        <div class="integration-name">Meta Pixel + CAPI</div>
+        <div class="integration-desc">Eventos de conversão server-side confiáveis, sem depender de cookies</div>
+        <div class="integration-status status-core">CORE</div>
+      </div>
+      <div class="integration-row">
+        <div class="integration-icon">🏷️</div>
+        <div class="integration-name">Google Tag Manager</div>
+        <div class="integration-desc">Rastreamento unificado. Controle total sem mexer no código</div>
+        <div class="integration-status status-core">CORE</div>
+      </div>
+      <div class="integration-row">
+        <div class="integration-icon">📈</div>
+        <div class="integration-name">Google Analytics 4</div>
+        <div class="integration-desc">Comportamento no site, funil, retenção e jornada do usuário</div>
+        <div class="integration-status status-data">DATA</div>
+      </div>
+      <div class="integration-row">
+        <div class="integration-icon">👥</div>
+        <div class="integration-name">CRM (GHL / ActiveCampaign)</div>
+        <div class="integration-desc">Jornada completa do lead: captura → nurturing → conversão → retenção</div>
+        <div class="integration-status status-core">CORE</div>
+      </div>
+    </div>
+
+    <div class="avatar-mega">
+      <div class="avatar-header" style="background: linear-gradient(135deg, rgba(16,185,129,0.1) 0%, transparent 60%); padding: 20px 24px;">
+        <div style="font-family: 'Syne', sans-serif; font-weight: 800; font-size: 16px;">📡 Distribuição</div>
+      </div>
+      <div class="integration-row">
+        <div class="integration-icon">📘</div>
+        <div class="integration-name">Meta Ads</div>
+        <div class="integration-desc">Facebook + Instagram. Cold / Warm / Hot. Escala 20%</div>
+        <div class="integration-status status-dist">DIST</div>
+      </div>
+      <div class="integration-row">
+        <div class="integration-icon">🔍</div>
+        <div class="integration-name">Google Ads</div>
+        <div class="integration-desc">Search (intenção) + YouTube (awareness). Retargeting cross-platform</div>
+        <div class="integration-status status-dist">DIST</div>
+      </div>
+      <div class="integration-row">
+        <div class="integration-icon">📧</div>
+        <div class="integration-name">Email Marketing</div>
+        <div class="integration-desc">Nurturing, lançamento, sequências automáticas, upsell pós-compra</div>
+        <div class="integration-status status-dist">DIST</div>
+      </div>
+      <div class="integration-row">
+        <div class="integration-icon">💬</div>
+        <div class="integration-name">WhatsApp API</div>
+        <div class="integration-desc">Proximidade e conversão. Sequências de carrinho, lembrete de evento</div>
+        <div class="integration-status status-dist">DIST</div>
+      </div>
+    </div>
+
+    <div class="avatar-mega">
+      <div class="avatar-header" style="background: linear-gradient(135deg, rgba(124,58,237,0.1) 0%, transparent 60%); padding: 20px 24px;">
+        <div style="font-family: 'Syne', sans-serif; font-weight: 800; font-size: 16px;">🧠 Dados Centrais</div>
+      </div>
+      <div class="integration-row">
+        <div class="integration-icon">🗄️</div>
+        <div class="integration-name">Supabase</div>
+        <div class="integration-desc">Banco central do OS. Todos os dados de projeto, squad, execução e conteúdo</div>
+        <div class="integration-status status-core">CORE</div>
+      </div>
+      <div class="integration-row">
+        <div class="integration-icon">⚡</div>
+        <div class="integration-name">n8n / OpenClaw</div>
+        <div class="integration-desc">Automações, webhooks, orquestração de squads e pipelines</div>
+        <div class="integration-status status-core">CORE</div>
+      </div>
+      <div class="integration-row">
+        <div class="integration-icon">🤖</div>
+        <div class="integration-name">Telegram Bot</div>
+        <div class="integration-desc">Relatórios diários em 5 linhas. Comandos para acionar pipeline</div>
+        <div class="integration-status status-data">DATA</div>
+      </div>
+    </div>
+
+    <div class="avatar-mega">
+      <div class="avatar-header" style="background: linear-gradient(135deg, rgba(236,72,153,0.1) 0%, transparent 60%); padding: 20px 24px;">
+        <div style="font-family: 'Syne', sans-serif; font-weight: 800; font-size: 16px;">📱 Conteúdo Orgânico</div>
+      </div>
+      <div class="integration-row">
+        <div class="integration-icon">▶️</div>
+        <div class="integration-name">YouTube</div>
+        <div class="integration-desc">2x/semana. Vídeos 8-15min. SEO com pergunta exata do avatar</div>
+        <div class="integration-status status-dist">DIST</div>
+      </div>
+      <div class="integration-row">
+        <div class="integration-icon">📸</div>
+        <div class="integration-name">Instagram Reels + Carrossel</div>
+        <div class="integration-desc">Reels 4x/semana (30-60s). Carrossel 2x/semana (educativo, salvável)</div>
+        <div class="integration-status status-dist">DIST</div>
+      </div>
+      <div class="integration-row">
+        <div class="integration-icon">🎵</div>
+        <div class="integration-name">TikTok</div>
+        <div class="integration-desc">Topo de funil. Awareness para novos públicos. Cross-post de Reels</div>
+        <div class="integration-status status-dist">DIST</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================== -->
+  <!-- PIPELINE HACKERVERSO -->
+  <!-- =========================================================== -->
+  <div class="divider"></div>
+
+  <div class="section-label fade-in">05 — Pipeline HackerVerso</div>
+  <h2 class="section-title fade-in">20 Steps.<br>Da Ideia à Escala.</h2>
+  <p class="section-desc fade-in">O pipeline completo que transforma um nicho em um sistema de marketing autônomo e lucrativo.</p>
+
+  <div class="fade-in">
+    <div class="phase-label"><div class="phase-dot" style="background:#7c3aed;"></div> FASE 1 — FUNDAÇÃO</div>
+    <div class="pipeline-grid phase-fundacao">
+      <div class="pipeline-step"><div class="ps-num">STEP 00</div><div class="ps-name">Estudo Avançado do Avatar</div><div class="ps-guru">Yoshitani</div></div>
+      <div class="pipeline-step"><div class="ps-num">STEP 00B</div><div class="ps-name">Resumo Psicológico / Trauma</div><div class="ps-guru">Fascinations</div></div>
+      <div class="pipeline-step"><div class="ps-num">STEP 01</div><div class="ps-name">Multidão Faminta</div><div class="ps-guru">Kennedy</div></div>
+      <div class="pipeline-step"><div class="ps-num">STEP 02</div><div class="ps-name">Descobridor de Problemas</div><div class="ps-guru">Halbert</div></div>
+      <div class="pipeline-step" style="background: rgba(124,58,237,0.1); border-color: rgba(124,58,237,0.3);"><div class="ps-num" style="color:#a78bfa;">GATE</div><div class="ps-name" style="color:#a78bfa;">Avatar Validado</div><div class="ps-guru">QA Check</div></div>
+    </div>
+
+    <div class="phase-label"><div class="phase-dot" style="background:#3b82f6;"></div> FASE 2 — DIFERENCIAÇÃO</div>
+    <div class="pipeline-grid phase-diferenciacao">
+      <div class="pipeline-step"><div class="ps-num">STEP 03</div><div class="ps-name">O Lago / Sub-mercado</div><div class="ps-guru">Carlton</div></div>
+      <div class="pipeline-step"><div class="ps-num">STEP 04</div><div class="ps-name">Falhas do Concorrente</div><div class="ps-guru">Carlton</div></div>
+      <div class="pipeline-step"><div class="ps-num">STEP 05</div><div class="ps-name">Mecanismo Único</div><div class="ps-guru">Sugarman</div></div>
+      <div class="pipeline-step"><div class="ps-num">STEP 06</div><div class="ps-name">Escada de Valor</div><div class="ps-guru">Kennedy</div></div>
+      <div class="pipeline-step" style="background: rgba(59,130,246,0.1); border-color: rgba(59,130,246,0.3);"><div class="ps-num" style="color:#60a5fa;">GATE</div><div class="ps-name" style="color:#60a5fa;">Mecanismo Único</div><div class="ps-guru">QA Check</div></div>
+    </div>
+
+    <div class="phase-label"><div class="phase-dot" style="background:#10b981;"></div> FASE 3 — MONETIZAÇÃO</div>
+    <div class="pipeline-grid phase-monetizacao" style="grid-template-columns: repeat(3,1fr);">
+      <div class="pipeline-step"><div class="ps-num">STEP 07</div><div class="ps-name">Oferta Irresistível Grand Slam</div><div class="ps-guru">Kennedy + Hormozi</div></div>
+      <div class="pipeline-step"><div class="ps-num">STEP 08</div><div class="ps-name">Oferta Lowticket / Tripwire</div><div class="ps-guru">Kennedy</div></div>
+      <div class="pipeline-step" style="background: rgba(16,185,129,0.1); border-color: rgba(16,185,129,0.3);"><div class="ps-num" style="color:#34d399;">GATE</div><div class="ps-name" style="color:#34d399;">Oferta Irresistível</div><div class="ps-guru">QA Check</div></div>
+    </div>
+
+    <div class="phase-label"><div class="phase-dot" style="background:#f59e0b;"></div> FASE 4 — ATIVAÇÃO</div>
+    <div class="pipeline-grid phase-ativacao">
+      <div class="pipeline-step"><div class="ps-num">STEP 09</div><div class="ps-name">Roteiro VSL</div><div class="ps-guru">Story Chief</div></div>
+      <div class="pipeline-step"><div class="ps-num">STEP 10</div><div class="ps-name">Copy de Anúncio (3 var.)</div><div class="ps-guru">Traffic Masters</div></div>
+      <div class="pipeline-step"><div class="ps-num">STEP 11</div><div class="ps-name">Brief de Criativo Visual</div><div class="ps-guru">Design Chief</div></div>
+      <div class="pipeline-step"><div class="ps-num">STEP QA</div><div class="ps-name">QA de Copy + Design</div><div class="ps-guru">QA Squad</div></div>
+      <div class="pipeline-step" style="background: rgba(245,158,11,0.1); border-color: rgba(245,158,11,0.3);"><div class="ps-num" style="color:#fbbf24;">GATE</div><div class="ps-name" style="color:#fbbf24;">Criativo Aprovado</div><div class="ps-guru">QA Check</div></div>
+    </div>
+
+    <div class="phase-label"><div class="phase-dot" style="background:#10b981;"></div> FASE 5 — DISTRIBUIÇÃO</div>
+    <div class="pipeline-grid" style="grid-template-columns: repeat(4,1fr);">
+      <div class="pipeline-step" style="position:relative;"><div class="pipeline-step::before" style="background: var(--accent-green);"></div><div class="ps-num">STEP 12</div><div class="ps-name">Setup de Campanha</div><div class="ps-guru">Traffic Masters</div></div>
+      <div class="pipeline-step"><div class="ps-num">STEP 13</div><div class="ps-name">Monitor de Métricas</div><div class="ps-guru">Data Chief</div></div>
+      <div class="pipeline-step"><div class="ps-num">STEP 14</div><div class="ps-name">Loop Autônomo</div><div class="ps-guru">Data Chief</div></div>
+      <div class="pipeline-step" style="background: rgba(16,185,129,0.1); border-color: rgba(16,185,129,0.3);"><div class="ps-num" style="color:#34d399;">GATE</div><div class="ps-name" style="color:#34d399;">Loop Ativo</div><div class="ps-guru">QA Check</div></div>
+    </div>
+
+    <div class="phase-label"><div class="phase-dot" style="background:#ec4899;"></div> FASE 6 — CONTEÚDO</div>
+    <div class="pipeline-grid" style="grid-template-columns: repeat(4,1fr);">
+      <div class="pipeline-step phase-conteudo"><div class="ps-num">STEP C1</div><div class="ps-name">Roteiro de Conteúdo Orgânico</div><div class="ps-guru">Story Chief</div></div>
+      <div class="pipeline-step phase-conteudo"><div class="ps-num">STEP C2</div><div class="ps-name">Calendário 30 dias</div><div class="ps-guru">Traffic Masters</div></div>
+      <div class="pipeline-step phase-conteudo"><div class="ps-num">STEP C3</div><div class="ps-name">Performance de Conteúdo</div><div class="ps-guru">Data Chief</div></div>
+      <div class="pipeline-step" style="background: rgba(236,72,153,0.1); border-color: rgba(236,72,153,0.3);"><div class="ps-num" style="color:#f472b6;">GATE</div><div class="ps-name" style="color:#f472b6;">Conteúdo Aprovado</div><div class="ps-guru">QA Check</div></div>
+    </div>
+  </div>
+
+  <!-- =========================================================== -->
+  <!-- CALENDÁRIO DE CONTEÚDO -->
+  <!-- =========================================================== -->
+  <div class="divider"></div>
+
+  <div class="section-label fade-in">06 — Calendário de Conteúdo</div>
+  <h2 class="section-title fade-in">Mix Mensal<br>por Projeto</h2>
+  <p class="section-desc fade-in">Cada projeto tem seu próprio calendário gerado pelo pipeline. Ciclo de reutilização automático.</p>
+
+  <div class="grid-3 fade-in" style="margin-bottom: 32px;">
+    <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 28px; text-align: center;">
+      <div style="font-family: 'Syne', sans-serif; font-size: 56px; font-weight: 800; color: #a78bfa; line-height: 1;">70%</div>
+      <div style="font-weight: 700; font-size: 16px; margin: 8px 0 6px;">Valor / Educativo</div>
+      <div style="font-size: 13px; color: var(--text-muted);">Constrói autoridade, audiência e confiança antes da oferta</div>
+    </div>
+    <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 28px; text-align: center;">
+      <div style="font-family: 'Syne', sans-serif; font-size: 56px; font-weight: 800; color: #60a5fa; line-height: 1;">20%</div>
+      <div style="font-weight: 700; font-size: 16px; margin: 8px 0 6px;">Bastidores / Processo</div>
+      <div style="font-size: 13px; color: var(--text-muted);">Gera conexão humana, prova social e curiosidade pelo método</div>
+    </div>
+    <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 28px; text-align: center;">
+      <div style="font-family: 'Syne', sans-serif; font-size: 56px; font-weight: 800; color: #34d399; line-height: 1;">10%</div>
+      <div style="font-weight: 700; font-size: 16px; margin: 8px 0 6px;">Oferta Direta</div>
+      <div style="font-size: 13px; color: var(--text-muted);">Converte a audiência quente que já está pronta para comprar</div>
+    </div>
+  </div>
+
+  <div class="card fade-in" style="margin-bottom: 48px;">
+    <div class="card-title" style="margin-bottom: 20px;">🔄 Ciclo de Reutilização Automático</div>
+    <div class="flow">
+      <div class="flow-step"><div class="flow-step-num">01</div><div class="flow-step-name">YouTube Longo</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="flow-step-num">02</div><div class="flow-step-name">Corta em 3 Reels</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="flow-step-num">03</div><div class="flow-step-name">Vira Carrossel</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="flow-step-num">04</div><div class="flow-step-name">Vira Email</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="flow-step-num">05</div><div class="flow-step-name">Post Viral?</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step" style="border-color: rgba(245,158,11,0.4); background: rgba(245,158,11,0.08);"><div class="flow-step-num" style="color:#fbbf24;">BOOST</div><div class="flow-step-name" style="color:#fbbf24;">Vira Anúncio</div></div>
+    </div>
+  </div>
+
+  <!-- =========================================================== -->
+  <!-- FLUXO DO SISTEMA -->
+  <!-- =========================================================== -->
+  <div class="divider"></div>
+
+  <div class="section-label fade-in">07 — Fluxo de Execução</div>
+  <h2 class="section-title fade-in">Task First.<br>Autônomo.</h2>
+  <p class="section-desc fade-in">O sistema funciona automaticamente. Uma task entra, o pipeline executa, o resultado sai.</p>
+
+  <div class="highlight-box fade-in">
+    <p><strong>Princípio central:</strong> Toda execução começa com uma task. Seja criada manualmente pelo usuário ou acionada por um trigger automático (relatório, evento de mercado, resultado abaixo do threshold), o fluxo é sempre o mesmo: Intel pesquisa → Mente gera → Squad executa → QA valida → Data monitora → Loop.</p>
+  </div>
+
+  <div class="grid-4 fade-in">
+    <div class="card card-purple">
+      <div style="font-family: 'Space Mono', monospace; font-size: 10px; color: #a78bfa; letter-spacing: 0.2em; margin-bottom: 12px;">PASSO 01</div>
+      <div class="card-title">🔔 Task Criada</div>
+      <div class="card-body">Manual pelo usuário ou trigger automático (Telegram, threshold, evento).</div>
+    </div>
+    <div class="card card-blue">
+      <div style="font-family: 'Space Mono', monospace; font-size: 10px; color: #60a5fa; letter-spacing: 0.2em; margin-bottom: 12px;">PASSO 02</div>
+      <div class="card-title">🔬 Intel Pesquisa</div>
+      <div class="card-body">Benchmarks, spy de anúncios, padrões vencedores do nicho.</div>
+    </div>
+    <div class="card card-purple">
+      <div style="font-family: 'Space Mono', monospace; font-size: 10px; color: #a78bfa; letter-spacing: 0.2em; margin-bottom: 12px;">PASSO 03</div>
+      <div class="card-title">🧠 Mente Gera</div>
+      <div class="card-body">O guru correto para o step é ativado. Output em JSON estruturado.</div>
+    </div>
+    <div class="card card-green">
+      <div style="font-family: 'Space Mono', monospace; font-size: 10px; color: #34d399; letter-spacing: 0.2em; margin-bottom: 12px;">PASSO 04</div>
+      <div class="card-title">⚡ Squad Executa</div>
+      <div class="card-body">Copy, Story, Design, Traffic — cada squad processa seu output.</div>
+    </div>
+    <div class="card card-orange">
+      <div style="font-family: 'Space Mono', monospace; font-size: 10px; color: #fbbf24; letter-spacing: 0.2em; margin-bottom: 12px;">PASSO 05</div>
+      <div class="card-title">✅ QA Valida</div>
+      <div class="card-body">Score obrigatório antes de publicar. Hook ≥7, clareza ≥8, CTA único.</div>
+    </div>
+    <div class="card card-blue">
+      <div style="font-family: 'Space Mono', monospace; font-size: 10px; color: #60a5fa; letter-spacing: 0.2em; margin-bottom: 12px;">PASSO 06</div>
+      <div class="card-title">🔌 Tech Conecta</div>
+      <div class="card-body">Pixel, UTM, CRM, Supabase sync. Tudo rastreado antes de ir ao ar.</div>
+    </div>
+    <div class="card card-pink">
+      <div style="font-family: 'Space Mono', monospace; font-size: 10px; color: #f472b6; letter-spacing: 0.2em; margin-bottom: 12px;">PASSO 07</div>
+      <div class="card-title">📊 Data Monitora</div>
+      <div class="card-body">Dashboard em tempo real. Relatório Telegram a cada 6h ou diário.</div>
+    </div>
+    <div class="card card-green">
+      <div style="font-family: 'Space Mono', monospace; font-size: 10px; color: #34d399; letter-spacing: 0.2em; margin-bottom: 12px;">PASSO 08</div>
+      <div class="card-title">🔄 Loop Autônomo</div>
+      <div class="card-body">Ciclo semanal: Testar → Otimizar → Escalar → Renovar. Sistema aprende.</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="logo">IMPÉRIO X</div>
+  <p>Operating System v2.0 — Arquitetura Completa</p>
+  <p style="margin-top: 8px; color: #374151;">Task First · Mente Sintética · Squad Especializado · Loop Autônomo</p>
+</footer>
+
+<script>
+  // Intersection Observer for fade-in animations
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => {
+          entry.target.classList.add('visible');
+        }, 60 * (Array.from(entry.target.parentElement?.children || []).indexOf(entry.target)));
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.08 });
+
+  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>

@@ -1,0 +1,109 @@
+graph TD
+    subgraph INPUT["📥 ENTRADA"]
+        REQ["Requisito / Ideia Vaga"]
+    end
+
+    subgraph ORCHESTRATOR["🎯 PAX — Orchestrator (@aios-master)"]
+        direction TB
+        PAX_ANALYZE["Analisa requisito"]
+        PAX_ROUTE["Roteia para agentes"]
+        PAX_MONITOR["Monitora progresso"]
+    end
+
+    subgraph SPEC_PIPELINE["🏗️ SPEC PIPELINE"]
+        direction LR
+        SP1["1. Requisito vago"] --> SP2["2. Análise"]
+        SP2 --> SP3["3. Spec detalhada"]
+        SP3 --> SP4["4. Tasks geradas"]
+    end
+
+    subgraph AGENTS["🤖 AGENTES ESPECIALIZADOS"]
+        direction TB
+        
+        subgraph ARIA["🏗️ ARIA — Architect (@architect)"]
+            ARIA_WORK["Define arquitetura\nPadrões de design\nDecisões técnicas"]
+        end
+        
+        subgraph DEX["⚡ DEX — Developer (@dev)"]
+            DEX_WORK["Implementa código\nExecuta tasks\nConstrói features"]
+        end
+        
+        subgraph QUINN["🔍 QUINN — QA Engineer (@qa)"]
+            QUINN_WORK["Testa qualidade\nValida entregas\nQuality gates"]
+        end
+    end
+
+    subgraph EXECUTION["⚙️ EXECUTION ENGINE"]
+        direction LR
+        EX1["Task recebida"] --> EX2["Implementação"]
+        EX2 --> EX3["Self-critique"]
+        EX3 --> EX4["Validação"]
+    end
+
+    subgraph QA_LOOP["✅ QA LOOP"]
+        direction LR
+        QA1["Code review"] --> QA2["Testes auto"]
+        QA2 --> QA3["Quality gate"]
+        QA3 --> QA4["Aprovação"]
+    end
+
+    subgraph MEMORY["🧠 MEMORY LAYER"]
+        direction LR
+        MEM1["Insights"] --> MEM2["Padrões"]
+        MEM2 --> MEM3["Decisões"]
+        MEM3 --> MEM4["Codebase map"]
+    end
+
+    subgraph SQUADS["👥 SQUADS — Times Modulares"]
+        direction TB
+        SQ1["L1: LOCAL — ./squads/"]
+        SQ2["L2: AIOS-SQUADS — github.com/SynkraAI"]
+        SQ3["L3: SYNKRA API — api.synkra.dev"]
+    end
+
+    subgraph OUTPUT["📦 SAÍDA"]
+        CODE["Código funcional"]
+        DOCS["Documentação"]
+        TESTS["Testes"]
+    end
+
+    %% Fluxo principal
+    REQ --> PAX_ANALYZE
+    PAX_ANALYZE --> PAX_ROUTE
+    PAX_ROUTE --> SPEC_PIPELINE
+    
+    SP4 --> ARIA_WORK
+    ARIA_WORK --> DEX_WORK
+    DEX_WORK --> EXECUTION
+    
+    EX4 --> QUINN_WORK
+    QUINN_WORK --> QA_LOOP
+    
+    QA4 -->|"✅ Aprovado"| OUTPUT
+    QA4 -->|"❌ Reprovado"| DEX_WORK
+    
+    PAX_MONITOR --> AGENTS
+    
+    %% Memory connections
+    EX4 --> MEMORY
+    QA4 --> MEMORY
+    MEM4 -->|"Contexto"| PAX_ANALYZE
+    
+    %% Squad connections
+    SQUADS -.->|"Extensões"| AGENTS
+
+    %% Styling
+    classDef orchestrator fill:#F59E0B,stroke:#F59E0B,color:#000,stroke-width:2px
+    classDef architect fill:#8B5CF6,stroke:#8B5CF6,color:#fff,stroke-width:2px
+    classDef developer fill:#3B82F6,stroke:#3B82F6,color:#fff,stroke-width:2px
+    classDef qa fill:#10B981,stroke:#10B981,color:#fff,stroke-width:2px
+    classDef memory fill:#F59E0B,stroke:#F59E0B,color:#000,stroke-width:1px
+    classDef input fill:#334155,stroke:#64748b,color:#fff,stroke-width:2px
+    classDef output fill:#059669,stroke:#10B981,color:#fff,stroke-width:2px
+
+    class PAX_ANALYZE,PAX_ROUTE,PAX_MONITOR orchestrator
+    class ARIA_WORK architect
+    class DEX_WORK developer
+    class QUINN_WORK qa
+    class REQ input
+    class CODE,DOCS,TESTS output
