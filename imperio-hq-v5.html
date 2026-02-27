@@ -4918,6 +4918,7 @@ Analise e retorne:
     }
 
     function renderSidebar() {
+      window.projects = PROJECTS; // sync global so OpenClaw Flow & other views can read
       const cats = {};
       const catIcons = { iGaming: '🎰', Lançamentos: '🚀', Infoprodutos: '📦', Nutraceuticos: '🌿', Ecommerce: '🛍️', Forex: '📈' };
       PROJECTS.forEach(p => {
@@ -9067,147 +9068,147 @@ TOM: Analítico. Prático. Orientado a resultados. Sem romantismo sobre o que n�
             objetivo: rich.objetivo || '', contexto: rich.contexto || '',
             orcamento_trafego: rich.orcamento_trafego || 'A definir',
             links: rich.links || { site: '', ads: '', analytics: '', criativos: '' },
-            avatar: rich.avatar || { ext erno: '', in terno: '', dores_superf iciais: [], dores_pr ofundas: [], medos: [], objecoes: [], inimigo: '', result ado_sonhado: '', t rigger_event: '', fas e_consciencia: '', sub_avatares: [], storyboard: [] },
-            pipeline: rich.pipe line || { avatar: 0, funil: 0, copy: 0, prompts: 0, design: 0, trafego: 0 },
-            branding: rich.b randing || { a rquetipo: '', mani festo: '', mecanis mo_key: '', in i migo _co mum: ' ', linguage m: { usa: [], evit a: [] }, cores: '', personalidade: '' },
-              kpis: rich.kpis || { thumb stop: null, ctr: null, cpm: nul l, cpc: nu ll, roas: n u ll, ltv: nul l, cac: null, cvr: nu ll, meta: { roas_target: null, cpa_target: null } },
-                assets: rich.assets || []
-        };
-      });
-    const merged = [...existing.filter(p => !supaIds.includes(p.id)), ...fromSupa];
-    if (typeof projectsSaveCustom === 'function') projectsSaveCustom(merged);
+            avatar: rich.avatar || { externo: '', interno: '', dores_superficiais: [], dores_profundas: [], medos: [], objecoes: [], inimigo: '', resultado_sonhado: '', trigger_event: '', fase_consciencia: '', sub_avatares: [], storyboard: [] },
+            pipeline: rich.pipeline || { avatar: 0, funil: 0, copy: 0, prompts: 0, design: 0, trafego: 0 },
+            branding: rich.branding || { arquetipo: '', manifesto: '', mecanismo_key: '', inimigo_comum: '', linguagem: { usa: [], evita: [] }, cores: '', personalidade: '' },
+            kpis: rich.kpis || { thumbstop: null, ctr: null, cpm: null, cpc: null, roas: null, ltv: null, cac: null, cvr: null, meta: { roas_target: null, cpa_target: null } },
+            assets: rich.assets || []
+          };
+        });
+        const merged = [...existing.filter(p => !supaIds.includes(p.id)), ...fromSupa];
+        if (typeof projectsSaveCustom === 'function') projectsSaveCustom(merged);
       },
       async upsertProject(proj) {
-      if (!proj._custom) return;
-      // Store all rich data in the data JSONB column
-      const richData = {
-        status: proj.status, vende: proj.vende, produto: proj.produto,
-        preco: proj.preco, objetivo: proj.objetivo, contexto: proj.contexto,
-        orcamento_trafego: proj.orcamento_trafego, links: proj.links,
-        avatar: proj.avatar, pipeline: proj.pipeline, branding: proj.branding,
-        kpis: proj.kpis, assets: proj.assets
-      };
-      const row = {
-        id: proj.id, name: proj.nome || proj.name,
-        category: proj.categoria || proj.category || null,
-        color: proj.vertical_color || proj.color || '#d4af37',
-        parent_id: proj.parent_id || null, icon: proj.icon || '📁',
-        description: proj.description || null, members: proj.members || [],
-        data: richData, updated_at: new Date().toISOString()
-      };
-      const { error } = await _sb.from('imphq_projects').upsert(row, { onConflict: 'id' });
-      if (error) console.warn('[SB] upsertProject', error);
-    },
+        if (!proj._custom) return;
+        // Store all rich data in the data JSONB column
+        const richData = {
+          status: proj.status, vende: proj.vende, produto: proj.produto,
+          preco: proj.preco, objetivo: proj.objetivo, contexto: proj.contexto,
+          orcamento_trafego: proj.orcamento_trafego, links: proj.links,
+          avatar: proj.avatar, pipeline: proj.pipeline, branding: proj.branding,
+          kpis: proj.kpis, assets: proj.assets
+        };
+        const row = {
+          id: proj.id, name: proj.nome || proj.name,
+          category: proj.categoria || proj.category || null,
+          color: proj.vertical_color || proj.color || '#d4af37',
+          parent_id: proj.parent_id || null, icon: proj.icon || '📁',
+          description: proj.description || null, members: proj.members || [],
+          data: richData, updated_at: new Date().toISOString()
+        };
+        const { error } = await _sb.from('imphq_projects').upsert(row, { onConflict: 'id' });
+        if (error) console.warn('[SB] upsertProject', error);
+      },
       async deleteProject(id) {
-      const { error } = await _sb.from('imphq_projects').delete().eq('id', id);
-      if (error) console.warn('[SB] deleteProject', error);
-      else console.log('[SB] 🗑 Projeto deletado do Supabase:', id);
-    },
+        const { error } = await _sb.from('imphq_projects').delete().eq('id', id);
+        if (error) console.warn('[SB] deleteProject', error);
+        else console.log('[SB] 🗑 Projeto deletado do Supabase:', id);
+      },
 
       // ── KANBAN ───────────────────────────────────────────────────
       async loadKanban() {
-      const { data, error } = await _sb.from('imphq_kanban').select('*').order('order_idx');
-      if (error) { console.warn('[SB] loadKanban', error); return; }
-      if (!data || !data.length) return;
-      if (typeof knCards !== 'undefined' && Array.isArray(knCards)) {
-        const supaIds = data.map(r => r.id);
-        const local = knCards.filter(c => !supaIds.includes(c.id));
-        const fromSupa = data.map(r => ({ id: r.id, project: r.project_id, title: r.title, description: r.description, status: r.status || 'todo', priority: r.priority || 'normal', owner: r.assignee, deadline: r.due_date, tags: r.tags || [] }));
-        knCards.length = 0;
-        [...local, ...fromSupa].forEach(c => knCards.push(c));
-        const _orig = localStorage.setItem.bind(localStorage);
-        _orig('knCards', JSON.stringify(knCards));
-      }
-    },
+        const { data, error } = await _sb.from('imphq_kanban').select('*').order('order_idx');
+        if (error) { console.warn('[SB] loadKanban', error); return; }
+        if (!data || !data.length) return;
+        if (typeof knCards !== 'undefined' && Array.isArray(knCards)) {
+          const supaIds = data.map(r => r.id);
+          const local = knCards.filter(c => !supaIds.includes(c.id));
+          const fromSupa = data.map(r => ({ id: r.id, project: r.project_id, title: r.title, description: r.description, status: r.status || 'todo', priority: r.priority || 'normal', owner: r.assignee, deadline: r.due_date, tags: r.tags || [] }));
+          knCards.length = 0;
+          [...local, ...fromSupa].forEach(c => knCards.push(c));
+          const _orig = localStorage.setItem.bind(localStorage);
+          _orig('knCards', JSON.stringify(knCards));
+        }
+      },
       async upsertCard(card) {
-      if (!card || !card.id || !card.project) return;
-      const row = { id: card.id, project_id: card.project, title: card.title, description: card.description || null, status: card.status || 'todo', priority: card.priority || 'normal', assignee: card.owner || null, due_date: card.deadline || null, tags: card.tags || [], order_idx: 0, updated_at: new Date().toISOString() };
-      const { error } = await _sb.from('imphq_kanban').upsert(row, { onConflict: 'id' });
-      if (error) console.warn('[SB] upsertCard', error);
-    },
+        if (!card || !card.id || !card.project) return;
+        const row = { id: card.id, project_id: card.project, title: card.title, description: card.description || null, status: card.status || 'todo', priority: card.priority || 'normal', assignee: card.owner || null, due_date: card.deadline || null, tags: card.tags || [], order_idx: 0, updated_at: new Date().toISOString() };
+        const { error } = await _sb.from('imphq_kanban').upsert(row, { onConflict: 'id' });
+        if (error) console.warn('[SB] upsertCard', error);
+      },
       async deleteCard(id) {
-      const { error } = await _sb.from('imphq_kanban').delete().eq('id', id);
-      if (error) console.warn('[SB] deleteCard', error);
-      else console.log('[SB] 🗑 Card deletado do Supabase:', id);
-    },
+        const { error } = await _sb.from('imphq_kanban').delete().eq('id', id);
+        if (error) console.warn('[SB] deleteCard', error);
+        else console.log('[SB] 🗑 Card deletado do Supabase:', id);
+      },
 
       // ── DOCS ──────────────────────────────────────────────────────
       async loadDocs() {
-      const { data, error } = await _sb.from('imphq_docs').select('*').order('created_at');
-      if (error) { console.warn('[SB] loadDocs', error); return; }
-      if (!data || !data.length) return;
-      const fromSupa = data.map(r => ({
-        id: r.id, title: r.title, cat: r.cat, project: r.project_id,
-        body: r.body || r.content || '', tags: r.tags || [],
-        created: r.created_at, updated: r.updated_at
-      }));
-      // Merge without overwriting local-only docs
-      if (typeof DOCS !== 'undefined' && Array.isArray(DOCS)) {
-        const supaIds = fromSupa.map(d => d.id);
-        const localOnly = DOCS.filter(d => !supaIds.includes(d.id));
-        DOCS.length = 0;
-        [...localOnly, ...fromSupa].forEach(d => DOCS.push(d));
-        const _orig = localStorage.setItem.bind(localStorage);
-        _orig('imperio_docs', JSON.stringify(DOCS));
-      }
-    },
+        const { data, error } = await _sb.from('imphq_docs').select('*').order('created_at');
+        if (error) { console.warn('[SB] loadDocs', error); return; }
+        if (!data || !data.length) return;
+        const fromSupa = data.map(r => ({
+          id: r.id, title: r.title, cat: r.cat, project: r.project_id,
+          body: r.body || r.content || '', tags: r.tags || [],
+          created: r.created_at, updated: r.updated_at
+        }));
+        // Merge without overwriting local-only docs
+        if (typeof DOCS !== 'undefined' && Array.isArray(DOCS)) {
+          const supaIds = fromSupa.map(d => d.id);
+          const localOnly = DOCS.filter(d => !supaIds.includes(d.id));
+          DOCS.length = 0;
+          [...localOnly, ...fromSupa].forEach(d => DOCS.push(d));
+          const _orig = localStorage.setItem.bind(localStorage);
+          _orig('imperio_docs', JSON.stringify(DOCS));
+        }
+      },
       async upsertDoc(doc) {
-      const row = { id: doc.id, title: doc.title, project_id: doc.project || null, cat: doc.cat || null, body: doc.body || null, content: doc.body || null, tags: doc.tags || [], updated_at: new Date().toISOString() };
-      const { error } = await _sb.from('imphq_docs').upsert(row, { onConflict: 'id' });
-      if (error) console.warn('[SB] upsertDoc', error);
-    },
+        const row = { id: doc.id, title: doc.title, project_id: doc.project || null, cat: doc.cat || null, body: doc.body || null, content: doc.body || null, tags: doc.tags || [], updated_at: new Date().toISOString() };
+        const { error } = await _sb.from('imphq_docs').upsert(row, { onConflict: 'id' });
+        if (error) console.warn('[SB] upsertDoc', error);
+      },
       async deleteDoc(id) {
-      const { error } = await _sb.from('imphq_docs').delete().eq('id', id);
-      if (error) console.warn('[SB] deleteDoc', error);
-      else console.log('[SB] 🗑 Doc deletado do Supabase:', id);
-    },
+        const { error } = await _sb.from('imphq_docs').delete().eq('id', id);
+        if (error) console.warn('[SB] deleteDoc', error);
+        else console.log('[SB] 🗑 Doc deletado do Supabase:', id);
+      },
 
       // ── KNOWLEDGE BASE ────────────────────────────────────────────
       async loadKB() {
-      const { data, error } = await _sb.from('imphq_kb').select('*').order('order_idx');
-      if (error) { console.warn('[SB] loadKB', error); return; }
-      if (!data || !data.length) return;
-      const kbMap = {};
-      (data || []).forEach(r => { kbMap[r.section_key] = r.content; });
-      if (typeof KB_DATA !== 'undefined') {
-        Object.assign(KB_DATA, kbMap);
-        const _orig = localStorage.setItem.bind(localStorage);
-        _orig('imperio_kb', JSON.stringify(KB_DATA));
-      }
-    },
+        const { data, error } = await _sb.from('imphq_kb').select('*').order('order_idx');
+        if (error) { console.warn('[SB] loadKB', error); return; }
+        if (!data || !data.length) return;
+        const kbMap = {};
+        (data || []).forEach(r => { kbMap[r.section_key] = r.content; });
+        if (typeof KB_DATA !== 'undefined') {
+          Object.assign(KB_DATA, kbMap);
+          const _orig = localStorage.setItem.bind(localStorage);
+          _orig('imperio_kb', JSON.stringify(KB_DATA));
+        }
+      },
       async upsertKBSection(sectionKey, content) {
-      const s = typeof KB_SECTIONS !== 'undefined' ? KB_SECTIONS.find(x => x.id === sectionKey) : null;
-      const row = { id: 'kb_' + sectionKey, section_key: sectionKey, title: s ? s.label : sectionKey, content, updated_at: new Date().toISOString() };
-      const { error } = await _sb.from('imphq_kb').upsert(row, { onConflict: 'id' });
-      if (error) console.warn('[SB] upsertKBSection', error);
-    },
+        const s = typeof KB_SECTIONS !== 'undefined' ? KB_SECTIONS.find(x => x.id === sectionKey) : null;
+        const row = { id: 'kb_' + sectionKey, section_key: sectionKey, title: s ? s.label : sectionKey, content, updated_at: new Date().toISOString() };
+        const { error } = await _sb.from('imphq_kb').upsert(row, { onConflict: 'id' });
+        if (error) console.warn('[SB] upsertKBSection', error);
+      },
 
       // ── EMPRESA ───────────────────────────────────────────────────
       async upsertEmpresaItem(item) {
-      const row = { id: item.id || ('emp_' + Date.now()), tipo: item.tipo || 'outro', nome: item.nome, valor: item.valor || null, extra: item.extra || {}, updated_at: new Date().toISOString() };
-      const { error } = await _sb.from('imphq_empresa').upsert(row, { onConflict: 'id' });
-      if (error) console.warn('[SB] upsertEmpresa', error);
-    },
+        const row = { id: item.id || ('emp_' + Date.now()), tipo: item.tipo || 'outro', nome: item.nome, valor: item.valor || null, extra: item.extra || {}, updated_at: new Date().toISOString() };
+        const { error } = await _sb.from('imphq_empresa').upsert(row, { onConflict: 'id' });
+        if (error) console.warn('[SB] upsertEmpresa', error);
+      },
       async loadEmpresa() {
-      const { data, error } = await _sb.from('imphq_empresa').select('*').order('created_at');
-      if (error) { console.warn('[SB] loadEmpresa', error); return; }
-      if (data && data.length) localStorage.setItem('imphq_empresa', JSON.stringify(data));
-    },
+        const { data, error } = await _sb.from('imphq_empresa').select('*').order('created_at');
+        if (error) { console.warn('[SB] loadEmpresa', error); return; }
+        if (data && data.length) localStorage.setItem('imphq_empresa', JSON.stringify(data));
+      },
 
       // ── INIT ──────────────────────────────────────────────────────
       async init() {
-      console.log('[SB] 🔄 Sincronizado com Supabase…');
-      await Promise.all([SB.loadLinks(), SB.loadProjects(), SB.loadKanban(, SB.loadKB(), SB.loadDocs(), SB.loadEmpresa()]);
-      console.log('[SB] ✅ Sincronização concluída');
-      if (typeof renderSidebar === 'function') renderSidebar();
-    },
+        console.log('[SB] 🔄 Sincronizado com Supabase…');
+        await Promise.all([SB.loadLinks(), SB.loadProjects(), SB.loadKanban(), SB.loadKB(), SB.loadDocs(), SB.loadEmpresa()]);
+        console.log('[SB] ✅ Sincronização concluída');
+        if (typeof renderSidebar === 'function') renderSidebar();
+      },
 
-    // Timer refs for debounce
-    _kanbanTimer: null,
+      // Timer refs for debounce
+      _kanbanTimer: null,
       _docsTimer: null,
-        // Track deleted IDs to propagate deletes
-        _deletedCards: new Set(),
-          _deletedDocs: new Set()
+      // Track deleted IDs to propagate deletes
+      _deletedCards: new Set(),
+      _deletedDocs: new Set()
     };
 
     // ══════════════════════════════════════════════════════════════
@@ -9215,14 +9216,14 @@ TOM: Analítico. Prático. Orientado a resultados. Sem romantismo sobre o que n�
     // ══════════════════════════════════════════════════════════════
 
     // ── Links Rápidos ─────────────────────────────────────────────
-    const _or igSaveLink = saveLink;
+    const _origSaveLink = saveLink;
     saveLink = function () {
       _origSaveLink();
       const links = getLinks();
       if (_qlEditId) { const l = links.find(x => x.id === _qlEditId); if (l) SB.upsertLink(l); }
       else { const last = links[links.length - 1]; if (last) SB.upsertLink(last); }
     };
-    const _origDel eteLink = deleteLink;
+    const _origDeleteLink = deleteLink;
     deleteLink = function (id) {
       SB._deletedCards.add('ql_' + id);
       _origDeleteLink(id);
@@ -9247,7 +9248,7 @@ TOM: Analítico. Prático. Orientado a resultados. Sem romantismo sobre o que n�
     }
 
     // ── Docs — patch deleteDoc to track delete ────────────────────
-    const _or igDeleteDoc = deleteDoc;
+    const _origDeleteDoc = deleteDoc;
     deleteDoc = function () {
       const deletingId = docEditId; // captured before the fn clears it
       SB._deletedDocs.add(deletingId);
