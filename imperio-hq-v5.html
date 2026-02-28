@@ -2226,29 +2226,33 @@
     </div>
 
     <!-- CRON VIEW -->
-<div id="view-cron" class="panel" style="height:100%;overflow-y:auto;padding:20px">
-  <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
-    <div style="font-size:18px;font-weight:700;color:var(--text)">⏱️ Cron Jobs</div>
-    <button onclick="renderCron()" style="background:rgba(212,175,55,.1);color:var(--gold);border:1px solid rgba(212,175,55,.3);padding:4px 12px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer">↻ Refresh</button>
-  </div>
-  <div style="font-size:12px;color:var(--text3);margin-bottom:16px">Automações agendadas — status em tempo real</div>
-  <div id="cron-body"></div>
-</div>
+    <div id="view-cron" class="panel" style="height:100%;overflow-y:auto;padding:20px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+        <div style="font-size:18px;font-weight:700;color:var(--text)">⏱️ Cron Jobs</div>
+        <button onclick="renderCron()"
+          style="background:rgba(212,175,55,.1);color:var(--gold);border:1px solid rgba(212,175,55,.3);padding:4px 12px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer">↻
+          Refresh</button>
+      </div>
+      <div style="font-size:12px;color:var(--text3);margin-bottom:16px">Automações agendadas — status em tempo real
+      </div>
+      <div id="cron-body"></div>
+    </div>
 
-<!-- SKILLS VIEW -->
-<div id="view-skills" class="panel" style="height:100%;overflow-y:auto;padding:20px">
-  <div style="font-size:18px;font-weight:700;color:var(--text);margin-bottom:4px">🔧 Skills</div>
-  <div style="font-size:12px;color:var(--text3);margin-bottom:16px">Skills disponíveis no OpenClaw — capacidades da IA</div>
-  <div id="skills-body"></div>
-</div>
+    <!-- SKILLS VIEW -->
+    <div id="view-skills" class="panel" style="height:100%;overflow-y:auto;padding:20px">
+      <div style="font-size:18px;font-weight:700;color:var(--text);margin-bottom:4px">🔧 Skills</div>
+      <div style="font-size:12px;color:var(--text3);margin-bottom:16px">Skills disponíveis no OpenClaw — capacidades da
+        IA</div>
+      <div id="skills-body"></div>
+    </div>
 
-<!-- FINANCAS VIEW -->
-<div id="view-financas" class="panel" style="height:100%;overflow-y:auto;padding:20px">
-  <div style="font-size:18px;font-weight:700;color:var(--text);margin-bottom:4px">💰 Custos Mensais</div>
-  <div style="font-size:12px;color:var(--text3);margin-bottom:16px">Despesas com ferramentas e APIs</div>
-  
-  <div id="financas-body"></div>
-</div>
+    <!-- FINANCAS VIEW -->
+    <div id="view-financas" class="panel" style="height:100%;overflow-y:auto;padding:20px">
+      <div style="font-size:18px;font-weight:700;color:var(--text);margin-bottom:4px">💰 Custos Mensais</div>
+      <div style="font-size:12px;color:var(--text3);margin-bottom:16px">Despesas com ferramentas e APIs</div>
+
+      <div id="financas-body"></div>
+    </div>
 
     <!-- MAIN -->
     <div id="main">
@@ -3050,12 +3054,15 @@
                 <div id="wa-dot-forex" class="wa-status-dot" data-project="forex"
                   style="margin-left:auto;width:10px;height:10px;border-radius:50%;background:var(--text3)"></div>
               </div>
-              <div style="font-size:10px;color:var(--text3);margin-bottom:6px" id="wa-session-forex">Verificando...</div>
+              <div style="font-size:10px;color:var(--text3);margin-bottom:6px" id="wa-session-forex">Verificando...
+              </div>
               <div style="display:flex;gap:6px">
                 <button onclick="waGenerateQR('forex')" id="wa-qr-btn-forex"
-                  style="flex:1;padding:5px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;border:1px solid var(--border2);background:var(--surface3);color:var(--text2)">📱 QR</button>
+                  style="flex:1;padding:5px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;border:1px solid var(--border2);background:var(--surface3);color:var(--text2)">📱
+                  QR</button>
                 <button onclick="waStartBot('forex')" id="wa-start-btn-forex"
-                  style="flex:1;padding:5px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;border:1px solid var(--border2);background:var(--surface3);color:var(--text2)">▶ Iniciar</button>
+                  style="flex:1;padding:5px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;border:1px solid var(--border2);background:var(--surface3);color:var(--text2)">▶
+                  Iniciar</button>
               </div>
             </div>
             <div id="wa-card-igaming"
@@ -3069,12 +3076,15 @@
                 <div id="wa-dot-igaming" class="wa-status-dot" data-project="igaming"
                   style="margin-left:auto;width:10px;height:10px;border-radius:50%;background:var(--text3)"></div>
               </div>
-              <div style="font-size:10px;color:var(--text3);margin-bottom:6px" id="wa-session-igaming">Verificando...</div>
+              <div style="font-size:10px;color:var(--text3);margin-bottom:6px" id="wa-session-igaming">Verificando...
+              </div>
               <div style="display:flex;gap:6px">
                 <button onclick="waGenerateQR('igaming')" id="wa-qr-btn-igaming"
-                  style="flex:1;padding:5px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;border:1px solid var(--border2);background:var(--surface3);color:var(--text2)">📱 QR</button>
+                  style="flex:1;padding:5px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;border:1px solid var(--border2);background:var(--surface3);color:var(--text2)">📱
+                  QR</button>
                 <button onclick="waStartBot('igaming')" id="wa-start-btn-igaming"
-                  style="flex:1;padding:5px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;border:1px solid var(--border2);background:var(--surface3);color:var(--text2)">▶ Iniciar</button>
+                  style="flex:1;padding:5px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;border:1px solid var(--border2);background:var(--surface3);color:var(--text2)">▶
+                  Iniciar</button>
               </div>
             </div>
             <div id="wa-card-eu"
@@ -3091,9 +3101,11 @@
               <div style="font-size:10px;color:var(--text3);margin-bottom:6px" id="wa-session-eu">Verificando...</div>
               <div style="display:flex;gap:6px">
                 <button onclick="waGenerateQR('eu')" id="wa-qr-btn-eu"
-                  style="flex:1;padding:5px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;border:1px solid var(--border2);background:var(--surface3);color:var(--text2)">📱 QR</button>
+                  style="flex:1;padding:5px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;border:1px solid var(--border2);background:var(--surface3);color:var(--text2)">📱
+                  QR</button>
                 <button onclick="waStartBot('eu')" id="wa-start-btn-eu"
-                  style="flex:1;padding:5px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;border:1px solid var(--border2);background:var(--surface3);color:var(--text2)">▶ Iniciar</button>
+                  style="flex:1;padding:5px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;border:1px solid var(--border2);background:var(--surface3);color:var(--text2)">▶
+                  Iniciar</button>
               </div>
             </div>
           </div>
@@ -3230,7 +3242,8 @@
         <div class="card" style="margin-bottom:12px">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
             <div class="card-title" style="margin:0">💬 Conversas Recentes</div>
-            <select id="wa-project-filter" onchange="waLoadConversations()" style="background:var(--surface3);border:1px solid var(--border);color:var(--text);padding:4px 8px;border-radius:4px;font-size:11px">
+            <select id="wa-project-filter" onchange="waLoadConversations()"
+              style="background:var(--surface3);border:1px solid var(--border);color:var(--text);padding:4px 8px;border-radius:4px;font-size:11px">
               <option value="">Todos os projetos</option>
               <option value="forex">Forex</option>
               <option value="igaming">iGaming</option>
@@ -3243,15 +3256,20 @@
         </div>
 
         <!-- QR MODAL -->
-        <div id="wa-qr-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.8);z-index:9999;align-items:center;justify-content:center">
-          <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;max-width:400px;width:90%;text-align:center">
-            <div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:8px" id="wa-qr-title">QR Code</div>
-            <div style="font-size:12px;color:var(--text3);margin-bottom:16px" id="wa-qr-desc">Escaneie com o WhatsApp</div>
+        <div id="wa-qr-modal"
+          style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.8);z-index:9999;align-items:center;justify-content:center">
+          <div
+            style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;max-width:400px;width:90%;text-align:center">
+            <div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:8px" id="wa-qr-title">QR Code
+            </div>
+            <div style="font-size:12px;color:var(--text3);margin-bottom:16px" id="wa-qr-desc">Escaneie com o WhatsApp
+            </div>
             <div id="wa-qr-content" style="background:white;padding:20px;border-radius:12px;margin-bottom:16px">
               <!-- QR or instructions here -->
             </div>
             <div style="font-size:11px;color:var(--text2);margin-bottom:16px" id="wa-qr-instructions"></div>
-            <button onclick="document.getElementById('wa-qr-modal').style.display='none'" style="background:var(--surface3);border:1px solid var(--border);color:var(--text);padding:10px 24px;border-radius:8px;font-size:12px;cursor:pointer">Fechar</button>
+            <button onclick="document.getElementById('wa-qr-modal').style.display='none'"
+              style="background:var(--surface3);border:1px solid var(--border);color:var(--text);padding:10px 24px;border-radius:8px;font-size:12px;cursor:pointer">Fechar</button>
           </div>
         </div>
 
@@ -4075,7 +4093,7 @@
       },
       {
         id: 'jonathan', icon: '🎰', categoria: 'iGaming', vertical_color: 'var(--red-bright)',
-        nome: 'Jonathan', produto: 'iGaming / Jonathan', preco: '', status: 'Ativo', vende: false,
+        nome: 'Jonathan' produto: 'iGaming / Jonathan', preco: '', status: 'Ativo', vende: false,
         objetivo: 'Escala em iGaming', orcamento_trafego: 'A definir',
         links: { site: '', ads: '', analytics: '', criativos: '' }, contexto: '',
         avatar: { externo: '', interno: '', dores_superficiais: [], dores_profundas: [], medos: [], objecoes: [], inimigo: '', resultado_sonhado: '', trigger_event: '', fase_consciencia: '', sub_avatares: [], storyboard: [] },
@@ -4085,7 +4103,7 @@
       },
       {
         id: 'pedro', icon: '🎰', categoria: 'iGaming', vertical_color: 'var(--red-bright)',
-        nome: 'Pedro', produto: 'iGaming / Pedro', preco: '', status: 'Ativo', vende: false,
+        nome: 'Pedr', produto: 'iGaming / Pedro', preco: '', status: 'Ativo', vende: false,
         objetivo: 'Escala em iGaming', orcamento_trafego: 'A definir',
         links: { site: '', ads: '', analytics: '', criativos: '' }, contexto: '',
         avatar: { externo: '', interno: '', dores_superficiais: [], dores_profundas: [], medos: [], objecoes: [], inimigo: '', resultado_sonhado: '', trigger_event: '', fase_consciencia: '', sub_avatares: [], storyboard: [] },
@@ -4095,7 +4113,7 @@
       },
       {
         id: 'theo', icon: '🎰', categoria: 'iGaming', vertical_color: 'var(--red-bright)',
-        nome: 'Theo', produto: 'iGaming / Theo', preco: '', status: 'Ativo', vende: false,
+        nome: 'The', produto: 'iGaming / Theo', preco: '', status: 'Ativo', vende: false,
         objetivo: 'Escala em iGaming', orcamento_trafego: 'A definir',
         links: { site: '', ads: '', analytics: '', criativos: '' }, contexto: '',
         avatar: { externo: '', interno: '', dores_superficiais: [], dores_profundas: [], medos: [], objecoes: [], inimigo: '', resultado_sonhado: '', trigger_event: '', fase_consciencia: '', sub_avatares: [], storyboard: [] },
@@ -5061,15 +5079,19 @@ Analise e retorne:
     // ═══════════════════════════════════════════════════════
     //  NAVIGATION
     // ═══════════════════════════════════════════════════════
-    function showOverview() {
-      document.querySelectorAll('#main > div.panel').forEach(p => p.classList.remove('active'));
+    function hideAllPanels() {
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
       document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    }
+
+    function showOverview() {
+      hideAllPanels();
       document.getElementById('view-overview').classList.add('active');
       document.getElementById('nav-overview').classList.add('active');
     }
 
     function showSection(s) {
-      document.querySelectorAll('#main > div.panel').forEach(p => p.classList.remove('active'));
+      hideAllPanels();
       const el = document.getElementById('view-' + s);
       if (el) el.classList.add('active');
     }
@@ -5078,11 +5100,10 @@ Analise e retorne:
       currentProject = PROJECTS.find(p => p.id === id);
       if (!currentProject) return;
 
-      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      hideAllPanels();
       const navEl = document.getElementById('nav-' + id);
       if (navEl) navEl.classList.add('active');
 
-      document.querySelectorAll('#main > div.panel').forEach(p => p.classList.remove('active'));
       document.getElementById('view-project').classList.add('active');
 
       renderProjectHero();
@@ -8457,11 +8478,11 @@ Registre aqui o que funcionou e o que não funcionou. Este é o CÉREBRO ESTRAT�
     function renderFinancas() {
       const el = document.getElementById('financas-body');
       if (!el) return;
-      
+
       const custos = getCustos();
       const totalUSD = custos.reduce((sum, c) => sum + c.valor, 0);
       const totalBRL = totalUSD * COTACAO_USD_BRL;
-      
+
       let html = `
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
           <div style="font-size:14px;font-weight:700;color:var(--text)">Custos Mensais</div>
@@ -8483,7 +8504,7 @@ Registre aqui o que funcionou e o que não funcionou. Este é o CÉREBRO ESTRAT�
         </div>
         <div style="display:flex;flex-direction:column;gap:8px">
       `;
-      
+
       custos.forEach((c, idx) => {
         const brl = c.valor * COTACAO_USD_BRL;
         html += `
@@ -8500,7 +8521,7 @@ Registre aqui o que funcionou e o que não funcionou. Este é o CÉREBRO ESTRAT�
           </div>
         `;
       });
-      
+
       html += '</div>';
       el.innerHTML = html;
     }
@@ -9130,7 +9151,7 @@ TOM: Irreverente. De bar. Honesto até doer. Zero corporativismo.`
         ],
         tom: 'Fluido e envolvente',
         tonTags: ['flowing', 'curious', 'inventive', 'explanatory'],
-        dna: 'Sugarman entendia que o copy deve ser um "escorregadero" — cada frase torna impossível parar de ler. E o mecanismo único é a razão pela qual seu produto funciona de forma diferente de tudo que o avatar já viu.',
+        dna: 'Sugarman entendia que o copy deve ser um "escorregadero" — cada frase torna impossível parar de ler. E o mecanismo único é a razão pela qual seu oduto e forma diferente de tudo que o avatar já viu.',
         heuristics: '1. O propósito de cada frase é fazer o leitor ler a próxima — "slippery slide"\n2. O mecanismo único diferencia mesmo em mercados saturados\n3. Explique o "por que funciona" em termos simples e visuais\n4. Use "dimensões sensoriais" — deixe o leitor sentir o produto\n5. Admita uma fraqueza antes do rollo de benefícios\n6. A compra é emocional, a justificativa é lógica — alimente ambas',
         padroes: '- Mecanismo único nomeado e explicado\n- Abertura que cria loop de curiosidade\n- Frases curtas intercaladas com longas para fluxo\n- Analogias visuais para conceitos técnicos\n- "Deixe-me explicar por que isso funciona..."\n- Admissão de fraqueza para ganhar credibilidade',
         prompt: `Você é Joe Sugarman — criador do conceito de Unique Mechanism e do "Slippery Slide" copy.
@@ -9434,7 +9455,7 @@ TOM: Analítico. Prático. Orientado a resultados. Sem romantismo sobre o que n�
         const { error } = await _sb.from('imphq_projects').upsert(row, { onConflict: 'id' });
         if (error) console.warn('[SB] upsertProject', error);
       },
-      async deleteProject(id) {
+      async lett(id) {
         const { error } = await _sb.from('imphq_projects').delete().eq('id', id);
         if (error) console.warn('[SB] deleteProject', error);
         else console.log('[SB] 🗑 Projeto deletado do Supabase:', id);
@@ -9737,7 +9758,7 @@ TOM: Analítico. Prático. Orientado a resultados. Sem romantismo sobre o que n�
       try {
         const res = await fetch(`${WA_API_URL}/status`);
         const status = await res.json();
-        
+
         const projects = ['forex', 'igaming', 'eu'];
         projects.forEach(p => {
           const dot = document.getElementById(`wa-dot-${p}`);
@@ -9763,15 +9784,15 @@ TOM: Analítico. Prático. Orientado a resultados. Sem romantismo sobre o que n�
       try {
         const res = await fetch(`${WA_API_URL}/qr/${project}`);
         const data = await res.json();
-        
+
         const modal = document.getElementById('wa-qr-modal');
         const title = document.getElementById('wa-qr-title');
         const desc = document.getElementById('wa-qr-desc');
         const content = document.getElementById('wa-qr-content');
         const instructions = document.getElementById('wa-qr-instructions');
-        
+
         title.textContent = project.toUpperCase();
-        
+
         if (data.needsQr) {
           desc.textContent = 'Execute o comando para gerar QR Code';
           content.innerHTML = `
@@ -9802,13 +9823,13 @@ cd C:\\Users\\vsuga\\clawd\\scripts\\whatsapp-bot<br>
           `;
           instructions.innerHTML = `<button onclick="document.getElementById('wa-qr-modal').style.display='none'" style="background:var(--gold);border:none;color:var(--bg);padding:10px 24px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer">OK</button>`;
         }
-        
+
         modal.style.display = 'flex';
       } catch (err) {
         alert('Erro: ' + err.message);
       }
     }
-    
+
     async function waVerifyStatus(project) {
       await waLoadStatus();
       document.getElementById('wa-qr-modal').style.display = 'none';
@@ -9819,15 +9840,15 @@ cd C:\\Users\\vsuga\\clawd\\scripts\\whatsapp-bot<br>
       try {
         const res = await fetch(`${WA_API_URL}/start/${project}`);
         const data = await res.json();
-        
+
         const modal = document.getElementById('wa-qr-modal');
         const title = document.getElementById('wa-qr-title');
         const desc = document.getElementById('wa-qr-desc');
         const content = document.getElementById('wa-qr-content');
         const instructions = document.getElementById('wa-qr-instructions');
-        
+
         title.textContent = 'Iniciar Bot - ' + project.toUpperCase();
-        
+
         if (data.scriptExists) {
           desc.textContent = 'Siga os passos para iniciar';
           content.innerHTML = `
@@ -9849,7 +9870,7 @@ cd C:\\Users\\vsuga\\clawd\\scripts\\whatsapp-bot<br>
           content.innerHTML = `<div style="font-size:32px">❌</div><div style="color:#666;margin-top:8px">Script não encontrado para este projeto</div>`;
           instructions.innerHTML = `<button onclick="document.getElementById('wa-qr-modal').style.display='none'" style="background:var(--gold);border:none;color:var(--bg);padding:10px 24px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer">OK</button>`;
         }
-        
+
         modal.style.display = 'flex';
       } catch (err) {
         alert('Erro: ' + err.message);
@@ -9870,26 +9891,26 @@ cd C:\\Users\\vsuga\\clawd\\scripts\\whatsapp-bot<br>
     async function waLoadConversations() {
       const container = document.getElementById('wa-conversations-list');
       const project = document.getElementById('wa-project-filter')?.value || '';
-      
+
       if (!container) return;
-      
+
       container.innerHTML = '<div style="font-size:11px;color:var(--text3);padding:20px;text-align:center">Carregando...</div>';
-      
+
       try {
         const url = project ? `${WA_API_URL}/conversations?project=${project}&limit=20` : `${WA_API_URL}/conversations?limit=20`;
         const res = await fetch(url);
         const data = await res.json();
-        
+
         if (!data || data.length === 0) {
           container.innerHTML = '<div style="font-size:11px;color:var(--text3);padding:20px;text-align:center">Nenhuma conversa encontrada</div>';
           return;
         }
-        
+
         container.innerHTML = data.map(conv => {
           const time = new Date(conv.last_time).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
           const directionIcon = conv.direction === 'inbound' ? '📥' : '📤';
           const unreadBadge = conv.unread ? '<span style="background:var(--red-bright);color:white;padding:2px 6px;border-radius:10px;font-size:9px;margin-left:8px">NOVO</span>' : '';
-          
+
           return `
             <div onclick="waOpenChat(${conv.lead_id}, '${conv.project_id}')" 
                  style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;cursor:pointer;transition:.15s">
@@ -9906,7 +9927,7 @@ cd C:\\Users\\vsuga\\clawd\\scripts\\whatsapp-bot<br>
             </div>
           `;
         }).join('');
-        
+
       } catch (err) {
         container.innerHTML = `<div style="font-size:11px;color:var(--red-bright);padding:20px;text-align:center">Erro: ${err.message}</div>`;
       }
@@ -9917,28 +9938,28 @@ cd C:\\Users\\vsuga\\clawd\\scripts\\whatsapp-bot<br>
       currentWaProject = project;
       const container = document.getElementById('wa-conversations-list');
       container.innerHTML = '<div style="font-size:11px;color:var(--text3);padding:20px;text-align:center">Carregando chat...</div>';
-      
+
       try {
         // Get lead info and messages in parallel
         const [msgsRes, leadsRes] = await Promise.all([
           fetch(`${WA_API_URL}/messages/${leadId}${project ? '?project=' + project : ''}`),
           fetch(`${WA_API_URL}/leads?id=eq.${leadId}`)
         ]);
-        
+
         const messages = await msgsRes.json();
         const leads = await leadsRes.json();
         const lead = leads && leads.length > 0 ? leads[0] : null;
-        
+
         if (!messages || messages.length === 0) {
           container.innerHTML = '<div style="font-size:11px;color:var(--text3);padding:20px;text-align:center">Nenhuma mensagem</div>';
           return;
         }
-        
+
         // Lead header with info
         const leadName = lead?.name || `Lead #${leadId}`;
         const leadPhone = lead?.phone || 'Sem telefone';
         const leadAvatar = lead?.avatar || leadName.charAt(0).toUpperCase();
-        
+
         container.innerHTML = `
           <div style="margin-bottom:12px">
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
@@ -9956,9 +9977,9 @@ cd C:\\Users\\vsuga\\clawd\\scripts\\whatsapp-bot<br>
           
           <div style="display:flex;flex-direction:column;gap:8px;max-height:300px;overflow-y:auto;margin-bottom:12px">
             ${messages.map(m => {
-              const time = new Date(m.created_at).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
-              const isOutbound = m.direction === 'outbound';
-              return `
+          const time = new Date(m.created_at).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+          const isOutbound = m.direction === 'outbound';
+          return `
                 <div style="background:${isOutbound ? 'var(--surface3)' : 'var(--gold-dim)'};border:1px solid ${isOutbound ? 'var(--border)' : 'var(--gold)'};border-radius:8px;padding:10px;${isOutbound ? '' : 'border-left:3px solid var(--gold)'}">
                   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
                     <span style="font-size:10px;font-weight:700;color:${isOutbound ? 'var(--blue-bright)' : 'var(--gold)'}">${isOutbound ? '📤 Você' : '📥 Lead'}</span>
@@ -9967,7 +9988,7 @@ cd C:\\Users\\vsuga\\clawd\\scripts\\whatsapp-bot<br>
                   <div style="font-size:12px;color:var(--text)">${m.content || '(sem texto)'}</div>
                 </div>
               `;
-            }).join('')}
+        }).join('')}
           </div>
           
           <!-- Enviar mensagem -->
@@ -9978,7 +9999,7 @@ cd C:\\Users\\vsuga\\clawd\\scripts\\whatsapp-bot<br>
             <div id="wa-send-status" style="font-size:10px;color:var(--text3);margin-top:6px;text-align:center"></div>
           </div>
         `;
-        
+
       } catch (err) {
         container.innerHTML = `<div style="font-size:11px;color:var(--red-bright);padding:20px;text-align:center">Erro: ${err.message}</div>`;
       }
@@ -9988,14 +10009,14 @@ cd C:\\Users\\vsuga\\clawd\\scripts\\whatsapp-bot<br>
       const input = document.getElementById('wa-msg-input');
       const status = document.getElementById('wa-send-status');
       const message = input?.value?.trim();
-      
+
       if (!message || !currentWaLeadId || !currentWaProject) {
         alert('Selecione um chat primeiro');
         return;
       }
-      
+
       status.innerHTML = 'Enviando...';
-      
+
       try {
         const res = await fetch(`${WA_API_URL}/send`, {
           method: 'POST',
@@ -10006,9 +10027,9 @@ cd C:\\Users\\vsuga\\clawd\\scripts\\whatsapp-bot<br>
             message: message
           })
         });
-        
+
         const data = await res.json();
-        
+
         if (data.success) {
           status.innerHTML = '<span style="color:var(--green-bright)">✓ Mensagem registrada!</span>';
           input.value = '';
@@ -10024,7 +10045,7 @@ cd C:\\Users\\vsuga\\clawd\\scripts\\whatsapp-bot<br>
 
     // Auto-load WhatsApp conversations and status when view is shown
     const _origShowWhatsApp = window.showWhatsApp;
-    window.showWhatsApp = function() {
+    window.showWhatsApp = function () {
       if (_origShowWhatsApp) _origShowWhatsApp();
       setTimeout(() => {
         waLoadStatus();
