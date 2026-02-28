@@ -2195,7 +2195,7 @@
         <div class="nav-item" id="nav-referencias" onclick="showReferencias()">
           <span class="icon">🖼️</span> Referências
         </div>
-        <div class="nav-item" id="nav-equipe" onclick="showEquipe()">
+        <div class="nav-item" id="nav-equipe" onclick="showEquipe(); event.stopPropagation();">
           <span class="icon">👥</span> Equipe
         </div>
         <div class="nav-item" id="nav-openclaw" onclick="showOpenClaw()">
@@ -2211,12 +2211,12 @@
           <span class="badge"
             style="background:rgba(0,255,200,.12);color:#00ffc8;font-size:9px;padding:1px 6px">8</span>
         </div>
-        <div class="nav-item" id="nav-cron" onclick="showCron()">
+        <div class="nav-item" id="nav-cron" onclick="showCron(); event.stopPropagation();">
           <span class="icon">⏱️</span> Cron Jobs
           <span class="badge" id="cron-fail-badge"
             style="background:rgba(224,92,92,.2);color:#e05c5c;display:none">!</span>
         </div>
-        <div class="nav-item" id="nav-skills" onclick="showSkills()">
+        <div class="nav-item" id="nav-skills" onclick="showSkills(); event.stopPropagation();">
           <span class="icon">🔧</span> Skills
         </div>
       </div>
@@ -3034,18 +3034,18 @@
                 <div style="font-size:18px">📈</div>
                 <div>
                   <div style="font-size:12px;font-weight:700;color:var(--text)">Forex</div>
-                  <div style="font-size:10px;color:var(--text3)">WA_DEFAULT_PROJECT_ID = forex</div>
+                  <div style="font-size:10px;color:var(--text3)">forex</div>
                 </div>
-                <div id="wa-dot-forex"
-                  style="margin-left:auto;width:8px;height:8px;border-radius:50%;background:var(--text3)"></div>
+                <div id="wa-dot-forex" class="wa-status-dot" data-project="forex"
+                  style="margin-left:auto;width:10px;height:10px;border-radius:50%;background:var(--text3)"></div>
               </div>
-              <div style="font-size:10px;color:var(--text3);margin-bottom:6px">Sessão: sessions/forex/</div>
-              <button
-                onclick="waSetStatus('forex',(document.getElementById('wa-dot-forex').dataset.on==='1'?'off':'on'))"
-                style="width:100%;padding:5px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;border:1px solid var(--border2);background:var(--surface3);color:var(--text2)"
-                id="wa-toggle-forex">▶ Iniciar</button>
-              <div style="margin-top:6px;font-size:10px;color:var(--text3)">Start: <code
-                  style="background:var(--surface3);padding:1px 4px;border-radius:3px">.\start-forex.ps1</code></div>
+              <div style="font-size:10px;color:var(--text3);margin-bottom:6px" id="wa-session-forex">Verificando...</div>
+              <div style="display:flex;gap:6px">
+                <button onclick="waGenerateQR('forex')" id="wa-qr-btn-forex"
+                  style="flex:1;padding:5px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;border:1px solid var(--border2);background:var(--surface3);color:var(--text2)">📱 QR</button>
+                <button onclick="waStartBot('forex')" id="wa-start-btn-forex"
+                  style="flex:1;padding:5px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;border:1px solid var(--border2);background:var(--surface3);color:var(--text2)">▶ Iniciar</button>
+              </div>
             </div>
             <div id="wa-card-igaming"
               style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px">
@@ -3053,18 +3053,18 @@
                 <div style="font-size:18px">🎰</div>
                 <div>
                   <div style="font-size:12px;font-weight:700;color:var(--text)">iGaming</div>
-                  <div style="font-size:10px;color:var(--text3)">WA_DEFAULT_PROJECT_ID = igaming</div>
+                  <div style="font-size:10px;color:var(--text3)">igaming</div>
                 </div>
-                <div id="wa-dot-igaming"
-                  style="margin-left:auto;width:8px;height:8px;border-radius:50%;background:var(--text3)"></div>
+                <div id="wa-dot-igaming" class="wa-status-dot" data-project="igaming"
+                  style="margin-left:auto;width:10px;height:10px;border-radius:50%;background:var(--text3)"></div>
               </div>
-              <div style="font-size:10px;color:var(--text3);margin-bottom:6px">Sessão: sessions/igaming/</div>
-              <button
-                onclick="waSetStatus('igaming',(document.getElementById('wa-dot-igaming').dataset.on==='1'?'off':'on'))"
-                style="width:100%;padding:5px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;border:1px solid var(--border2);background:var(--surface3);color:var(--text2)"
-                id="wa-toggle-igaming">▶ Iniciar</button>
-              <div style="margin-top:6px;font-size:10px;color:var(--text3)">Start: <code
-                  style="background:var(--surface3);padding:1px 4px;border-radius:3px">.\start-igaming.ps1</code></div>
+              <div style="font-size:10px;color:var(--text3);margin-bottom:6px" id="wa-session-igaming">Verificando...</div>
+              <div style="display:flex;gap:6px">
+                <button onclick="waGenerateQR('igaming')" id="wa-qr-btn-igaming"
+                  style="flex:1;padding:5px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;border:1px solid var(--border2);background:var(--surface3);color:var(--text2)">📱 QR</button>
+                <button onclick="waStartBot('igaming')" id="wa-start-btn-igaming"
+                  style="flex:1;padding:5px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;border:1px solid var(--border2);background:var(--surface3);color:var(--text2)">▶ Iniciar</button>
+              </div>
             </div>
             <div id="wa-card-eu"
               style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px">
@@ -3072,18 +3072,17 @@
                 <div style="font-size:18px">🌿</div>
                 <div>
                   <div style="font-size:12px;font-weight:700;color:var(--text)">EU Encapsulados</div>
-                  <div style="font-size:10px;color:var(--text3)">WA_DEFAULT_PROJECT_ID = eu-encapsulados</div>
+                  <div style="font-size:10px;color:var(--text3)">eu</div>
                 </div>
-                <div id="wa-dot-eu"
-                  style="margin-left:auto;width:8px;height:8px;border-radius:50%;background:var(--text3)">
-                </div>
+                <div id="wa-dot-eu" class="wa-status-dot" data-project="eu"
+                  style="margin-left:auto;width:10px;height:10px;border-radius:50%;background:var(--text3)"></div>
               </div>
-              <div style="font-size:10px;color:var(--text3);margin-bottom:6px">Sessão: sessions/eu-encapsulados/</div>
-              <button onclick="waSetStatus('eu',(document.getElementById('wa-dot-eu').dataset.on==='1'?'off':'on'))"
-                style="width:100%;padding:5px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;border:1px solid var(--border2);background:var(--surface3);color:var(--text2)"
-                id="wa-toggle-eu">▶ Iniciar</button>
-              <div style="margin-top:6px;font-size:10px;color:var(--text3)">Start: <code
-                  style="background:var(--surface3);padding:1px 4px;border-radius:3px">.\start-eu-encapsulados.ps1</code>
+              <div style="font-size:10px;color:var(--text3);margin-bottom:6px" id="wa-session-eu">Verificando...</div>
+              <div style="display:flex;gap:6px">
+                <button onclick="waGenerateQR('eu')" id="wa-qr-btn-eu"
+                  style="flex:1;padding:5px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;border:1px solid var(--border2);background:var(--surface3);color:var(--text2)">📱 QR</button>
+                <button onclick="waStartBot('eu')" id="wa-start-btn-eu"
+                  style="flex:1;padding:5px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;border:1px solid var(--border2);background:var(--surface3);color:var(--text2)">▶ Iniciar</button>
               </div>
             </div>
           </div>
@@ -3213,6 +3212,35 @@
               <div style="font-size:11px;color:var(--text3)">Cheque se o token do bot Telegram e o CHAT_ID estão
                 configurados nas variáveis de ambiente.</div>
             </div>
+          </div>
+        </div>
+
+        <!-- CONVERSAS (API) -->
+        <div class="card" style="margin-bottom:12px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+            <div class="card-title" style="margin:0">💬 Conversas Recentes</div>
+            <select id="wa-project-filter" onchange="waLoadConversations()" style="background:var(--surface3);border:1px solid var(--border);color:var(--text);padding:4px 8px;border-radius:4px;font-size:11px">
+              <option value="">Todos os projetos</option>
+              <option value="forex">Forex</option>
+              <option value="igaming">iGaming</option>
+              <option value="eu-encapsulados">EU Encapsulados</option>
+            </select>
+          </div>
+          <div id="wa-conversations-list" style="display:flex;flex-direction:column;gap:8px">
+            <div style="font-size:11px;color:var(--text3);padding:20px;text-align:center">Carregando...</div>
+          </div>
+        </div>
+
+        <!-- QR MODAL -->
+        <div id="wa-qr-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.8);z-index:9999;align-items:center;justify-content:center">
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;max-width:400px;width:90%;text-align:center">
+            <div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:8px" id="wa-qr-title">QR Code</div>
+            <div style="font-size:12px;color:var(--text3);margin-bottom:16px" id="wa-qr-desc">Escaneie com o WhatsApp</div>
+            <div id="wa-qr-content" style="background:white;padding:20px;border-radius:12px;margin-bottom:16px">
+              <!-- QR or instructions here -->
+            </div>
+            <div style="font-size:11px;color:var(--text2);margin-bottom:16px" id="wa-qr-instructions"></div>
+            <button onclick="document.getElementById('wa-qr-modal').style.display='none'" style="background:var(--surface3);border:1px solid var(--border);color:var(--text);padding:10px 24px;border-radius:8px;font-size:12px;cursor:pointer">Fechar</button>
           </div>
         </div>
 
@@ -9579,6 +9607,313 @@ TOM: Analítico. Prático. Orientado a resultados. Sem romantismo sobre o que n�
     // ── Boot ──────────────────────────────────────────────────────
     window.addEventListener('load', () => { setTimeout(() => SB.init(), 400); });
     window.SB = SB;
+
+    // ═══════════════════════════════════════════════════════
+    //  WHATSAPP CONVERSATIONS (API)
+    // ═══════════════════════════════════════════════════════
+    const WA_API_URL = 'http://localhost:3003/api/whatsapp';
+    let currentWaLeadId = null;
+    let currentWaProject = null;
+
+    // Load status for all projects
+    async function waLoadStatus() {
+      try {
+        const res = await fetch(`${WA_API_URL}/status`);
+        const status = await res.json();
+        
+        const projects = ['forex', 'igaming', 'eu'];
+        projects.forEach(p => {
+          const dot = document.getElementById(`wa-dot-${p}`);
+          const session = document.getElementById(`wa-session-${p}`);
+          if (dot && session && status[p]) {
+            const s = status[p];
+            if (s.hasSession) {
+              dot.style.background = 'var(--green-bright)';
+              session.innerHTML = `<span style="color:var(--green-bright)">✓ Conectado</span> · ${s.sessionPath}`;
+            } else {
+              dot.style.background = 'var(--text3)';
+              session.innerHTML = `<span style="color:var(--gold)">⚠ Precisa parear</span>`;
+            }
+          }
+        });
+      } catch (err) {
+        console.error('WA Status error:', err);
+      }
+    }
+
+    // Generate/show QR code instructions
+    async function waGenerateQR(project) {
+      try {
+        const res = await fetch(`${WA_API_URL}/qr/${project}`);
+        const data = await res.json();
+        
+        const modal = document.getElementById('wa-qr-modal');
+        const title = document.getElementById('wa-qr-title');
+        const desc = document.getElementById('wa-qr-desc');
+        const content = document.getElementById('wa-qr-content');
+        const instructions = document.getElementById('wa-qr-instructions');
+        
+        title.textContent = project.toUpperCase();
+        
+        if (data.needsQr) {
+          desc.textContent = 'Execute o comando para gerar QR Code';
+          content.innerHTML = `
+            <div style="color:#333;font-size:14px;line-height:1.8;text-align:left">
+              <div style="margin-bottom:12px;font-weight:700;color:var(--gold)">PASO 1: Abra o terminal</div>
+              <div style="background:#f5f5f5;padding:12px;border-radius:8px;font-family:monospace;font-size:11px;word-break:break-all">
+cd C:\\Users\\vsuga\\clawd\\scripts\\whatsapp-bot<br>
+.\\start-${project}.ps1
+              </div>
+              <div style="margin-top:12px;margin-bottom:12px;font-weight:700;color:var(--gold)">PASO 2: Escaneie o QR</div>
+              <div style="font-size:12px;color:#666">O QR Code aparecerá no terminal. Escaneie com o WhatsApp.</div>
+              <div style="margin-top:12px;padding:10px;background:#e8f5e9;border-radius:8px;font-size:11px;color:#2e7d32">
+                ✅ Após parear, clique em "Verificar Status" nesta página
+              </div>
+            </div>
+          `;
+          instructions.innerHTML = `<button onclick="waVerifyStatus('${project}')" style="background:var(--green-bright);border:none;color:white;padding:10px 20px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;margin-right:8px">✓ Verificar Status</button>
+            <button onclick="document.getElementById('wa-qr-modal').style.display='none'" style="background:var(--surface3);border:1px solid var(--border);color:var(--text);padding:10px 20px;border-radius:8px;font-size:12px;cursor:pointer">Fechar</button>`;
+        } else {
+          desc.textContent = 'Já está conectado!';
+          content.innerHTML = `
+            <div style="font-size:48px">✅</div>
+            <div style="font-size:14px;color:#333;margin-top:12px">Sessão Ativa</div>
+            <div style="font-size:11px;color:#666;margin-top:4px">${data.sessionPath}</div>
+            <div style="margin-top:16px;font-size:11px;color:#666">
+              Para reconectar:<br>Delete a pasta de sessão
+            </div>
+          `;
+          instructions.innerHTML = `<button onclick="document.getElementById('wa-qr-modal').style.display='none'" style="background:var(--gold);border:none;color:var(--bg);padding:10px 24px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer">OK</button>`;
+        }
+        
+        modal.style.display = 'flex';
+      } catch (err) {
+        alert('Erro: ' + err.message);
+      }
+    }
+    
+    async function waVerifyStatus(project) {
+      await waLoadStatus();
+      document.getElementById('wa-qr-modal').style.display = 'none';
+    }
+
+    // Start bot instructions
+    async function waStartBot(project) {
+      try {
+        const res = await fetch(`${WA_API_URL}/start/${project}`);
+        const data = await res.json();
+        
+        const modal = document.getElementById('wa-qr-modal');
+        const title = document.getElementById('wa-qr-title');
+        const desc = document.getElementById('wa-qr-desc');
+        const content = document.getElementById('wa-qr-content');
+        const instructions = document.getElementById('wa-qr-instructions');
+        
+        title.textContent = 'Iniciar Bot - ' + project.toUpperCase();
+        
+        if (data.scriptExists) {
+          desc.textContent = 'Siga os passos para iniciar';
+          content.innerHTML = `
+            <div style="color:#333;font-size:14px;line-height:1.8">
+              <div style="margin-bottom:12px;font-weight:700;color:var(--gold)">PASO 1: Abra o terminal</div>
+              <div style="background:#f5f5f5;padding:12px;border-radius:8px;font-family:monospace;font-size:11px;word-break:break-all">
+cd C:\\Users\\vsuga\\clawd\\scripts\\whatsapp-bot<br>
+.\\start-${project}.ps1
+              </div>
+              <div style="margin-top:16px;font-size:12px;color:#666">
+                O bot vai iniciar. Se precisar parear, o QR Code aparecerá no terminal.
+              </div>
+            </div>
+          `;
+          instructions.innerHTML = `<button onclick="waVerifyStatus('${project}')" style="background:var(--green-bright);border:none;color:white;padding:10px 20px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;margin-right:8px">✓ Verificar Status</button>
+            <button onclick="document.getElementById('wa-qr-modal').style.display='none'" style="background:var(--surface3);border:1px solid var(--border);color:var(--text);padding:10px 20px;border-radius:8px;font-size:12px;cursor:pointer">Fechar</button>`;
+        } else {
+          desc.textContent = 'Script não encontrado';
+          content.innerHTML = `<div style="font-size:32px">❌</div><div style="color:#666;margin-top:8px">Script não encontrado para este projeto</div>`;
+          instructions.innerHTML = `<button onclick="document.getElementById('wa-qr-modal').style.display='none'" style="background:var(--gold);border:none;color:var(--bg);padding:10px 24px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer">OK</button>`;
+        }
+        
+        modal.style.display = 'flex';
+      } catch (err) {
+        alert('Erro: ' + err.message);
+      }
+    }
+
+    // Get lead info from Supabase
+    async function waGetLeadInfo(leadId) {
+      try {
+        const res = await fetch(`${WA_API_URL}/leads?id=eq.${leadId}`);
+        const leads = await res.json();
+        return leads && leads.length > 0 ? leads[0] : null;
+      } catch {
+        return null;
+      }
+    }
+
+    async function waLoadConversations() {
+      const container = document.getElementById('wa-conversations-list');
+      const project = document.getElementById('wa-project-filter')?.value || '';
+      
+      if (!container) return;
+      
+      container.innerHTML = '<div style="font-size:11px;color:var(--text3);padding:20px;text-align:center">Carregando...</div>';
+      
+      try {
+        const url = project ? `${WA_API_URL}/conversations?project=${project}&limit=20` : `${WA_API_URL}/conversations?limit=20`;
+        const res = await fetch(url);
+        const data = await res.json();
+        
+        if (!data || data.length === 0) {
+          container.innerHTML = '<div style="font-size:11px;color:var(--text3);padding:20px;text-align:center">Nenhuma conversa encontrada</div>';
+          return;
+        }
+        
+        container.innerHTML = data.map(conv => {
+          const time = new Date(conv.last_time).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+          const directionIcon = conv.direction === 'inbound' ? '📥' : '📤';
+          const unreadBadge = conv.unread ? '<span style="background:var(--red-bright);color:white;padding:2px 6px;border-radius:10px;font-size:9px;margin-left:8px">NOVO</span>' : '';
+          
+          return `
+            <div onclick="waOpenChat(${conv.lead_id}, '${conv.project_id}')" 
+                 style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;cursor:pointer;transition:.15s">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+                <div style="font-size:11px;font-weight:700;color:var(--text)">${conv.lead_name || 'Lead #' + conv.lead_id}</div>
+                <div style="font-size:10px;color:var(--text3)">${time}</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px">
+                <span style="font-size:12px">${directionIcon}</span>
+                <div style="font-size:11px;color:var(--text2);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${conv.last_message || '(sem mensagem)'}</div>
+                ${unreadBadge}
+              </div>
+              <div style="font-size:9px;color:var(--text3);margin-top:4px">Projeto: ${conv.project_id}</div>
+            </div>
+          `;
+        }).join('');
+        
+      } catch (err) {
+        container.innerHTML = `<div style="font-size:11px;color:var(--red-bright);padding:20px;text-align:center">Erro: ${err.message}</div>`;
+      }
+    }
+
+    async function waOpenChat(leadId, project) {
+      currentWaLeadId = leadId;
+      currentWaProject = project;
+      const container = document.getElementById('wa-conversations-list');
+      container.innerHTML = '<div style="font-size:11px;color:var(--text3);padding:20px;text-align:center">Carregando chat...</div>';
+      
+      try {
+        // Get lead info and messages in parallel
+        const [msgsRes, leadsRes] = await Promise.all([
+          fetch(`${WA_API_URL}/messages/${leadId}${project ? '?project=' + project : ''}`),
+          fetch(`${WA_API_URL}/leads?id=eq.${leadId}`)
+        ]);
+        
+        const messages = await msgsRes.json();
+        const leads = await leadsRes.json();
+        const lead = leads && leads.length > 0 ? leads[0] : null;
+        
+        if (!messages || messages.length === 0) {
+          container.innerHTML = '<div style="font-size:11px;color:var(--text3);padding:20px;text-align:center">Nenhuma mensagem</div>';
+          return;
+        }
+        
+        // Lead header with info
+        const leadName = lead?.name || `Lead #${leadId}`;
+        const leadPhone = lead?.phone || 'Sem telefone';
+        const leadAvatar = lead?.avatar || leadName.charAt(0).toUpperCase();
+        
+        container.innerHTML = `
+          <div style="margin-bottom:12px">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+              <button onclick="waLoadConversations()" style="background:var(--surface3);border:1px solid var(--border);color:var(--text);padding:6px 12px;border-radius:6px;font-size:11px;cursor:pointer">← Voltar</button>
+            </div>
+            <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;display:flex;align-items:center;gap:12px">
+              <div style="width:40px;height:40px;border-radius:50%;background:var(--gold);color:var(--bg);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700">${leadAvatar}</div>
+              <div style="flex:1">
+                <div style="font-size:13px;font-weight:700;color:var(--text)">${leadName}</div>
+                <div style="font-size:11px;color:var(--text3)">📱 ${leadPhone}</div>
+                <div style="font-size:10px;color:var(--text3)">Projeto: ${project}</div>
+              </div>
+            </div>
+          </div>
+          
+          <div style="display:flex;flex-direction:column;gap:8px;max-height:300px;overflow-y:auto;margin-bottom:12px">
+            ${messages.map(m => {
+              const time = new Date(m.created_at).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+              const isOutbound = m.direction === 'outbound';
+              return `
+                <div style="background:${isOutbound ? 'var(--surface3)' : 'var(--gold-dim)'};border:1px solid ${isOutbound ? 'var(--border)' : 'var(--gold)'};border-radius:8px;padding:10px;${isOutbound ? '' : 'border-left:3px solid var(--gold)'}">
+                  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+                    <span style="font-size:10px;font-weight:700;color:${isOutbound ? 'var(--blue-bright)' : 'var(--gold)'}">${isOutbound ? '📤 Você' : '📥 Lead'}</span>
+                    <span style="font-size:9px;color:var(--text3)">${time}</span>
+                  </div>
+                  <div style="font-size:12px;color:var(--text)">${m.content || '(sem texto)'}</div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+          
+          <!-- Enviar mensagem -->
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px">
+            <div style="font-size:11px;font-weight:700;color:var(--text);margin-bottom:8px">✉️ Responder</div>
+            <textarea id="wa-msg-input" placeholder="Digite sua mensagem..." rows="3" style="width:100%;background:var(--surface3);border:1px solid var(--border);border-radius:6px;padding:10px;color:var(--text);font-size:12px;resize:none;margin-bottom:8px"></textarea>
+            <button onclick="waSendMessage()" style="width:100%;padding:10px;background:var(--gold);color:var(--bg);border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer">📤 Enviar Mensagem</button>
+            <div id="wa-send-status" style="font-size:10px;color:var(--text3);margin-top:6px;text-align:center"></div>
+          </div>
+        `;
+        
+      } catch (err) {
+        container.innerHTML = `<div style="font-size:11px;color:var(--red-bright);padding:20px;text-align:center">Erro: ${err.message}</div>`;
+      }
+    }
+
+    async function waSendMessage() {
+      const input = document.getElementById('wa-msg-input');
+      const status = document.getElementById('wa-send-status');
+      const message = input?.value?.trim();
+      
+      if (!message || !currentWaLeadId || !currentWaProject) {
+        alert('Selecione um chat primeiro');
+        return;
+      }
+      
+      status.innerHTML = 'Enviando...';
+      
+      try {
+        const res = await fetch(`${WA_API_URL}/send`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            project: currentWaProject,
+            leadId: currentWaLeadId,
+            message: message
+          })
+        });
+        
+        const data = await res.json();
+        
+        if (data.success) {
+          status.innerHTML = '<span style="color:var(--green-bright)">✓ Mensagem registrada!</span>';
+          input.value = '';
+          // Refresh chat
+          setTimeout(() => waOpenChat(currentWaLeadId, currentWaProject), 1000);
+        } else {
+          status.innerHTML = `<span style="color:var(--red-bright)">Erro: ${data.error}</span>`;
+        }
+      } catch (err) {
+        status.innerHTML = `<span style="color:var(--red-bright)">Erro: ${err.message}</span>`;
+      }
+    }
+
+    // Auto-load WhatsApp conversations and status when view is shown
+    const _origShowWhatsApp = window.showWhatsApp;
+    window.showWhatsApp = function() {
+      if (_origShowWhatsApp) _origShowWhatsApp();
+      setTimeout(() => {
+        waLoadStatus();
+        waLoadConversations();
+      }, 500);
+    };
   </script>
 </body>
 
