@@ -8430,14 +8430,20 @@ Registre aqui o que funcionou e o que não funcionou. Este é o CÉREBRO ESTRAT�
       renderSkills();
     }
 
-    // Dados de custos mensais
-    const CUSTOS = [
-      { nome: 'MiniMax', valor: 20, dolar: true },
-      { nome: 'OpenAI (GPT)', valor: 20, dolar: true },
-      { nome: 'Claude', valor: 20, dolar: true },
-      { nome: 'Supabase', valor: 50, dolar: true },
-      { nome: 'n8n', valor: 40, dolar: true }
-    ];
+    // Dados de custos mensais (localStorage)
+    function getCustos() {
+      const s = localStorage.getItem('imperio_custos');
+      return s ? JSON.parse(s) : [
+        { nome: 'MiniMax', valor: 20, dolar: true },
+        { nome: 'OpenAI (GPT)', valor: 20, dolar: true },
+        { nome: 'Claude', valor: 20, dolar: true },
+        { nome: 'Supabase', valor: 50, dolar: true },
+        { nome: 'n8n', valor: 40, dolar: true }
+      ];
+    }
+
+    function saveCustos(c) { localStorage.setItem('imperio_custos', JSON.stringify(c)); }
+
     const COTACAO_USD_BRL = 5.00;
 
     function showFinancas() {
@@ -8452,44 +8458,82 @@ Registre aqui o que funcionou e o que não funcionou. Este é o CÉREBRO ESTRAT�
       const el = document.getElementById('financas-body');
       if (!el) return;
       
-      const totalUSD = CUSTOS.reduce((sum, c) => sum + c.valor, 0);
+      const custos = getCustos();
+      const totalUSD = custos.reduce((sum, c) => sum + c.valor, 0);
       const totalBRL = totalUSD * COTACAO_USD_BRL;
       
       let html = `
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;margin-bottom:20px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <div style="font-size:14px;font-weight:700;color:var(--text)">Custos Mensais</div>
+          <button onclick="addCusto()" style="background:var(--gold);border:none;color:var(--bg);padding:6px 14px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer">+ Adicionar</button>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px">
           <div style="background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center">
             <div style="font-size:24px;font-weight:700;color:var(--gold)">$${totalUSD}</div>
-            <div style="font-size:11px;color:var(--text3)">Total USD/mês</div>
+            <div style="font-size:11px;color:var(--text3)">USD/mes</div>
           </div>
           <div style="background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center">
             <div style="font-size:24px;font-weight:700;color:var(--green-bright)">R$ ${totalBRL.toLocaleString('pt-BR')}</div>
-            <div style="font-size:11px;color:var(--text3)">Total BRL/mês</div>
+            <div style="font-size:11px;color:var(--text3)">BRL/mes</div>
           </div>
           <div style="background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center">
             <div style="font-size:24px;font-weight:700;color:var(--text)">R$ ${(totalBRL * 12).toLocaleString('pt-BR')}</div>
-            <div style="font-size:11px;color:var(--text3)">Total BRL/ano</div>
+            <div style="font-size:11px;color:var(--text3)">BRL/ano</div>
           </div>
         </div>
-        
-        <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:12px">Detalhamento</div>
         <div style="display:flex;flex-direction:column;gap:8px">
       `;
       
-      CUSTOS.forEach(c => {
+      custos.forEach((c, idx) => {
         const brl = c.valor * COTACAO_USD_BRL;
         html += `
           <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;display:flex;align-items:center;justify-content:space-between">
             <div style="font-size:13px;color:var(--text)">${c.nome}</div>
-            <div style="text-align:right">
-              <div style="font-size:13px;font-weight:700;color:var(--gold)">$${c.valor}</div>
-              <div style="font-size:11px;color:var(--text3)">R$ ${brl.toLocaleString('pt-BR')}</div>
+            <div style="display:flex;align-items:center;gap:12px">
+              <div style="text-align:right">
+                <div style="font-size:13px;font-weight:700;color:var(--gold)">$${c.valor}</div>
+                <div style="font-size:11px;color:var(--text3)">R$ ${brl.toLocaleString('pt-BR')}</div>
+              </div>
+              <button onclick="editCusto(${idx})" style="background:var(--surface3);border:1px solid var(--border);color:var(--text2);padding:4px 8px;border-radius:4px;font-size:10px;cursor:pointer">E</button>
+              <button onclick="deleteCusto(${idx})" style="background:var(--surface3);border:1px solid var(--red-bright);color:var(--red-bright);padding:4px 8px;border-radius:4px;font-size:10px;cursor:pointer">X</button>
             </div>
           </div>
         `;
       });
       
-      html += `</div>`;
+      html += '</div>';
       el.innerHTML = html;
+    }
+
+    function addCusto() {
+      const n = prompt('Nome:');
+      if (!n) return;
+      const v = parseFloat(prompt('Valor USD:') || '0');
+      if (!v) return;
+      const custos = getCustos();
+      custos.push({ nome: n, valor: v, dolar: true });
+      saveCustos(custos);
+      renderFinancas();
+    }
+
+    function editCusto(idx) {
+      const custos = getCustos();
+      const c = custos[idx];
+      const n = prompt('Nome:', c.nome);
+      if (n === null) return;
+      const v = parseFloat(prompt('Valor USD:', c.valor));
+      if (isNaN(v)) return;
+      custos[idx] = { nome: n, valor: v, dolar: true };
+      saveCustos(custos);
+      renderFinancas();
+    }
+
+    function deleteCusto(idx) {
+      if (!confirm('Excluir?')) return;
+      const custos = getCustos();
+      custos.splice(idx, 1);
+      saveCustos(custos);
+      renderFinancas();
     }
 
     function renderSkills() {
