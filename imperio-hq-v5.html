@@ -5800,12 +5800,15 @@ Analise e retorne:
     //  NAVIGATION
     // ═══════════════════════════════════════════════════════
     function hideAllPanels() {
-      // Esconde painéis dentro do #main
-      document.querySelectorAll('#main > div.panel').forEach(p => p.classList.remove('active'));
-      // Esconde painéis que ficam fora do #main
+      // Esconde TODOS os painéis .panel no documento (dentro e fora do #main)
+      document.querySelectorAll('.panel').forEach(p => {
+        p.classList.remove('active');
+        p.style.display = '';  // Limpa qualquer inline display
+      });
+      // Esconde painéis que ficam fora do #main (cron, skills, financas)
       ['view-cron', 'view-skills', 'view-financas'].forEach(id => {
         const el = document.getElementById(id);
-        if (el) el.classList.remove('active');
+        if (el) { el.classList.remove('active'); el.style.display = ''; }
       });
       document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
     }
@@ -8665,9 +8668,8 @@ Registre aqui o que funcionou e o que não funcionou. Este é o CÉREBRO ESTRAT�
     const tipoEmojis = { 'Criativo': '🎬', 'Página de Captura': '📋', 'VSL': '🎥', 'Funil': '🔻', 'Copy': '✍️', 'Landing Page': '🌐', 'Email': '📧' };
 
     function showReferencias() {
-      document.querySelectorAll('#main > div.panel').forEach(p => p.classList.remove('active'));
+      hideAllPanels();
       document.getElementById('view-referencias').classList.add('active');
-      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
       document.getElementById('nav-referencias').classList.add('active');
       renderReferencias();
     }
@@ -9953,9 +9955,8 @@ TOM: Analítico. Prático. Orientado a resultados. Sem romantismo sobre o que n�
     let _menteAtual = null;
 
     function showMentes() {
-      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      hideAllPanels();
       document.getElementById('nav-mentes').classList.add('active');
-      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
       document.getElementById('view-mentes').classList.add('active');
       renderMentes();
     }
@@ -10493,9 +10494,7 @@ TOM: Analítico. Prático. Orientado a resultados. Sem romantismo sobre o que n�
 
     function showOpenFlow() {
       hideAllPanels();
-      document.getElementById('view-openflow').style.display = 'flex';
       document.getElementById('view-openflow').classList.add('active');
-      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
       const nav = document.getElementById('nav-openflow');
       if (nav) nav.classList.add('active');
       if (Object.keys(OF.nodes).length === 0) ofLoadTemplate('model_product');
