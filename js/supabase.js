@@ -688,8 +688,8 @@
     };
 
     async function ofCallReplicate(modelKey, input) {
-      const apiKey = localStorage.getItem('replicate_key');
-      if (!apiKey) throw new Error('Chave Replicate não configurada. Acesse ⚙️ Configurações.');
+      const apiKey = localStorage.getItem('tool_replicate_key');
+      if (!apiKey) throw new Error('Chave Replicate não configurada. Acesse Ferramentas → 🎨 Replicate.');
       const modelId = REPLICATE_MODELS[modelKey] || modelKey;
       // Criar prediction
       const createRes = await fetch('https://api.replicate.com/v1/models/' + modelId + '/predictions', {
@@ -728,8 +728,8 @@
     }
 
     async function ofCallGemini(prompt, imageSrc) {
-      const apiKey = localStorage.getItem('google_ai_key');
-      if (!apiKey) throw new Error('Chave Google AI não configurada. Acesse ⚙️ Configurações.');
+      const apiKey = localStorage.getItem('tool_gemini_key');
+      if (!apiKey) throw new Error('Chave Google AI não configurada. Acesse Ferramentas → ✨ Gemini.');
       const parts = [];
       if (imageSrc) {
         const base64 = imageSrc.split(',')[1];
@@ -841,7 +841,7 @@
           } else if (modelType.startsWith('or-')) {
             lbl.textContent = 'Consultando OpenRouter...';
             const orKey = localStorage.getItem('openrouter_key');
-            if (!orKey) throw new Error('Chave OpenRouter não configurada. Acesse ⚙️ Configurações.');
+            if (!orKey) throw new Error('Chave OpenRouter não configurada. Acesse Ferramentas → ⚡ OpenRouter.');
             const orModelMap = { 'or-gpt4o': 'openai/gpt-4o', 'or-llama4': 'meta-llama/llama-4-maverick', 'or-deepseek': 'deepseek/deepseek-r1' };
             const orModel = orModelMap[modelType] || 'openai/gpt-4o';
             const orRes = await fetch('https://openrouter.ai/api/v1/chat/completions', {
