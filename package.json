@@ -1,0 +1,19 @@
+{
+  "name": "imperio-hq",
+  "version": "5.0.0",
+  "private": true,
+  "description": "IMPÉRIO HQ — Marketing OS",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "extract": "node scripts/extract.mjs"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.49.1"
+  },
+  "devDependencies": {
+    "vite": "^5.4.14"
+  }
+}
