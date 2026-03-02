@@ -1,9 +1,12 @@
-    function showFinancas() {
+    async function showFinancas() {
       showSection('financas');
       document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
       const nav = document.getElementById('nav-financas');
       if (nav) nav.classList.add('active');
       window._finTab = window._finTab || 'geral';
+      window._finSynced = null;
+      renderFinancas();
+      window._finSynced = await _custosLoadFromSupa();
       renderFinancas();
     }
 
@@ -18,14 +21,21 @@
       const totalFerrUSD = custos.reduce((s, c) => s + (c.valor || 0), 0);
       const totalApisUSD = apiCustos.reduce((s, c) => s + (c.valor || 0), 0);
       const totalUSD = totalFerrUSD + totalApisUSD;
-      const tabLabels = { geral: '📊 Visão Geral', ferramentas: '🔧 Ferramentas', apis: '⚡ APIs & Ads' };
 
-      let html = `<div style="display:flex;gap:4px;margin-bottom:16px;border-bottom:1px solid var(--border);padding-bottom:12px">`;
+      const syncBadge = window._finSynced === null
+        ? `<span style="font-size:10px;color:var(--text3);background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:2px 8px">⏳ sincronizando...</span>`
+        : window._finSynced
+          ? `<span style="font-size:10px;color:var(--green-bright);background:rgba(82,183,136,.1);border:1px solid rgba(82,183,136,.25);border-radius:10px;padding:2px 8px">☁️ Supabase</span>`
+          : `<span style="font-size:10px;color:var(--gold);background:rgba(212,175,55,.08);border:1px solid rgba(212,175,55,.2);border-radius:10px;padding:2px 8px">💾 Local</span>`;
+
+      const tabLabels = { geral: '📊 Visão Geral', ferramentas: '🔧 Ferramentas', apis: '⚡ APIs & Ads' };
+      let html = `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;border-bottom:1px solid var(--border);padding-bottom:12px">
+        <div style="display:flex;gap:4px">`;
       ['geral', 'ferramentas', 'apis'].forEach(t => {
         const active = tab === t;
         html += `<button onclick="window._finTab='${t}';renderFinancas()" style="padding:6px 14px;border-radius:6px;border:1px solid ${active ? 'var(--gold)' : 'var(--border)'};background:${active ? 'rgba(212,175,55,.12)' : 'transparent'};color:${active ? 'var(--gold)' : 'var(--text3)'};font-size:12px;font-weight:${active ? '700' : '400'};cursor:pointer">${tabLabels[t]}</button>`;
       });
-      html += `</div>`;
+      html += `</div>${syncBadge}</div>`;
 
       if (tab === 'geral') {
         html += `
@@ -56,7 +66,7 @@
         [...custos, ...apiCustos].sort((a, b) => (b.valor || 0) - (a.valor || 0)).slice(0, 6).forEach(c => {
           html += `<div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px;display:flex;justify-content:space-between;align-items:center">
             <div style="font-size:12px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:110px">${c.nome}</div>
-            <div style="font-size:12px;font-weight:700;color:var(--gold);flex-shrink:0">$${c.valor || 0}</div>
+            <div style="font-size:12px;font-weight:700;color:var(--gold);flex-shrink:0">$${(c.valor || 0).toFixed(2)}</div>
           </div>`;
         });
         html += `</div>`;
@@ -75,7 +85,7 @@
               <div style="font-size:11px;color:var(--text3)">R$ ${((c.valor || 0) * cotacao).toLocaleString('pt-BR', {maximumFractionDigits:0})}/mês</div>
             </div>
             <div style="display:flex;align-items:center;gap:10px">
-              <div style="font-size:14px;font-weight:700;color:var(--gold)">$${c.valor}</div>
+              <div style="font-size:14px;font-weight:700;color:var(--gold)">$${(c.valor || 0).toFixed(2)}</div>
               <button onclick="editCusto(${idx})" style="background:var(--surface3);border:1px solid var(--border);color:var(--text2);padding:4px 8px;border-radius:4px;font-size:10px;cursor:pointer">✏️</button>
               <button onclick="deleteCusto(${idx})" style="background:transparent;border:1px solid var(--red-bright);color:var(--red-bright);padding:4px 8px;border-radius:4px;font-size:10px;cursor:pointer">🗑</button>
             </div>
@@ -84,14 +94,30 @@
         html += `</div>`;
 
       } else {
+        // APIs & Ads tab
         const ocUrl = localStorage.getItem('openclaw_url');
         const adsEntry = apiCustos.find(c => c.is_ads) || { valor: 0 };
         const adsIdx = apiCustos.findIndex(c => c.is_ads);
+        const detected = _getDetectedApis();
+
         html += `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
           <div style="font-size:12px;color:var(--text3)">Gastos variáveis com APIs e campanhas</div>
           <button onclick="addApiCusto()" style="background:var(--gold);border:none;color:var(--bg);padding:6px 14px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer">+ API</button>
-        </div>
-        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px">
+        </div>`;
+
+        // Detectadas mas não cadastradas
+        if (detected.length) {
+          html += `<div style="background:rgba(212,175,55,.06);border:1px dashed rgba(212,175,55,.3);border-radius:10px;padding:12px;margin-bottom:12px">
+            <div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:8px">💡 APIs configuradas — adicione o custo estimado</div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px">`;
+          detected.forEach(d => {
+            html += `<button onclick="addApiCustoDetected('${d.nome.replace(/'/g, "\\'")}')" style="font-size:11px;background:rgba(212,175,55,.1);border:1px solid rgba(212,175,55,.3);color:var(--gold);padding:4px 12px;border-radius:8px;cursor:pointer">${d.nome} <span style="opacity:.6">+</span></button>`;
+          });
+          html += `</div></div>`;
+        }
+
+        // Google Ads block
+        html += `<div style="background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
             <div>
               <div style="font-size:13px;font-weight:700;color:var(--text)">📢 Google Ads</div>
@@ -104,18 +130,18 @@
             <input type="number" value="${adsEntry.valor || 0}" min="0" step="10" style="background:var(--surface3);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:6px 10px;font-size:16px;font-weight:700;width:120px" onchange="updateApiCusto(${adsIdx}, parseFloat(this.value)||0)">
             <span style="font-size:12px;color:var(--text3)">≈ R$ ${((adsEntry.valor || 0) * cotacao).toLocaleString('pt-BR', {maximumFractionDigits:0})}</span>
           </div>
-          ${!ocUrl ? `<div style="font-size:11px;color:var(--text3);margin-top:10px">⚙️ Configure a URL do OpenClaw nas Configurações para habilitar sincronização automática</div>` : ''}
+          ${!ocUrl ? `<div style="font-size:11px;color:var(--text3);margin-top:10px">⚙️ Configure o OpenClaw nas Ferramentas para sincronização automática</div>` : ''}
         </div>
         <div style="display:flex;flex-direction:column;gap:8px">`;
         apiCustos.forEach((c, idx) => {
           if (c.is_ads) return;
           html += `<div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;display:flex;align-items:center;justify-content:space-between">
-            <div>
-              <div style="font-size:13px;color:var(--text)">${c.nome}</div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:13px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.nome}</div>
               <div style="font-size:11px;color:var(--text3)">R$ ${((c.valor || 0) * cotacao).toLocaleString('pt-BR', {maximumFractionDigits:0})}/mês</div>
             </div>
-            <div style="display:flex;align-items:center;gap:8px">
-              <input type="number" value="${c.valor || 0}" min="0" step="1" style="background:var(--surface3);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:4px 8px;font-size:13px;font-weight:700;width:80px" onchange="updateApiCusto(${idx}, parseFloat(this.value)||0)">
+            <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+              <input type="number" value="${c.valor || 0}" min="0" step="0.5" style="background:var(--surface3);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:4px 8px;font-size:13px;font-weight:700;width:88px" onchange="updateApiCusto(${idx}, parseFloat(this.value)||0)">
               <span style="font-size:11px;color:var(--text3)">USD</span>
               <button onclick="deleteApiCusto(${idx})" style="background:transparent;border:1px solid var(--red-bright);color:var(--red-bright);padding:4px 8px;border-radius:4px;font-size:10px;cursor:pointer">🗑</button>
             </div>
@@ -127,63 +153,91 @@
       el.innerHTML = html;
     }
 
-    function addCusto() {
+    async function addCusto() {
       const n = prompt('Nome da ferramenta:');
       if (!n) return;
       const v = parseFloat(prompt('Valor mensal (USD):', '0') || '0');
       if (isNaN(v)) return;
       const custos = getCustos();
-      custos.push({ nome: n, valor: v, dolar: true });
+      const entry = { nome: n, valor: v, dolar: true };
+      custos.push(entry);
       saveCustos(custos);
       renderFinancas();
+      await _custoUpsertSupa(entry, 'ferramenta');
+      saveCustos(custos); // salva id atribuído pelo Supabase
     }
 
-    function editCusto(idx) {
+    async function editCusto(idx) {
       const custos = getCustos();
       const c = custos[idx];
       const n = prompt('Nome:', c.nome);
       if (n === null) return;
       const v = parseFloat(prompt('Valor USD:', c.valor));
       if (isNaN(v)) return;
-      custos[idx] = { nome: n, valor: v, dolar: true };
+      custos[idx] = { ...c, nome: n, valor: v };
       saveCustos(custos);
       renderFinancas();
+      await _custoUpsertSupa(custos[idx], 'ferramenta');
+      saveCustos(custos);
     }
 
-    function deleteCusto(idx) {
+    async function deleteCusto(idx) {
       if (!confirm('Excluir?')) return;
       const custos = getCustos();
+      const item = custos[idx];
       custos.splice(idx, 1);
       saveCustos(custos);
       renderFinancas();
+      await _custoDeleteSupa(item.id);
     }
 
-    function addApiCusto() {
+    async function addApiCusto() {
       const n = prompt('Nome da API:');
       if (!n) return;
       const v = parseFloat(prompt('Gasto estimado este mês (USD):', '0') || '0');
       const arr = getApiCustos();
-      arr.push({ nome: n, valor: isNaN(v) ? 0 : v, moeda: 'USD' });
+      const entry = { nome: n, valor: isNaN(v) ? 0 : v, moeda: 'USD' };
+      arr.push(entry);
       saveApiCustos(arr);
       renderFinancas();
+      await _custoUpsertSupa(entry, 'api');
+      saveApiCustos(arr);
+    }
+
+    async function addApiCustoDetected(nome) {
+      const v = parseFloat(prompt(`Custo estimado de "${nome}" este mês (USD):`, '0') || '0');
+      const arr = getApiCustos();
+      const entry = { nome, valor: isNaN(v) ? 0 : v, moeda: 'USD' };
+      arr.push(entry);
+      saveApiCustos(arr);
+      renderFinancas();
+      await _custoUpsertSupa(entry, 'api');
+      saveApiCustos(arr);
     }
 
     function updateApiCusto(idx, val) {
       const arr = getApiCustos();
-      if (arr[idx] !== undefined) { arr[idx].valor = val; saveApiCustos(arr); }
+      if (arr[idx] !== undefined) {
+        arr[idx].valor = val;
+        saveApiCustos(arr);
+        // Sync ao Supabase em background (não-ads apenas)
+        if (!arr[idx].is_ads) _custoUpsertSupa(arr[idx], 'api');
+      }
     }
 
-    function deleteApiCusto(idx) {
+    async function deleteApiCusto(idx) {
       const arr = getApiCustos();
       if (!arr[idx] || arr[idx].is_ads) return;
+      const item = arr[idx];
       arr.splice(idx, 1);
       saveApiCustos(arr);
       renderFinancas();
+      await _custoDeleteSupa(item.id);
     }
 
     function syncGoogleAds() {
       const ocUrl = localStorage.getItem('openclaw_url');
-      if (!ocUrl) { alert('Configure a URL do OpenClaw nas Configurações primeiro.'); return; }
+      if (!ocUrl) { alert('Configure o OpenClaw nas Ferramentas primeiro.'); return; }
       alert('Endpoint Google Ads via OpenClaw ainda não implementado.\nDigite o valor manualmente por enquanto.');
     }
 
@@ -211,4 +265,3 @@
       html += `</div>`;
       el.innerHTML = html;
     }
-

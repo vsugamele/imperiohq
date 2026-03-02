@@ -57,4 +57,57 @@
       ];
     }
     function saveApiCustos(arr) { localStorage.setItem('imperio_api_custos', JSON.stringify(arr)); }
+
+    // ── Supabase sync helpers para Finanças ──────────────────
+    async function _custosLoadFromSupa() {
+      try {
+        const { data, error } = await _sb.from('imperio_custos').select('*').order('id');
+        if (error || !data || !data.length) return false;
+        const ferramentas = data
+          .filter(r => r.tipo === 'ferramenta')
+          .map(r => ({ id: r.id, nome: r.nome, valor: Number(r.valor), dolar: r.dolar !== false }));
+        const apis = data
+          .filter(r => r.tipo === 'api')
+          .map(r => ({ id: r.id, nome: r.nome, valor: Number(r.valor), moeda: 'USD' }));
+        if (ferramentas.length) saveCustos(ferramentas);
+        if (apis.length) {
+          const cur = getApiCustos();
+          const adsEntry = cur.find(c => c.is_ads) || { nome: 'Google Ads', valor: 0, moeda: 'USD', is_ads: true };
+          saveApiCustos([adsEntry, ...apis]);
+        }
+        return true;
+      } catch(e) { return false; }
+    }
+
+    async function _custoUpsertSupa(item, tipo) {
+      try {
+        if (item.id && typeof item.id === 'number') {
+          await _sb.from('imperio_custos').update({ nome: item.nome, valor: item.valor, dolar: true, tipo }).eq('id', item.id);
+        } else {
+          const { data } = await _sb.from('imperio_custos').insert({ nome: item.nome, valor: item.valor, dolar: true, tipo }).select('id').single();
+          if (data?.id) item.id = data.id;
+        }
+      } catch(e) {}
+    }
+
+    async function _custoDeleteSupa(id) {
+      if (!id || typeof id !== 'number') return;
+      try { await _sb.from('imperio_custos').delete().eq('id', id); } catch(e) {}
+    }
+
+    // Retorna APIs que têm chave configurada mas ainda não estão nos custos
+    function _getDetectedApis() {
+      const cur = getApiCustos().map(c => c.nome.toLowerCase());
+      const detected = [];
+      const check = (key, nome, icon) => {
+        if (localStorage.getItem(key) && !cur.some(n => n.includes(icon.toLowerCase()) || n.includes(nome.toLowerCase()))) {
+          detected.push({ nome: icon + ' ' + nome, valor: 0, moeda: 'USD', _detected: true });
+        }
+      };
+      check('tool_replicate_key', 'Replicate', '🎨');
+      check('tool_gemini_key', 'Gemini AI', '✨');
+      check('openrouter_key', 'OpenRouter', '⚡');
+      check('anthropic_key', 'Anthropic Claude', '🤖');
+      return detected;
+    }
 
