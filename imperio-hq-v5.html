@@ -919,6 +919,9 @@
             <div class="of-template-chip" onclick="ofLoadTemplate('model_product')">Modelo + Produto</div>
             <div class="of-template-chip" onclick="ofLoadTemplate('prompt_enhance')">Melhorar Prompt</div>
             <div class="of-template-chip" onclick="ofLoadTemplate('analyze')">Analisar Imagem</div>
+            <div class="of-template-chip" onclick="ofLoadTemplate('generate_image')">🎨 Gerar Imagem</div>
+            <div class="of-template-chip" onclick="ofLoadTemplate('generate_video')">🎬 Gerar Vídeo</div>
+            <div class="of-template-chip" onclick="ofLoadTemplate('prompt_to_video')">✨ Prompt → Vídeo</div>
           </div>
           <div class="of-topbar-sep"></div>
           <div class="of-topbar-right">
@@ -1800,6 +1803,16 @@
             <option value="meta-llama/llama-4-maverick">Llama 4 Maverick</option>
             <option value="deepseek/deepseek-r1">DeepSeek R1</option>
           </select>
+        </div>
+        <div class="settings-group">
+          <div class="settings-label">🎨 Replicate API Key</div>
+          <input type="password" id="input-replicate-key" class="settings-input" placeholder="r8_...">
+          <div class="settings-desc">Gera imagens (FLUX) e vídeos (Wan, Kling) — <a href="https://replicate.com/account/api-tokens" target="_blank" style="color:var(--gold)">replicate.com/api-tokens</a></div>
+        </div>
+        <div class="settings-group">
+          <div class="settings-label">🌐 Google AI (Vertex) API Key</div>
+          <input type="password" id="input-google-key" class="settings-input" placeholder="AQ...">
+          <div class="settings-desc">Gemini Pro Vision para análise e geração — <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:var(--gold)">aistudio.google.com</a></div>
         </div>
         <div class="settings-group">
           <div class="settings-label">🕷️ OpenClaw Webhook URL</div>

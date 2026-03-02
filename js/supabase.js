@@ -406,6 +406,8 @@
       if (type === 'image') { node.data.src = null; node.data.label = 'IMAGEM'; }
       if (type === 'prompt') { node.data.text = ''; }
       if (type === 'model') { node.data.model = 'claude'; node.data.ratio = '1:1'; }
+      if (type === 'image-gen') { node.data.model = 'flux-schnell'; node.data.ratio = '1:1'; node.data.result = null; }
+      if (type === 'video-gen') { node.data.model = 'wan-t2v'; node.data.duration = 5; node.data.result = null; }
       if (type === 'output') { node.data.result = null; node.data.filename = ''; }
       if (type === 'note') { node.data.text = 'Anotação...'; }
       OF.nodes[id] = node;
@@ -433,6 +435,8 @@
         image: { icon: '🖼', label: 'IMAGEM', bg: 'rgba(72,149,239,.15)', color: '#4895ef' },
         prompt: { icon: '✍️', label: 'PROMPT', bg: 'rgba(82,183,136,.1)', color: '#52b788' },
         model: { icon: '⚡', label: 'MODELO IA', bg: 'rgba(201,168,76,.1)', color: '#c9a84c' },
+        'image-gen': { icon: '🎨', label: 'GERAR IMAGEM', bg: 'rgba(255,107,107,.12)', color: '#ff6b6b' },
+        'video-gen': { icon: '🎬', label: 'GERAR VÍDEO', bg: 'rgba(150,100,255,.12)', color: '#9664ff' },
         output: { icon: '📤', label: 'SAÍDA', bg: 'rgba(155,93,229,.1)', color: '#9b5de5' },
         note: { icon: '📝', label: 'NOTA', bg: 'rgba(80,80,80,.2)', color: '#888' },
       };
@@ -474,15 +478,64 @@
       if (node.type === 'model') {
         return `<div class="of-model-name"><span class="dot"></span> CLAUDE AI</div>
       <select class="of-model-select" onchange="OF.nodes['${node.id}'].data.model=this.value">
-        <option value="claude">Claude Sonnet (Análise)</option>
-        <option value="describe">Descrever Imagem</option>
-        <option value="enhance">Melhorar Prompt</option>
-        <option value="concept">Gerar Conceito</option>
+        <optgroup label="── Claude (Anthropic) ──">
+          <option value="claude">Claude Sonnet (Análise)</option>
+          <option value="describe">Descrever Imagem</option>
+          <option value="enhance">Melhorar Prompt</option>
+          <option value="concept">Gerar Conceito</option>
+        </optgroup>
+        <optgroup label="── Google Gemini ──">
+          <option value="gemini-pro">Gemini 2.0 Flash</option>
+          <option value="gemini-vision">Gemini Vision (Imagem)</option>
+        </optgroup>
+        <optgroup label="── OpenRouter ──">
+          <option value="or-gpt4o">GPT-4o</option>
+          <option value="or-llama4">Llama 4 Maverick</option>
+          <option value="or-deepseek">DeepSeek R1</option>
+        </optgroup>
       </select>
       <div class="of-model-ratio">
         ${['1:1', '16:9', '9:16', '4:3'].map(r => `<div class="of-ratio-btn${node.data.ratio === r ? ' active' : ''}" onclick="ofSetRatio('${node.id}','${r}')">${r}</div>`).join('')}
       </div>
       <div class="of-model-run-hint">Clique em ▶ Executar</div>`;
+      }
+      if (node.type === 'image-gen') {
+        return `<div class="of-model-name" style="color:#ff6b6b"><span class="dot" style="background:#ff6b6b"></span> REPLICATE</div>
+      <select class="of-model-select" onchange="OF.nodes['${node.id}'].data.model=this.value">
+        <optgroup label="── FLUX (Imagem) ──">
+          <option value="flux-schnell">FLUX Schnell (rápido)</option>
+          <option value="flux-dev">FLUX Dev (qualidade)</option>
+          <option value="flux-pro">FLUX 1.1 Pro (premium)</option>
+        </optgroup>
+        <optgroup label="── Stable Diffusion ──">
+          <option value="sdxl">SDXL (geral)</option>
+          <option value="sd3">SD3 Medium</option>
+        </optgroup>
+      </select>
+      <div class="of-model-ratio">
+        ${['1:1', '16:9', '9:16', '4:3'].map(r => `<div class="of-ratio-btn${node.data.ratio === r ? ' active' : ''}" onclick="OF.nodes['${node.id}'].data.ratio='${r}';ofRenderNode(OF.nodes['${node.id}'])">${r}</div>`).join('')}
+      </div>
+      <div class="of-model-run-hint" style="color:#ff6b6b">Clique em ▶ Executar</div>`;
+      }
+      if (node.type === 'video-gen') {
+        return `<div class="of-model-name" style="color:#9664ff"><span class="dot" style="background:#9664ff"></span> REPLICATE</div>
+      <select class="of-model-select" onchange="OF.nodes['${node.id}'].data.model=this.value">
+        <optgroup label="── Vídeo ──">
+          <option value="wan-t2v">Wan T2V (texto→vídeo)</option>
+          <option value="wan-i2v">Wan I2V (imagem→vídeo)</option>
+          <option value="kling-t2v">Kling 1.6 (qualidade)</option>
+          <option value="minimax-video">MiniMax Video</option>
+        </optgroup>
+      </select>
+      <div style="display:flex;align-items:center;gap:8px;margin:8px 0;font-size:11px;color:var(--text2)">
+        Duração:
+        <select class="of-model-select" style="flex:1" onchange="OF.nodes['${node.id}'].data.duration=+this.value">
+          <option value="3"${node.data.duration===3?' selected':''}>3s</option>
+          <option value="5"${node.data.duration===5?' selected':''}>5s</option>
+          <option value="10"${node.data.duration===10?' selected':''}>10s</option>
+        </select>
+      </div>
+      <div class="of-model-run-hint" style="color:#9664ff">Clique em ▶ Executar</div>`;
       }
       if (node.type === 'output') {
         let content = '';
@@ -518,6 +571,22 @@
         const lbl1 = document.createElement('div'); lbl1.className = 'of-port-label of-port-label-in'; lbl1.style.top = '52px'; lbl1.textContent = 'Imagem'; el.appendChild(lbl1);
         const pi2 = ofCreatePort('in', 'text'); pi2.style.top = '82px'; el.appendChild(pi2);
         const lbl2 = document.createElement('div'); lbl2.className = 'of-port-label of-port-label-in'; lbl2.style.top = '82px'; lbl2.textContent = 'Prompt'; el.appendChild(lbl2);
+        const po = ofCreatePort('out', 'result'); po.style.top = '50%'; el.appendChild(po);
+        [pi1, pi2].forEach(p => p.addEventListener('mousedown', e => { e.stopPropagation(); ofEndConnect(node.id, p); }));
+        po.addEventListener('mousedown', e => { e.stopPropagation(); ofStartConnect(node.id, 'out', po, 'result'); });
+      }
+      if (node.type === 'image-gen') {
+        const pi = ofCreatePort('in', 'text'); pi.style.top = '52px'; el.appendChild(pi);
+        const lbl = document.createElement('div'); lbl.className = 'of-port-label of-port-label-in'; lbl.style.top = '52px'; lbl.textContent = 'Prompt'; el.appendChild(lbl);
+        const po = ofCreatePort('out', 'image'); po.style.top = '50%'; el.appendChild(po);
+        pi.addEventListener('mousedown', e => { e.stopPropagation(); ofEndConnect(node.id, pi); });
+        po.addEventListener('mousedown', e => { e.stopPropagation(); ofStartConnect(node.id, 'out', po, 'image'); });
+      }
+      if (node.type === 'video-gen') {
+        const pi1 = ofCreatePort('in', 'text'); pi1.style.top = '52px'; el.appendChild(pi1);
+        const lbl1 = document.createElement('div'); lbl1.className = 'of-port-label of-port-label-in'; lbl1.style.top = '52px'; lbl1.textContent = 'Prompt'; el.appendChild(lbl1);
+        const pi2 = ofCreatePort('in', 'image'); pi2.style.top = '82px'; el.appendChild(pi2);
+        const lbl2 = document.createElement('div'); lbl2.className = 'of-port-label of-port-label-in'; lbl2.style.top = '82px'; lbl2.textContent = 'Imagem'; el.appendChild(lbl2);
         const po = ofCreatePort('out', 'result'); po.style.top = '50%'; el.appendChild(po);
         [pi1, pi2].forEach(p => p.addEventListener('mousedown', e => { e.stopPropagation(); ofEndConnect(node.id, p); }));
         po.addEventListener('mousedown', e => { e.stopPropagation(); ofStartConnect(node.id, 'out', po, 'result'); });
@@ -605,6 +674,112 @@
       ofRenderConnections();
     }
 
+    // ── Replicate helpers ────────────────────────────────────────────────────
+    const REPLICATE_MODELS = {
+      'flux-schnell': 'black-forest-labs/flux-schnell',
+      'flux-dev':     'black-forest-labs/flux-dev',
+      'flux-pro':     'black-forest-labs/flux-1.1-pro',
+      'sdxl':         'stability-ai/sdxl:39ed52f2319f9f0f24bc6578fd7e6c9c2c2c7b39f6e5a4c0a3b5c2b2b2b2b2b',
+      'sd3':          'stability-ai/stable-diffusion-3-medium',
+      'wan-t2v':      'wavespeedai/wan-2.1-t2v-480p',
+      'wan-i2v':      'wavespeedai/wan-2.1-i2v-480p',
+      'kling-t2v':    'klingai/kling-v1-6-standard',
+      'minimax-video':'minimax/video-01',
+    };
+
+    async function ofCallReplicate(modelKey, input) {
+      const apiKey = localStorage.getItem('replicate_key');
+      if (!apiKey) throw new Error('Chave Replicate não configurada. Acesse ⚙️ Configurações.');
+      const modelId = REPLICATE_MODELS[modelKey] || modelKey;
+      // Criar prediction
+      const createRes = await fetch('https://api.replicate.com/v1/models/' + modelId + '/predictions', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + apiKey, 'Content-Type': 'application/json', 'Prefer': 'wait' },
+        body: JSON.stringify({ input })
+      });
+      if (!createRes.ok) {
+        // Fallback para endpoint genérico
+        const createRes2 = await fetch('https://api.replicate.com/v1/predictions', {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + apiKey, 'Content-Type': 'application/json', 'Prefer': 'wait' },
+          body: JSON.stringify({ version: modelId.includes(':') ? modelId.split(':')[1] : undefined, model: modelId.includes(':') ? undefined : modelId, input })
+        });
+        if (!createRes2.ok) throw new Error('Replicate: ' + (await createRes2.text()));
+        const pred = await createRes2.json();
+        return await ofPollReplicate(pred.id, apiKey);
+      }
+      const pred = await createRes.json();
+      if (pred.status === 'succeeded') return pred.output;
+      if (pred.error) throw new Error('Replicate: ' + pred.error);
+      return await ofPollReplicate(pred.id, apiKey);
+    }
+
+    async function ofPollReplicate(predId, apiKey) {
+      for (let i = 0; i < 60; i++) {
+        await new Promise(r => setTimeout(r, 3000));
+        const res = await fetch('https://api.replicate.com/v1/predictions/' + predId, {
+          headers: { 'Authorization': 'Bearer ' + apiKey }
+        });
+        const pred = await res.json();
+        if (pred.status === 'succeeded') return pred.output;
+        if (pred.status === 'failed' || pred.status === 'canceled') throw new Error('Replicate falhou: ' + (pred.error || pred.status));
+      }
+      throw new Error('Replicate: timeout após 3 minutos');
+    }
+
+    async function ofCallGemini(prompt, imageSrc) {
+      const apiKey = localStorage.getItem('google_ai_key');
+      if (!apiKey) throw new Error('Chave Google AI não configurada. Acesse ⚙️ Configurações.');
+      const parts = [];
+      if (imageSrc) {
+        const base64 = imageSrc.split(',')[1];
+        const mime = (imageSrc.match(/data:([^;]+);/) || [])[1] || 'image/jpeg';
+        parts.push({ inlineData: { mimeType: mime, data: base64 } });
+      }
+      parts.push({ text: prompt });
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contents: [{ parts }] })
+      });
+      const data = await res.json();
+      if (data.error) throw new Error('Google AI: ' + data.error.message);
+      return data.candidates?.[0]?.content?.parts?.[0]?.text || 'Sem resultado.';
+    }
+
+    function ofSetOutputLoading(nodes) {
+      nodes.forEach(n => {
+        n.data.loading = true; n.data.result = null;
+        const el = document.getElementById('of-output-' + n.id);
+        if (el) el.innerHTML = `<div class="of-output-loading"><div class="of-spinner"></div><span>Processando...</span></div>`;
+      });
+    }
+
+    function ofSetOutputResult(nodes, result, isImage, isVideo) {
+      nodes.forEach(n => {
+        n.data.loading = false; n.data.result = result;
+        const el = document.getElementById('of-output-' + n.id);
+        if (!el) return;
+        if (isImage && result) {
+          el.innerHTML = `<div style="text-align:center"><img src="${result}" style="max-width:100%;border-radius:8px;margin-bottom:8px"><br><a href="${result}" target="_blank" style="font-size:10px;color:var(--gold)">↗ Abrir original</a></div>`;
+        } else if (isVideo && result) {
+          const url = Array.isArray(result) ? result[0] : result;
+          el.innerHTML = `<div style="text-align:center"><video src="${url}" controls style="max-width:100%;border-radius:8px;margin-bottom:8px"></video><br><a href="${url}" target="_blank" style="font-size:10px;color:var(--gold)">↗ Download</a></div>`;
+        } else {
+          const txt = Array.isArray(result) ? result.join('\n') : String(result);
+          el.innerHTML = `<div class="of-output-result-text">${txt.replace(/\n/g, '<br>')}</div>`;
+        }
+      });
+    }
+
+    function ofSetOutputError(nodes, err) {
+      nodes.forEach(n => {
+        n.data.loading = false;
+        const el = document.getElementById('of-output-' + n.id);
+        if (el) el.innerHTML = `<div class="of-output-result-text" style="color:var(--red-bright)">❌ ${err}</div>`;
+      });
+    }
+
     async function ofExecute() {
       if (OF.running) return;
       OF.running = true;
@@ -612,66 +787,103 @@
       const lbl = document.getElementById('of-exec-label');
       btn.classList.add('running');
       lbl.textContent = 'Rodando...';
-      const images = Object.values(OF.nodes).filter(n => n.type === 'image' && n.data.src).map(n => n.data.src);
+
+      const images  = Object.values(OF.nodes).filter(n => n.type === 'image' && n.data.src).map(n => n.data.src);
       const prompts = Object.values(OF.nodes).filter(n => n.type === 'prompt').map(n => n.data.text || '').filter(Boolean);
-      const modelNode = Object.values(OF.nodes).find(n => n.type === 'model');
-      const outputNodes = Object.values(OF.nodes).filter(n => n.type === 'output');
-      outputNodes.forEach(n => {
-        n.data.loading = true;
-        n.data.result = null;
-        const outEl = document.getElementById('of-output-' + n.id);
-        if (outEl) outEl.innerHTML = `<div class="of-output-loading"><div class="of-spinner"></div><span>Processando...</span></div>`;
-      });
+      const promptText = prompts.join('\n') || 'Analise e processe as imagens fornecidas.';
+
+      const modelNode    = Object.values(OF.nodes).find(n => n.type === 'model');
+      const imageGenNode = Object.values(OF.nodes).find(n => n.type === 'image-gen');
+      const videoGenNode = Object.values(OF.nodes).find(n => n.type === 'video-gen');
+      const outputNodes  = Object.values(OF.nodes).filter(n => n.type === 'output');
+
+      ofSetOutputLoading(outputNodes);
+
       try {
-        const modelType = modelNode?.data?.model || 'claude';
-        let systemPrompt = '';
-        let userContent = [];
-        if (modelType === 'describe') {
-          systemPrompt = 'Você é um especialista em análise visual. Descreva a imagem em detalhes, focando em composição, iluminação, estilo, cores e elementos presentes. Responda em português.';
-        } else if (modelType === 'enhance') {
-          systemPrompt = 'Você é um especialista em engenharia de prompts para geração de imagens AI. Receba um prompt e melhore-o significativamente, adicionando detalhes de iluminação, composição, estilo fotográfico, qualidade e câmera. Retorne APENAS o prompt melhorado em inglês, sem explicações.';
-        } else if (modelType === 'concept') {
-          systemPrompt = 'Você é um diretor criativo especialista em campanhas de marketing visual. Gere um conceito criativo detalhado baseado nas imagens e prompt fornecidos. Inclua: conceito central, referências visuais, paleta de cores, tipografia sugerida, e prompt para geração de imagem. Responda em português.';
-        } else {
-          systemPrompt = 'Você é um assistente criativo especializado em marketing visual e produção de conteúdo. Analise as imagens e o prompt fornecidos, e gere uma resposta criativa e detalhada. Responda em português.';
+        // ── 1. GERAÇÃO DE IMAGEM via Replicate ───────────────────────────────
+        if (imageGenNode) {
+          const modelKey = imageGenNode.data.model || 'flux-schnell';
+          const ratio = imageGenNode.data.ratio || '1:1';
+          const [w, h] = ratio === '16:9' ? [1280,720] : ratio === '9:16' ? [720,1280] : ratio === '4:3' ? [1024,768] : [1024,1024];
+          lbl.textContent = `Gerando imagem (${modelKey})...`;
+          const input = { prompt: promptText, width: w, height: h, num_outputs: 1 };
+          if (modelKey.startsWith('flux')) { input.output_format = 'webp'; input.output_quality = 90; }
+          const output = await ofCallReplicate(modelKey, input);
+          const imgUrl = Array.isArray(output) ? output[0] : output;
+          // Salva como fonte para video-gen encadeado
+          if (videoGenNode) videoGenNode.data._generatedImg = imgUrl;
+          ofSetOutputResult(outputNodes, imgUrl, true, false);
         }
-        if (images.length > 0) {
-          images.forEach(src => {
-            const base64 = src.split(',')[1];
-            const mimeMatch = src.match(/data:([^;]+);/);
-            const mediaType = mimeMatch ? mimeMatch[1] : 'image/jpeg';
-            userContent.push({ type: 'image', source: { type: 'base64', media_type: mediaType, data: base64 } });
-          });
+
+        // ── 2. GERAÇÃO DE VÍDEO via Replicate ───────────────────────────────
+        if (videoGenNode) {
+          const modelKey = videoGenNode.data.model || 'wan-t2v';
+          const duration = videoGenNode.data.duration || 5;
+          lbl.textContent = `Gerando vídeo (${modelKey})... pode levar 1-2 min`;
+          const srcImg = videoGenNode.data._generatedImg || images[0] || null;
+          let input = { prompt: promptText, duration };
+          if (modelKey.includes('i2v') && srcImg) { input.image = srcImg; }
+          const output = await ofCallReplicate(modelKey, input);
+          ofSetOutputResult(outputNodes, output, false, true);
         }
-        const promptText = prompts.join('\n') || 'Analise e processe as imagens fornecidas.';
-        userContent.push({ type: 'text', text: promptText });
-        const apiKey = localStorage.getItem('imperio_anthropic_key') || '';
-        const response = await fetch('https://api.anthropic.com/v1/messages', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
-          body: JSON.stringify({
-            model: 'claude-sonnet-4-20250514',
-            max_tokens: 1000,
-            system: systemPrompt,
-            messages: [{ role: 'user', content: userContent }]
-          })
-        });
-        const data = await response.json();
-        const result = data.content?.[0]?.text || data.error?.message || 'Sem resultado.';
-        outputNodes.forEach(n => {
-          n.data.loading = false;
-          n.data.result = result;
-          const outEl = document.getElementById('of-output-' + n.id);
-          if (outEl) outEl.innerHTML = `<div class="of-output-result-text">${result.replace(/\n/g, '<br>')}</div>`;
-        });
+
+        // ── 3. MODELO IA (análise/texto) ──────────────────────────────────────
+        if (modelNode && !imageGenNode && !videoGenNode) {
+          const modelType = modelNode.data.model || 'claude';
+
+          // Google Gemini
+          if (modelType.startsWith('gemini')) {
+            lbl.textContent = 'Consultando Gemini...';
+            const result = await ofCallGemini(promptText, images[0] || null);
+            ofSetOutputResult(outputNodes, result, false, false);
+
+          // OpenRouter (GPT, Llama, DeepSeek)
+          } else if (modelType.startsWith('or-')) {
+            lbl.textContent = 'Consultando OpenRouter...';
+            const orKey = localStorage.getItem('openrouter_key');
+            if (!orKey) throw new Error('Chave OpenRouter não configurada. Acesse ⚙️ Configurações.');
+            const orModelMap = { 'or-gpt4o': 'openai/gpt-4o', 'or-llama4': 'meta-llama/llama-4-maverick', 'or-deepseek': 'deepseek/deepseek-r1' };
+            const orModel = orModelMap[modelType] || 'openai/gpt-4o';
+            const orRes = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+              method: 'POST',
+              headers: { 'Authorization': 'Bearer ' + orKey, 'Content-Type': 'application/json' },
+              body: JSON.stringify({ model: orModel, messages: [{ role: 'user', content: promptText }] })
+            });
+            const orData = await orRes.json();
+            const result = orData.choices?.[0]?.message?.content || orData.error?.message || 'Sem resultado.';
+            ofSetOutputResult(outputNodes, result, false, false);
+
+          // Claude (Anthropic) — padrão
+          } else {
+            lbl.textContent = 'Consultando Claude...';
+            const systemMap = {
+              describe: 'Você é um especialista em análise visual. Descreva a imagem em detalhes, focando em composição, iluminação, estilo, cores e elementos. Responda em português.',
+              enhance:  'Você é um especialista em prompts para geração de imagens AI. Melhore o prompt recebido com detalhes de iluminação, composição, estilo fotográfico e qualidade. Retorne APENAS o prompt melhorado em inglês.',
+              concept:  'Você é um diretor criativo. Gere um conceito visual detalhado incluindo: conceito central, paleta de cores, tipografia sugerida e prompt para geração de imagem. Responda em português.',
+            };
+            const systemPrompt = systemMap[modelType] || 'Você é um assistente criativo especializado em marketing visual. Analise as imagens e o prompt fornecidos, e gere uma resposta criativa e detalhada. Responda em português.';
+            let userContent = [];
+            images.forEach(src => {
+              const base64 = src.split(',')[1];
+              const mime = (src.match(/data:([^;]+);/) || [])[1] || 'image/jpeg';
+              userContent.push({ type: 'image', source: { type: 'base64', media_type: mime, data: base64 } });
+            });
+            userContent.push({ type: 'text', text: promptText });
+            const apiKey = localStorage.getItem('imperio_anthropic_key') || '';
+            const res = await fetch('https://api.anthropic.com/v1/messages', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+              body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000, system: systemPrompt, messages: [{ role: 'user', content: userContent }] })
+            });
+            const data = await res.json();
+            const result = data.content?.[0]?.text || data.error?.message || 'Sem resultado.';
+            ofSetOutputResult(outputNodes, result, false, false);
+          }
+        }
       } catch (err) {
-        outputNodes.forEach(n => {
-          n.data.loading = false;
-          n.data.result = '❌ Erro: ' + err.message;
-          const outEl = document.getElementById('of-output-' + n.id);
-          if (outEl) outEl.innerHTML = `<div class="of-output-result-text" style="color:var(--red-bright)">❌ ${err.message}</div>`;
-        });
+        ofSetOutputError(outputNodes, err.message);
       }
+
       OF.running = false;
       btn.classList.remove('running');
       lbl.textContent = 'Executar';
@@ -710,6 +922,35 @@
         const output = ofAddNode('output', 680, 120);
         OF.nodes[model].data.model = 'describe';
         OF.connections = [{ from: img, to: model }, { from: model, to: output }];
+      } else if (name === 'generate_image') {
+        document.querySelector(`.of-template-chip[onclick*="generate_image"]`)?.classList.add('active');
+        document.getElementById('of-flow-name').value = 'Gerar Imagem';
+        const prompt = ofAddNode('prompt', 80, 150);
+        const imgGen = ofAddNode('image-gen', 380, 150);
+        const output = ofAddNode('output', 680, 150);
+        OF.nodes[prompt].data.text = 'Mulher elegante com bolsa de luxo, fotografia editorial, luz natural suave, fundo neutro';
+        OF.connections = [{ from: prompt, to: imgGen }, { from: imgGen, to: output }];
+      } else if (name === 'generate_video') {
+        document.querySelector(`.of-template-chip[onclick*="generate_video"]`)?.classList.add('active');
+        document.getElementById('of-flow-name').value = 'Gerar Vídeo';
+        const prompt = ofAddNode('prompt', 80, 150);
+        const vidGen = ofAddNode('video-gen', 380, 150);
+        const output = ofAddNode('output', 680, 150);
+        OF.nodes[prompt].data.text = 'Modelo caminhando em passarela de moda, câmera lenta, luzes dramáticas, estilo editorial';
+        OF.connections = [{ from: prompt, to: vidGen }, { from: vidGen, to: output }];
+      } else if (name === 'prompt_to_video') {
+        document.querySelector(`.of-template-chip[onclick*="prompt_to_video"]`)?.classList.add('active');
+        document.getElementById('of-flow-name').value = 'Prompt → Imagem → Vídeo';
+        const prompt = ofAddNode('prompt', 60, 200);
+        const imgGen = ofAddNode('image-gen', 340, 200);
+        const vidGen = ofAddNode('video-gen', 620, 200);
+        const output = ofAddNode('output', 900, 200);
+        OF.nodes[prompt].data.text = 'Modelo com vestido dourado em cenário urbano noturno, iluminação cinematográfica';
+        OF.connections = [
+          { from: prompt, to: imgGen },
+          { from: imgGen, to: vidGen },
+          { from: vidGen, to: output }
+        ];
       } else {
         document.querySelector(`.of-template-chip[onclick*="blank"]`)?.classList.add('active');
         document.getElementById('of-flow-name').value = 'Novo Flow';
@@ -834,9 +1075,11 @@
       menu.className = 'of-ctx-menu';
       menu.innerHTML = `
     <div class="of-ctx-section">Adicionar Nó</div>
-    <div class="of-ctx-item" onclick="ofAddNode('image');this.closest('.of-ctx-menu').remove()"><span class="of-ctx-item-icon">🖼</span> Imagem</div>
+    <div class="of-ctx-item" onclick="ofAddNode('image');this.closest('.of-ctx-menu').remove()"><span class="of-ctx-item-icon">🖼</span> Imagem (upload)</div>
     <div class="of-ctx-item" onclick="ofAddNode('prompt');this.closest('.of-ctx-menu').remove()"><span class="of-ctx-item-icon">✍️</span> Prompt</div>
-    <div class="of-ctx-item" onclick="ofAddNode('model');this.closest('.of-ctx-menu').remove()"><span class="of-ctx-item-icon">⚡</span> Modelo IA</div>
+    <div class="of-ctx-item" onclick="ofAddNode('model');this.closest('.of-ctx-menu').remove()"><span class="of-ctx-item-icon">⚡</span> Modelo IA (análise)</div>
+    <div class="of-ctx-item" onclick="ofAddNode('image-gen');this.closest('.of-ctx-menu').remove()"><span class="of-ctx-item-icon">🎨</span> Gerar Imagem (Replicate)</div>
+    <div class="of-ctx-item" onclick="ofAddNode('video-gen');this.closest('.of-ctx-menu').remove()"><span class="of-ctx-item-icon">🎬</span> Gerar Vídeo (Replicate)</div>
     <div class="of-ctx-item" onclick="ofAddNode('output');this.closest('.of-ctx-menu').remove()"><span class="of-ctx-item-icon">📤</span> Saída</div>
     <div class="of-ctx-item" onclick="ofAddNode('note');this.closest('.of-ctx-menu').remove()"><span class="of-ctx-item-icon">📝</span> Nota</div>
     <div class="of-ctx-sep"></div>

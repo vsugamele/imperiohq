@@ -849,6 +849,8 @@
     function openSettings() {
       document.getElementById('input-or-key').value = localStorage.getItem('openrouter_key') || '';
       document.getElementById('input-or-model').value = localStorage.getItem('openrouter_model') || 'anthropic/claude-sonnet-4-5';
+      document.getElementById('input-replicate-key').value = localStorage.getItem('replicate_key') || '';
+      document.getElementById('input-google-key').value = localStorage.getItem('google_ai_key') || '';
       document.getElementById('input-claw-url').value = localStorage.getItem('openclaw_url') || '';
       document.getElementById('settings-modal').classList.add('open');
     }
@@ -860,9 +862,13 @@
     function saveSettings() {
       const key = document.getElementById('input-or-key').value.trim();
       const model = document.getElementById('input-or-model').value;
+      const replicateKey = document.getElementById('input-replicate-key').value.trim();
+      const googleKey = document.getElementById('input-google-key').value.trim();
       const claw = document.getElementById('input-claw-url').value.trim();
       if (key) localStorage.setItem('openrouter_key', key);
       localStorage.setItem('openrouter_model', model);
+      if (replicateKey) localStorage.setItem('replicate_key', replicateKey);
+      if (googleKey) localStorage.setItem('google_ai_key', googleKey);
       if (claw) localStorage.setItem('openclaw_url', claw);
 
       // Update header pill
