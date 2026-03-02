@@ -2908,8 +2908,7 @@
 
     <!-- FINANCAS VIEW -->
     <div id="view-financas" class="panel" style="height:100%;overflow-y:auto;padding:20px">
-      <div style="font-size:18px;font-weight:700;color:var(--text);margin-bottom:4px">💰 Custos Mensais</div>
-      <div style="font-size:12px;color:var(--text3);margin-bottom:16px">Despesas com ferramentas e APIs</div>
+      <div style="font-size:18px;font-weight:700;color:var(--text);margin-bottom:16px">💰 Finanças</div>
 
       <div id="financas-body"></div>
     </div>
@@ -4191,6 +4190,9 @@
         <div class="mm-tab" onclick="showMenteTab('prompts',this)"
           style="padding:10px 16px;font-size:12px;font-weight:600;cursor:pointer;color:var(--text3);border-bottom:2px solid transparent;margin-bottom:-1px">
           Prompts</div>
+        <div class="mm-tab" onclick="showMenteTab('chat',this)"
+          style="padding:10px 16px;font-size:12px;font-weight:600;cursor:pointer;color:var(--text3);border-bottom:2px solid transparent;margin-bottom:-1px">
+          💬 Chat</div>
       </div>
       <!-- Tab Content -->
       <div style="flex:1;overflow-y:auto;padding:20px 22px">
@@ -4274,6 +4276,17 @@
               style="margin-top:12px;background:var(--gold);color:#0a0a0f;border:none;padding:7px 16px;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer">Copiar
               Prompt</button>
           </div>
+        </div>
+        <!-- Chat -->
+        <div id="mm-tab-chat" style="display:none;height:100%;flex-direction:column;gap:0">
+          <div id="mm-chat-messages" style="flex:1;overflow-y:auto;padding:8px 0;min-height:320px;max-height:420px;display:flex;flex-direction:column;gap:10px">
+            <div style="text-align:center;font-size:11px;color:var(--text3);padding:20px">Inicie uma conversa com esta mente sintética</div>
+          </div>
+          <div style="border-top:1px solid var(--border);padding-top:12px;display:flex;gap:8px;align-items:flex-end;flex-shrink:0">
+            <textarea id="mm-chat-input" rows="2" class="brief-input" placeholder="Digite sua mensagem..." style="flex:1;resize:none;font-size:12px" onkeydown="if((event.ctrlKey||event.metaKey)&&event.key==='Enter')sendMenteChat()"></textarea>
+            <button onclick="sendMenteChat()" id="mm-chat-send" style="background:var(--gold);color:#0a0a0f;border:none;padding:8px 16px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0;height:56px">Enviar</button>
+          </div>
+          <div style="font-size:10px;color:var(--text3);text-align:right;margin-top:4px">Ctrl+Enter para enviar · usa a chave OpenRouter configurada</div>
         </div>
       </div>
     </div>
@@ -4635,7 +4648,7 @@
       style="background:var(--surface);border:1px solid var(--border2);border-radius:14px;width:100%;max-width:440px">
       <div
         style="padding:20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
-        <div style="font-size:15px;font-weight:700;color:var(--text)">📦 Novo Asset</div>
+        <div id="na-modal-title" style="font-size:15px;font-weight:700;color:var(--text)">📦 Novo Asset</div>
         <button onclick="closeNewAssetModal()"
           style="background:transparent;border:1px solid var(--border2);color:var(--text3);padding:4px 12px;border-radius:6px;cursor:pointer">✕</button>
       </div>
@@ -4673,6 +4686,33 @@
           <button onclick="closeNewAssetModal()" class="btn btn-outline">Cancelar</button>
           <button onclick="saveNewAsset()" class="btn btn-gold">💾 Salvar Asset</button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- IMPORT FUNNEL MODAL -->
+  <div id="import-funnel-modal"
+    style="position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;z-index:3100;padding:20px;opacity:0;pointer-events:none;transition:.2s"
+    onclick="if(event.target===this)closeImportFunnelModal()">
+    <div style="background:var(--surface);border:1px solid var(--border2);border-radius:14px;width:100%;max-width:560px;max-height:90vh;display:flex;flex-direction:column">
+      <div style="padding:18px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+        <div id="ifm-title" style="font-size:15px;font-weight:700;color:var(--text)">📥 Importar Pesquisa</div>
+        <button onclick="closeImportFunnelModal()" style="background:transparent;border:1px solid var(--border2);color:var(--text3);padding:4px 12px;border-radius:6px;cursor:pointer">✕</button>
+      </div>
+      <div style="padding:18px 20px;display:flex;flex-direction:column;gap:12px;overflow-y:auto;flex:1">
+        <div style="font-size:11px;color:var(--text3);line-height:1.6;background:var(--surface2);border-radius:8px;padding:10px 12px">
+          <strong style="color:var(--text)">Como usar:</strong> Execute o <strong style="color:var(--gold)">Funnel Hacking Agent</strong> (OBJ 3 ou 4) para pesquisar este concorrente.
+          Depois, abra o arquivo de dossiê gerado (ex: <code style="font-size:10px;background:var(--border);border-radius:3px;padding:1px 4px">objetivo-3-escalados/dossies/dossie-nome.md</code>),
+          copie o conteúdo e cole abaixo.
+        </div>
+        <div class="brief-field">
+          <div class="brief-label">Conteúdo do Dossiê (markdown)</div>
+          <textarea id="ifm-content" class="brief-input" style="min-height:220px;resize:vertical;font-family:monospace;font-size:10px;line-height:1.5" placeholder="# Dossie: Nome do Concorrente&#10;&#10;## Score de Escala&#10;TOTAL: 12/15&#10;&#10;## Tráfego&#10;..."></textarea>
+        </div>
+      </div>
+      <div style="padding:14px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px;flex-shrink:0">
+        <button onclick="closeImportFunnelModal()" class="btn btn-outline">Cancelar</button>
+        <button onclick="importFunnelData()" class="btn btn-gold">📥 Importar Dados</button>
       </div>
     </div>
   </div>
@@ -5934,15 +5974,21 @@ Analise e retorne:
 
       const el = document.getElementById('tab-briefing');
 
-      const linksHtml = Object.entries(p.links || {}).map(([type, url]) => `
-    <div class="link-row">
-      <input class="brief-input link-type" value="${type}" placeholder="Tipo">
-      <input class="brief-input link-url" value="${url}" placeholder="https://">
-    </div>`).join('') + `
-    <div class="link-row">
-      <input class="brief-input link-type" placeholder="Tipo (ex: site)">
-      <input class="brief-input link-url" placeholder="https://">
-    </div>`;
+      // Migrar p.links (objeto) para p.linksArr (array) se necessário
+      if (!p.linksArr) {
+        p.linksArr = Object.entries(p.links || {}).map(([tipo, url]) => ({ tipo, url }));
+        if (p.linksArr.length === 0) p.linksArr = [{ tipo: '', url: '' }];
+      }
+      const linksHtml = `
+    <div id="project-links-list">
+      ${p.linksArr.map((lk, li) => `
+      <div class="link-row" style="display:flex;gap:6px;margin-bottom:6px;align-items:center">
+        <input class="brief-input link-type" value="${lk.tipo || ''}" placeholder="Tipo (ex: site)" style="flex:0 0 120px" onblur="saveProjectLink(${li},'tipo',this.value)">
+        <input class="brief-input link-url" value="${lk.url || ''}" placeholder="https://" style="flex:1" onblur="saveProjectLink(${li},'url',this.value)">
+        <button onclick="removeProjectLink(${li})" style="background:none;border:1px solid #e05c5c33;color:#e05c5c;border-radius:5px;padding:2px 8px;font-size:12px;cursor:pointer;flex-shrink:0">✕</button>
+      </div>`).join('')}
+    </div>
+    <button onclick="addProjectLink()" class="btn btn-sm btn-outline" style="margin-top:4px;width:100%">+ Adicionar Link</button>`;
 
       const produtosHtml = p.produtos.map((prod, pi) => {
         const tipoOpts = ['Digital', 'Físico', 'Serviço', 'Mentoria', 'Software', 'Evento'].map(t =>
@@ -6043,6 +6089,9 @@ Analise e retorne:
         </div>
       </div>
     </div>
+
+    <!-- ANÁLISE DE CONCORRENTES -->
+    ${renderConcorrentesSection(p)}
 
     <!-- PRODUTOS -->
     <div style="margin-bottom:8px;display:flex;align-items:center;justify-content:space-between">
@@ -6300,6 +6349,7 @@ Analise e retorne:
               <span style="font-size:10px;padding:2px 8px;border-radius:10px;color:${statusColor};border:1px solid ${statusColor}">${a.status}</span>
               ${a.url ? `<a href="${a.url}" target="_blank" class="btn btn-sm btn-outline" style="margin-left:4px;text-decoration:none">Abrir</a>` : ''}
               ${!a.url && relDoc ? `<button class="btn btn-sm btn-outline" style="margin-left:4px" onclick="openDocModal(null,'${relDoc.id}')">Abrir Doc</button>` : ''}
+              <button class="btn btn-sm btn-outline" style="margin-left:4px" onclick="openNewAssetModal(${i})">✏️</button>
               <button class="btn btn-sm btn-outline" style="color:#e05c5c;border-color:#e05c5c;margin-left:4px" onclick="removeAsset(${i})">✕</button>
             </div>
           </div>`;
@@ -6315,8 +6365,29 @@ Analise e retorne:
       renderAssets();
     }
 
-    function openNewAssetModal() {
+    let _editAssetIdx = -1;
+    function openNewAssetModal(idx) {
+      _editAssetIdx = (idx !== undefined && idx !== null) ? idx : -1;
       const m = document.getElementById('new-asset-modal');
+      const title = document.getElementById('na-modal-title');
+      if (_editAssetIdx >= 0 && currentProject.assets && currentProject.assets[_editAssetIdx]) {
+        const a = currentProject.assets[_editAssetIdx];
+        document.getElementById('na-nome').value = a.nome || '';
+        document.getElementById('na-url').value = a.url || '';
+        const tipoSel = document.getElementById('na-tipo');
+        const tipoVal = ['Copy','Criativo','Página','Email','Vídeo','Script','Outro'].includes(a.tipo) ? a.tipo : 'Outro';
+        tipoSel.value = tipoVal;
+        const statusSel = document.getElementById('na-status');
+        const statusVal = ['Rascunho','Em Revisão','Aprovado','Rodando'].includes(a.status) ? a.status : 'Rascunho';
+        statusSel.value = statusVal;
+        if (title) title.textContent = '✏️ Editar Asset';
+      } else {
+        document.getElementById('na-nome').value = '';
+        document.getElementById('na-url').value = '';
+        document.getElementById('na-tipo').value = 'Copy';
+        document.getElementById('na-status').value = 'Rascunho';
+        if (title) title.textContent = '📦 Novo Asset';
+      }
       m.style.opacity = '1'; m.style.pointerEvents = 'all';
     }
     function closeNewAssetModal() {
@@ -6329,14 +6400,19 @@ Analise e retorne:
       if (!currentProject.assets) currentProject.assets = [];
       const icons = { 'Copy': '✍️', 'Criativo': '🎨', 'Página': '📄', 'Email': '📧', 'Vídeo': '🎬', 'Script': '📝', 'Outro': '📦' };
       const tipo = document.getElementById('na-tipo').value;
-      currentProject.assets.push({
+      const assetData = {
         icon: icons[tipo] || '📦',
         nome, tipo,
         url: document.getElementById('na-url').value.trim(),
         status: document.getElementById('na-status').value,
         data: new Date().toLocaleDateString('pt-BR'),
         agente: 'Manual'
-      });
+      };
+      if (_editAssetIdx >= 0 && currentProject.assets[_editAssetIdx]) {
+        Object.assign(currentProject.assets[_editAssetIdx], assetData);
+      } else {
+        currentProject.assets.push(assetData);
+      }
       closeNewAssetModal();
       document.getElementById('na-nome').value = '';
       document.getElementById('na-url').value = '';
@@ -6594,7 +6670,7 @@ Analise e retorne:
       const p = currentProject;
       const b = p.branding || {};
       const el = document.getElementById('tab-branding');
-      if (!b.cores) b.cores = [
+      if (!b.cores || !Array.isArray(b.cores)) b.cores = [
         { nome: 'Primária', hex: '#c9a84c' },
         { nome: 'Secundária', hex: '#1a1a2e' },
         { nome: 'Acento', hex: '#52b788' },
@@ -6661,7 +6737,7 @@ Analise e retorne:
       <textarea class="brief-input" rows="5" placeholder="O que a marca acredita? Qual é sua missão e promessa central?" onblur="saveBranding('manifesto',this.value)">${b.manifesto || ''}</textarea>
     </div>
 
-    <div class="grid2">
+    <div class="grid2" style="margin-bottom:12px">
       <div class="card">
         <div class="card-title">✅ Linguagem: Usa</div>
         <textarea class="brief-input" rows="4" placeholder="Palavras, expressões, tom que a marca usa..." onblur="saveBrandingArr('usa',this.value)">${(b.linguagem?.usa || []).join('\n')}</textarea>
@@ -6669,6 +6745,73 @@ Analise e retorne:
       <div class="card">
         <div class="card-title">❌ Linguagem: Evita</div>
         <textarea class="brief-input" rows="4" placeholder="Termos, clichês e tons que a marca evita..." onblur="saveBrandingArr('evita',this.value)">${(b.linguagem?.evita || []).join('\n')}</textarea>
+      </div>
+    </div>
+
+    <!-- TIPOGRAFIA -->
+    <div class="card" style="margin-bottom:12px">
+      <div class="card-title">🔤 Tipografia</div>
+      <div class="grid2">
+        <div class="brief-field">
+          <div class="brief-label">Fonte Principal (Títulos)</div>
+          <input class="brief-input" value="${b.tipografia?.principal || ''}" placeholder="Ex: Playfair Display, Montserrat..." onblur="saveBrandingTip('principal',this.value)">
+        </div>
+        <div class="brief-field">
+          <div class="brief-label">Fonte Secundária (Corpo)</div>
+          <input class="brief-input" value="${b.tipografia?.secundaria || ''}" placeholder="Ex: Inter, Open Sans, Lato..." onblur="saveBrandingTip('secundaria',this.value)">
+        </div>
+        <div class="brief-field">
+          <div class="brief-label">Peso / Estilo (Títulos)</div>
+          <input class="brief-input" value="${b.tipografia?.peso_titulo || ''}" placeholder="Ex: Bold 700, Black 900..." onblur="saveBrandingTip('peso_titulo',this.value)">
+        </div>
+        <div class="brief-field">
+          <div class="brief-label">Tamanho Base / Escala</div>
+          <input class="brief-input" value="${b.tipografia?.escala || ''}" placeholder="Ex: 16px base, H1: 48px, H2: 32px..." onblur="saveBrandingTip('escala',this.value)">
+        </div>
+      </div>
+    </div>
+
+    <!-- LOGO -->
+    <div class="card" style="margin-bottom:12px">
+      <div class="card-title">🖼️ Logo & Identidade Visual</div>
+      <div class="grid2">
+        <div>
+          <div class="brief-field">
+            <div class="brief-label">URL do Logo (ou cole base64)</div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <input class="brief-input" value="${b.logo_url && !b.logo_url.startsWith('data:') ? b.logo_url : ''}" placeholder="https://..." onblur="saveBranding('logo_url',this.value);renderBranding()" style="flex:1">
+              <label style="cursor:pointer;background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:5px 10px;font-size:11px;color:var(--text2);white-space:nowrap;flex-shrink:0">📂 Upload<input type="file" accept="image/*" style="display:none" onchange="uploadBrandingLogo(this)"></label>
+            </div>
+          </div>
+          <div class="brief-field">
+            <div class="brief-label">Fundo do Logo</div>
+            <input class="brief-input" value="${b.logo_fundo || ''}" placeholder="Ex: Fundo escuro, Branco, Transparente..." onblur="saveBranding('logo_fundo',this.value)">
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:center;background:var(--surface2);border:1px solid var(--border);border-radius:8px;min-height:100px;padding:12px">
+          ${b.logo_url ? `<img src="${b.logo_url}" style="max-width:100%;max-height:100px;object-fit:contain">` : `<div style="font-size:11px;color:var(--text3);text-align:center">Logo aparecerá aqui<br>após upload</div>`}
+        </div>
+      </div>
+      <div class="brief-field" style="margin-top:8px">
+        <div class="brief-label">Variações do Logo (descreva)</div>
+        <textarea class="brief-input" rows="2" placeholder="Ex: Versão principal (colorida), Versão monocromática, Versão ícone apenas..." onblur="saveBranding('logo_variacoes',this.value)">${b.logo_variacoes || ''}</textarea>
+      </div>
+    </div>
+
+    <!-- DIRETRIZES -->
+    <div class="card">
+      <div class="card-title">📋 Diretrizes da Marca</div>
+      <div class="brief-field">
+        <div class="brief-label">Espaçamento / Uso do Logo</div>
+        <textarea class="brief-input" rows="2" placeholder="Ex: Área de proteção mínima, não distorcer, não rotacionar..." onblur="saveBranding('diretrizes_logo',this.value)">${b.diretrizes_logo || ''}</textarea>
+      </div>
+      <div class="brief-field">
+        <div class="brief-label">Aplicações Aprovadas</div>
+        <textarea class="brief-input" rows="2" placeholder="Ex: Fundo escuro com logo dourado, fundo branco com logo escuro..." onblur="saveBranding('aplicacoes_ok',this.value)">${b.aplicacoes_ok || ''}</textarea>
+      </div>
+      <div class="brief-field">
+        <div class="brief-label">Aplicações Proibidas</div>
+        <textarea class="brief-input" rows="2" placeholder="Ex: Nunca usar rosa, nunca usar fundo cinza, não misturar com outras marcas..." onblur="saveBranding('aplicacoes_nao',this.value)">${b.aplicacoes_nao || ''}</textarea>
       </div>
     </div>`;
     }
@@ -6709,6 +6852,432 @@ Analise e retorne:
       if (!currentProject.branding) currentProject.branding = {};
       if (!currentProject.branding.linguagem) currentProject.branding.linguagem = { usa: [], evita: [] };
       currentProject.branding.linguagem[subkey] = value.split('\n').filter(l => l.trim());
+    }
+
+    function saveBrandingTip(key, value) {
+      if (!currentProject.branding) currentProject.branding = {};
+      if (!currentProject.branding.tipografia) currentProject.branding.tipografia = {};
+      currentProject.branding.tipografia[key] = value;
+    }
+
+    function uploadBrandingLogo(input) {
+      const file = input.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        saveBranding('logo_url', e.target.result);
+        renderBranding();
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function addConcorrente() {
+      if (!currentProject.concorrentes) currentProject.concorrentes = [];
+      currentProject.concorrentes.push({
+        nome: '', url: '', diferencial: '', fraqueza: '', canais: '',
+        nicho: '', subnicho: '', publico_alvo: '', mecanismo: '',
+        headline: '', hook: '', cta: '',
+        oferta_principal: '', preco: '', garantia: '', bonus: '',
+        dossie: null
+      });
+      saveProjectData();
+      showTab('briefing');
+    }
+
+    function removeConcorrente(idx) {
+      if (!currentProject.concorrentes) return;
+      currentProject.concorrentes.splice(idx, 1);
+      saveProjectData();
+      showTab('briefing');
+    }
+
+    function saveConcorrente(idx, key, val) {
+      if (!currentProject.concorrentes) currentProject.concorrentes = [];
+      if (!currentProject.concorrentes[idx]) currentProject.concorrentes[idx] = {};
+      currentProject.concorrentes[idx][key] = val;
+    }
+
+    function savePosicionamento(key, val) {
+      if (!currentProject.posicionamento) currentProject.posicionamento = {};
+      currentProject.posicionamento[key] = val;
+    }
+
+    function saveProjectData() {
+      if (!currentProject) return;
+      var custom = projectsGetCustom();
+      var ci = custom.findIndex(function(p) { return p.id === currentProject.id; });
+      if (ci !== -1) {
+        custom[ci] = JSON.parse(JSON.stringify(currentProject));
+        projectsSaveCustom(custom);
+      }
+      var btn = document.getElementById('btn-save-project');
+      if (btn) {
+        var orig = btn.innerHTML;
+        btn.innerHTML = '✓ Salvo!';
+        btn.style.background = 'var(--green-bright)';
+        btn.style.color = '#0a0a0f';
+        setTimeout(function() { btn.innerHTML = orig; btn.style.background = ''; btn.style.color = ''; }, 1800);
+      }
+    }
+
+    // ── Competitor Section Render ──────────────────────────────────────────────
+    function renderConcorrentesSection(p) {
+      var tabs = ['Visão Geral','Mercado','Copywriting','Oferta','Dossiê'];
+      var tabBtns = tabs.map(function(t,i) {
+        return '<button id="conc-tab-' + i + '" onclick="showConcTab(' + i + ')" style="background:' + (i===0 ? 'var(--gold)' : 'transparent') + ';color:' + (i===0 ? '#1a1a1a' : 'var(--text3)') + ';border:none;border-bottom:' + (i===0 ? '2px solid var(--gold)' : '2px solid transparent') + ';padding:7px 13px;font-size:11px;font-weight:' + (i===0 ? '700' : '500') + ';cursor:pointer;transition:.15s;border-radius:6px 6px 0 0">' + t + '</button>';
+      }).join('');
+      return '<div class="card" style="margin-bottom:12px">'
+        + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">'
+        + '<div class="card-title" style="margin-bottom:0">🥊 Análise de Concorrentes</div>'
+        + '<div style="display:flex;gap:8px;align-items:center">'
+        + '<button onclick="addConcorrente()" class="btn btn-sm btn-outline">+ Concorrente</button>'
+        + '<button id="btn-save-project" onclick="saveProjectData()" class="btn btn-sm btn-gold">💾 Salvar</button>'
+        + '</div>'
+        + '</div>'
+        + '<div style="display:flex;gap:2px;border-bottom:1px solid var(--border);margin-bottom:14px">' + tabBtns + '</div>'
+        + '<div id="conc-panel-0">' + buildConcOverviewHtml(p) + '</div>'
+        + '<div id="conc-panel-1" style="display:none">' + buildConcMercadoHtml(p) + '</div>'
+        + '<div id="conc-panel-2" style="display:none">' + buildConcCopyHtml(p) + '</div>'
+        + '<div id="conc-panel-3" style="display:none">' + buildConcOfertaHtml(p) + '</div>'
+        + '<div id="conc-panel-4" style="display:none">' + buildConcDossieHtml(p) + '</div>'
+        + '</div>';
+    }
+
+    function showConcTab(idx) {
+      for (var i = 0; i < 5; i++) {
+        var panel = document.getElementById('conc-panel-' + i);
+        var tab = document.getElementById('conc-tab-' + i);
+        if (panel) panel.style.display = (i === idx) ? '' : 'none';
+        if (tab) {
+          tab.style.background = (i === idx) ? 'var(--gold)' : 'transparent';
+          tab.style.color = (i === idx) ? '#1a1a1a' : 'var(--text3)';
+          tab.style.fontWeight = (i === idx) ? '700' : '500';
+          tab.style.borderBottom = (i === idx) ? '2px solid var(--gold)' : '2px solid transparent';
+        }
+      }
+    }
+
+    // Tab 1: Comparison Table
+    function buildConcOverviewHtml(p) {
+      var concs = p.concorrentes || [];
+      if (!concs.length) return '<div style="font-size:11px;color:var(--text3);padding:16px 0 8px">Nenhum concorrente cadastrado. Clique em "+ Concorrente" para adicionar.</div>';
+      var rowDefs = [
+        ['Nome', 'nome'],['URL / Site', 'url'],['Ponto Forte', 'diferencial'],['Fraqueza', 'fraqueza'],
+        ['Canais Principais', 'canais'],['Nicho / Subnicho', 'nicho'],['Público-alvo', 'publico_alvo'],['Mecanismo Único', 'mecanismo']
+      ];
+      var proj = p.posicionamento || {};
+      var projFields = { nome: p.nome || '', nicho: proj.nicho||'', subnicho: proj.subnicho||'', publico_alvo: proj.publico_alvo||'', mecanismo: proj.mecanismo||'' };
+      var h = '<div style="overflow-x:auto;-webkit-overflow-scrolling:touch"><table style="width:100%;border-collapse:collapse;font-size:11px;min-width:480px">';
+      h += '<thead><tr>';
+      h += '<th style="text-align:left;padding:6px 8px;background:var(--surface2);color:var(--text3);font-weight:600;border:1px solid var(--border);white-space:nowrap;min-width:110px">Campo</th>';
+      h += '<th style="text-align:left;padding:6px 8px;background:rgba(201,168,76,0.12);color:var(--gold);font-weight:700;border:1px solid var(--border);min-width:130px">⭐ Seu Projeto</th>';
+      concs.forEach(function(c,ci) {
+        h += '<th style="text-align:left;padding:6px 8px;background:var(--surface2);color:var(--text);font-weight:600;border:1px solid var(--border);min-width:130px">' + (c.nome || ('Conc. '+(ci+1))) + '</th>';
+      });
+      h += '</tr></thead><tbody>';
+      rowDefs.forEach(function(rd) {
+        var label = rd[0], key = rd[1];
+        h += '<tr><td style="padding:6px 8px;background:var(--surface2);color:var(--text3);border:1px solid var(--border);white-space:nowrap;font-weight:500">' + label + '</td>';
+        var projVal = (projFields[key] !== undefined) ? projFields[key] : '';
+        var isProj = ['nicho','subnicho','publico_alvo','mecanismo'].includes(key);
+        h += '<td contenteditable="true" style="padding:6px 8px;background:rgba(201,168,76,0.04);color:var(--text);border:1px solid var(--border)" onblur="savePosicionamento(\'' + key + '\',this.textContent)">' + projVal + '</td>';
+        concs.forEach(function(c,ci) {
+          h += '<td contenteditable="true" style="padding:6px 8px;color:var(--text);border:1px solid var(--border)" onblur="saveConcorrente(' + ci + ',\'' + key + '\',this.textContent)">' + (c[key]||'') + '</td>';
+        });
+        h += '</tr>';
+      });
+      // Actions row
+      h += '<tr><td style="padding:6px 8px;background:var(--surface2);color:var(--text3);border:1px solid var(--border);font-weight:500">Ações</td>';
+      h += '<td style="padding:6px 8px;border:1px solid var(--border)"></td>';
+      concs.forEach(function(c,ci) {
+        h += '<td style="padding:6px 8px;border:1px solid var(--border)">'
+          + '<button onclick="removeConcorrente(' + ci + ')" style="background:none;border:1px solid #e05c5c33;color:#e05c5c;border-radius:5px;padding:2px 7px;font-size:10px;cursor:pointer">✕ Remover</button>'
+          + '<button onclick="openImportFunnelModal(' + ci + ')" style="background:none;border:1px solid var(--border2);color:var(--text3);border-radius:5px;padding:2px 7px;font-size:10px;cursor:pointer;margin-left:4px">📥 Import</button>'
+          + '</td>';
+      });
+      h += '</tr></tbody></table></div>';
+      return h;
+    }
+
+    // Tab 2: Radar de Proximidade + Keywords
+    function buildConcMercadoHtml(p) {
+      var concs = p.concorrentes || [];
+      if (!concs.length) return '<div style="font-size:11px;color:var(--text3);padding:16px 0 8px">Nenhum concorrente cadastrado.</div>';
+      var colors = ['#52b788','#e05c5c','#3b82f6','#a78bfa','#fb923c','#f472b6'];
+      var cx = 155, cy = 140, maxR = 105;
+      var angDeg = [270, 30, 150, 210, 90, 330];
+      var maxScore = 15;
+      concs.forEach(function(c) {
+        var s = (c.dossie && c.dossie.score_escala != null) ? c.dossie.score_escala : 5;
+        if (s > maxScore) maxScore = s;
+      });
+      var rings = '';
+      for (var ri = 1; ri <= 3; ri++) {
+        var rr = (maxR / 3) * ri;
+        rings += '<circle cx="' + cx + '" cy="' + cy + '" r="' + rr.toFixed(0) + '" fill="none" stroke="var(--border)" stroke-width="1" stroke-dasharray="4,3"/>';
+      }
+      var bubbles = '';
+      var legend = '';
+      concs.slice(0,6).forEach(function(c,ci) {
+        var score = (c.dossie && c.dossie.score_escala != null) ? c.dossie.score_escala : 5;
+        var ang = (angDeg[ci] || (ci*60)) * Math.PI / 180;
+        var dist = maxR * 0.62;
+        var bx = cx + dist * Math.cos(ang);
+        var by = cy + dist * Math.sin(ang);
+        var br = 18 + (score / maxScore) * 16;
+        var col = colors[ci % colors.length];
+        var lbl = (c.nome || ('Conc.'+(ci+1))).substring(0,9);
+        bubbles += '<circle cx="' + bx.toFixed(0) + '" cy="' + by.toFixed(0) + '" r="' + br.toFixed(0) + '" fill="' + col + '" fill-opacity="0.2" stroke="' + col + '" stroke-width="1.5"/>';
+        bubbles += '<text x="' + bx.toFixed(0) + '" y="' + (parseFloat(by.toFixed(0))+4) + '" text-anchor="middle" font-size="9" fill="' + col + '" font-weight="600">' + lbl + '</text>';
+        legend += '<rect x="8" y="' + (206+ci*15) + '" width="9" height="9" fill="' + col + '" fill-opacity="0.7" rx="2"/>';
+        legend += '<text x="21" y="' + (215+ci*15) + '" font-size="9" fill="var(--text3)">' + (c.nome||('Conc.'+(ci+1))).substring(0,16) + '</text>';
+      });
+      var svgH = 206 + Math.min(concs.length,6)*15 + 8;
+      var svgBlock = '<svg width="320" height="' + svgH + '" style="display:block">'
+        + rings
+        + '<circle cx="' + cx + '" cy="' + cy + '" r="16" fill="rgba(201,168,76,0.25)" stroke="var(--gold)" stroke-width="2"/>'
+        + '<text x="' + cx + '" y="' + (cy+4) + '" text-anchor="middle" font-size="8" fill="var(--gold)" font-weight="700">VOCÊ</text>'
+        + bubbles + legend + '</svg>';
+      // Bars
+      var barsHtml = '<div style="flex:1;min-width:180px">'
+        + '<div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Score de Escala</div>';
+      concs.forEach(function(c,ci) {
+        var score = (c.dossie && c.dossie.score_escala != null) ? c.dossie.score_escala : null;
+        var pct = score != null ? Math.min(100, Math.round(score/15*100)) : 0;
+        var col = colors[ci%colors.length];
+        barsHtml += '<div style="margin-bottom:10px">'
+          + '<div style="display:flex;justify-content:space-between;margin-bottom:3px">'
+          + '<span style="font-size:11px;color:var(--text)">' + (c.nome||('Conc.'+(ci+1))) + '</span>'
+          + '<span style="font-size:10px;color:var(--text3)">' + (score!=null ? score+'/15' : 'N/A') + '</span>'
+          + '</div>'
+          + '<div style="height:6px;background:var(--surface2);border-radius:3px">'
+          + '<div style="height:100%;width:' + pct + '%;background:' + col + ';border-radius:3px;transition:.3s"></div>'
+          + '</div></div>';
+      });
+      // Keywords
+      var kwMap = {};
+      concs.forEach(function(c) {
+        var kws = (c.dossie && c.dossie.palavras_chave) ? c.dossie.palavras_chave : [];
+        kws.forEach(function(kw) { kwMap[kw] = (kwMap[kw]||0)+1; });
+        if (c.canais) {
+          c.canais.split(/[,;]/).forEach(function(k) {
+            var t = k.trim();
+            if (t && t.length < 30) kwMap[t] = (kwMap[t]||0)+1;
+          });
+        }
+      });
+      var sortedKws = Object.entries(kwMap).sort(function(a,b){return b[1]-a[1];}).slice(0,18);
+      if (sortedKws.length) {
+        barsHtml += '<div style="margin-top:14px"><div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Canais & Palavras-chave Comuns</div>';
+        barsHtml += '<div style="display:flex;flex-wrap:wrap;gap:5px">';
+        sortedKws.forEach(function(entry) {
+          var kw = entry[0], cnt = entry[1];
+          var op = Math.min(1, 0.35 + cnt/concs.length*0.65);
+          barsHtml += '<span style="background:rgba(201,168,76,' + op.toFixed(2) + ');color:' + (cnt>1?'#1a1a1a':'var(--text)') + ';border-radius:20px;padding:3px 9px;font-size:10px;font-weight:' + (cnt>1?'700':'400') + '">' + kw + (cnt>1?' ×'+cnt:'') + '</span>';
+        });
+        barsHtml += '</div></div>';
+      }
+      barsHtml += '</div>';
+      return '<div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start">'
+        + '<div style="flex:0 0 auto"><div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Radar de Proximidade Competitiva</div>' + svgBlock + '</div>'
+        + barsHtml + '</div>';
+    }
+
+    // Tab 3: Copywriting
+    function buildConcCopyHtml(p) {
+      var concs = p.concorrentes || [];
+      if (!concs.length) return '<div style="font-size:11px;color:var(--text3);padding:16px 0 8px">Nenhum concorrente cadastrado.</div>';
+      var fields = [['headline','📰 Headline Principal'],['hook','🎣 Hook / Ângulo'],['cta','👆 CTA Principal']];
+      var h = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px">';
+      concs.forEach(function(c,ci) {
+        h += '<div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px">'
+          + '<div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border)">' + (c.nome||('Conc. '+(ci+1))) + '</div>';
+        fields.forEach(function(f) {
+          h += '<div style="margin-bottom:9px">'
+            + '<div style="font-size:9px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px">' + f[1] + '</div>'
+            + '<div contenteditable="true" style="font-size:11px;color:var(--text);background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:5px 7px;min-height:28px;line-height:1.4" onblur="saveConcorrente(' + ci + ',\'' + f[0] + '\',this.textContent)">' + (c[f[0]]||'') + '</div>'
+            + '</div>';
+        });
+        h += '</div>';
+      });
+      h += '</div>';
+      return h;
+    }
+
+    // Tab 4: Oferta
+    function buildConcOfertaHtml(p) {
+      var concs = p.concorrentes || [];
+      if (!concs.length) return '<div style="font-size:11px;color:var(--text3);padding:16px 0 8px">Nenhum concorrente cadastrado.</div>';
+      var fields = [['oferta_principal','🎯 Oferta Principal'],['preco','💰 Preço'],['garantia','🛡️ Garantia'],['bonus','🎁 Bônus']];
+      var h = '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:11px;min-width:380px">';
+      h += '<thead><tr><th style="text-align:left;padding:6px 8px;background:var(--surface2);color:var(--text3);border:1px solid var(--border);min-width:110px">Campo</th>';
+      concs.forEach(function(c,ci) {
+        h += '<th style="text-align:left;padding:6px 8px;background:var(--surface2);color:var(--text);border:1px solid var(--border);min-width:140px">' + (c.nome||('Conc.'+(ci+1))) + '</th>';
+      });
+      h += '</tr></thead><tbody>';
+      fields.forEach(function(f) {
+        h += '<tr><td style="padding:6px 8px;background:var(--surface2);color:var(--text3);border:1px solid var(--border);font-weight:500;white-space:nowrap">' + f[1] + '</td>';
+        concs.forEach(function(c,ci) {
+          h += '<td contenteditable="true" style="padding:6px 8px;color:var(--text);border:1px solid var(--border)" onblur="saveConcorrente(' + ci + ',\'' + f[0] + '\',this.textContent)">' + (c[f[0]]||'') + '</td>';
+        });
+        h += '</tr>';
+      });
+      h += '</tbody></table></div>';
+      return h;
+    }
+
+    // Tab 5: Dossiê (Funnel Hacking data)
+    function buildConcDossieHtml(p) {
+      var concs = p.concorrentes || [];
+      if (!concs.length) return '<div style="font-size:11px;color:var(--text3);padding:16px 0 8px">Nenhum concorrente cadastrado.</div>';
+      var typeColors = { LP:'#52b788', VSL:'#fb923c', PV:'#3b82f6', CK:'#a78bfa', UP:'#e05c5c', DS:'#f472b6', TY:'#22d3ee', MB:'#94a3b8' };
+      var h = '<div style="display:flex;flex-direction:column;gap:12px">';
+      concs.forEach(function(c,ci) {
+        var d = c.dossie || {};
+        var hasData = !!(d.insights || d.trafego_estimado || (d.stack && d.stack.length) || d.ads_ativos != null || (d.paginas_funil && d.paginas_funil.length));
+        h += '<div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px">';
+        h += '<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;gap:8px">';
+        h += '<div style="font-size:12px;font-weight:700;color:var(--text)">' + (c.nome||('Concorrente '+(ci+1))) + (c.url ? ' <a href="' + c.url + '" target="_blank" style="color:var(--gold);font-size:10px;font-weight:400">' + c.url + '</a>' : '') + '</div>';
+        h += '<button onclick="openImportFunnelModal(' + ci + ')" class="btn btn-sm btn-outline" style="font-size:10px;flex-shrink:0">📥 Importar Pesquisa</button>';
+        h += '</div>';
+        if (!hasData) {
+          h += '<div style="font-size:11px;color:var(--text3);text-align:center;padding:18px 0;line-height:1.8">'
+            + 'Nenhum dado de pesquisa importado ainda.<br>'
+            + '<span style="font-size:10px">Use o <strong style="color:var(--text)">Funnel Hacking Agent</strong> para pesquisar este concorrente e depois clique em "📥 Importar Pesquisa".</span>'
+            + '</div>';
+        } else {
+          if (d.score_escala != null) {
+            h += '<div style="display:inline-block;background:rgba(201,168,76,0.15);border:1px solid var(--gold);border-radius:6px;padding:3px 10px;font-size:11px;color:var(--gold);font-weight:700;margin-bottom:10px">🏆 Score de Escala: ' + d.score_escala + '/15</div>';
+          }
+          h += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:7px;margin-bottom:10px">';
+          if (d.trafego_estimado) h += '<div style="background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:8px"><div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">Tráfego Est.</div><div style="font-size:12px;color:var(--text);font-weight:600">' + d.trafego_estimado + '</div></div>';
+          if (d.ads_ativos != null) h += '<div style="background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:8px"><div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">Ads Ativos</div><div style="font-size:12px;color:var(--text);font-weight:600">' + d.ads_ativos + '</div></div>';
+          if (d.importado_em) h += '<div style="background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:8px"><div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">Importado em</div><div style="font-size:11px;color:var(--text3)">' + new Date(d.importado_em).toLocaleDateString('pt-BR') + '</div></div>';
+          h += '</div>';
+          if (d.stack && d.stack.length) {
+            h += '<div style="margin-bottom:9px"><div style="font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px">Stack Tecnológico</div><div style="display:flex;flex-wrap:wrap;gap:5px">';
+            d.stack.forEach(function(s) { h += '<span style="background:rgba(59,130,246,0.12);color:#3b82f6;border:1px solid rgba(59,130,246,0.25);border-radius:20px;padding:2px 8px;font-size:10px">' + s + '</span>'; });
+            h += '</div></div>';
+          }
+          if (d.paginas_funil && d.paginas_funil.length) {
+            h += '<div style="margin-bottom:9px"><div style="font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px">Páginas do Funil Detectadas</div><div style="display:flex;flex-wrap:wrap;gap:5px">';
+            d.paginas_funil.forEach(function(t) {
+              var col = typeColors[t] || '#94a3b8';
+              h += '<span style="border:1px solid ' + col + '44;color:' + col + ';border-radius:4px;padding:2px 7px;font-size:10px;font-weight:600;background:' + col + '11">' + t + '</span>';
+            });
+            h += '</div></div>';
+          }
+          if (d.insights) {
+            h += '<div style="background:rgba(201,168,76,0.07);border:1px solid rgba(201,168,76,0.2);border-radius:7px;padding:10px">'
+              + '<div style="font-size:9px;color:var(--gold);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">💡 Insights</div>'
+              + '<div style="font-size:11px;color:var(--text);line-height:1.6;white-space:pre-wrap">' + d.insights.substring(0,600) + '</div>'
+              + '</div>';
+          }
+        }
+        h += '</div>';
+      });
+      h += '</div>';
+      return h;
+    }
+
+    // ── Import Funnel Modal Functions ──────────────────────────────────────────
+    function openImportFunnelModal(concIdx) {
+      window._importFunnelConcIdx = concIdx;
+      var m = document.getElementById('import-funnel-modal');
+      if (!m) return;
+      var name = (currentProject.concorrentes && currentProject.concorrentes[concIdx])
+        ? (currentProject.concorrentes[concIdx].nome || ('Concorrente ' + (concIdx + 1))) : '';
+      var titleEl = document.getElementById('ifm-title');
+      if (titleEl) titleEl.textContent = '📥 Importar Pesquisa — ' + name;
+      var contentEl = document.getElementById('ifm-content');
+      if (contentEl) contentEl.value = '';
+      m.style.opacity = '1';
+      m.style.pointerEvents = 'all';
+    }
+
+    function closeImportFunnelModal() {
+      var m = document.getElementById('import-funnel-modal');
+      if (m) { m.style.opacity = '0'; m.style.pointerEvents = 'none'; }
+    }
+
+    function importFunnelData() {
+      var contentEl = document.getElementById('ifm-content');
+      var content = contentEl ? contentEl.value.trim() : '';
+      var ci = window._importFunnelConcIdx;
+      if (!content) { alert('Cole o conteúdo do dossiê antes de importar.'); return; }
+      if (ci === undefined || ci === null || ci < 0) return;
+      if (!currentProject.concorrentes || !currentProject.concorrentes[ci]) return;
+      var parsed = parseFunnelHackingMarkdown(content);
+      if (!currentProject.concorrentes[ci].dossie) currentProject.concorrentes[ci].dossie = {};
+      Object.assign(currentProject.concorrentes[ci].dossie, parsed, { importado_em: Date.now(), raw: content.substring(0, 2000) });
+      saveProjectData();
+      closeImportFunnelModal();
+      showTab('briefing');
+      setTimeout(function() { showConcTab(4); }, 120);
+    }
+
+    function parseFunnelHackingMarkdown(content) {
+      var result = {};
+      // Score de Escala
+      var sm = content.match(/(?:TOTAL|Score\s*Total)[^:\n]*[:\s]+(\d+)/i);
+      if (!sm) sm = content.match(/score[^:\n]*[:\s]+(\d+)\s*\/\s*15/i);
+      if (sm) result.score_escala = parseInt(sm[1]);
+      // Tráfego estimado
+      var tm = content.match(/(?:Tr[aá]fego|Traffic|Visitors)[^\n]*?([0-9][0-9.,\s]*[KkMm]?[^\n]{0,20}(?:\/m[eê]s|\/month)?)/i);
+      if (tm) result.trafego_estimado = tm[1].trim().split(/\s+/).slice(0,4).join(' ');
+      // Ads ativos
+      var am = content.match(/ads?\s*ativos?[:\s]+(\d+)/i);
+      if (!am) am = content.match(/(\d+)\s+ads?\s*(?:ativos?|running)/i);
+      if (am) result.ads_ativos = parseInt(am[1]);
+      // Stack tecnológico
+      var stackM = content.match(/Stack[^\n]*\n([\s\S]{0,600}?)(?:\n#|\n\n##|$)/i);
+      if (stackM) {
+        result.stack = stackM[1].split('\n')
+          .map(function(l){ return l.replace(/^[-*•\s\d.]+/, '').trim(); })
+          .filter(function(l){ return l.length > 1 && l.length < 60 && !/^#+/.test(l); })
+          .slice(0,12);
+      }
+      // Páginas do funil
+      var pts = content.match(/\b(LP|VSL|PV|CK|OB|UP|DS|TY|MB|WB|CS|BK)\b/g);
+      if (pts) result.paginas_funil = pts.filter(function(v,i,a){ return a.indexOf(v)===i; });
+      // Palavras-chave / canais
+      var kwM = content.match(/(?:Palavras[- ]chave|Keywords|Canais?)[^\n]*\n([\s\S]{0,400}?)(?:\n#|$)/i);
+      if (kwM) {
+        result.palavras_chave = kwM[1].split(/[\n,;|]+/)
+          .map(function(k){ return k.replace(/^[-*•\s]+/, '').trim(); })
+          .filter(function(k){ return k.length > 1 && k.length < 40 && !/^#+/.test(k); })
+          .slice(0,20);
+      }
+      // Insights / Oportunidades
+      var insM = content.match(/(?:INSIGHTS?|Oportunidades?|Gaps?)[^\n]*\n([\s\S]{0,800}?)(?:\n##|$)/i);
+      if (insM) result.insights = insM[1].trim().substring(0, 600);
+      return result;
+    }
+
+    function addProjectLink() {
+      if (!currentProject.linksArr) currentProject.linksArr = [];
+      currentProject.linksArr.push({ tipo: '', url: '' });
+      const li = currentProject.linksArr.length - 1;
+      const list = document.getElementById('project-links-list');
+      if (!list) return;
+      const row = document.createElement('div');
+      row.className = 'link-row';
+      row.style.cssText = 'display:flex;gap:6px;margin-bottom:6px;align-items:center';
+      row.innerHTML = `<input class="brief-input link-type" value="" placeholder="Tipo (ex: site)" style="flex:0 0 120px" onblur="saveProjectLink(${li},'tipo',this.value)"><input class="brief-input link-url" value="" placeholder="https://" style="flex:1" onblur="saveProjectLink(${li},'url',this.value)"><button onclick="removeProjectLink(${li})" style="background:none;border:1px solid #e05c5c33;color:#e05c5c;border-radius:5px;padding:2px 8px;font-size:12px;cursor:pointer;flex-shrink:0">✕</button>`;
+      list.appendChild(row);
+    }
+
+    function saveProjectLink(idx, key, val) {
+      if (!currentProject.linksArr) return;
+      if (!currentProject.linksArr[idx]) currentProject.linksArr[idx] = { tipo: '', url: '' };
+      currentProject.linksArr[idx][key] = val;
+    }
+
+    function removeProjectLink(idx) {
+      if (!currentProject.linksArr) return;
+      currentProject.linksArr.splice(idx, 1);
+      const tab = document.getElementById('tab-briefing');
+      if (tab) { showTab('briefing'); }
     }
 
     // ═══════════════════════════════════════════════════════
@@ -7875,7 +8444,10 @@ Registre aqui o que funcionou e o que não funcionou. Este é o CÉREBRO ESTRAT�
         <button onclick="saveKBSection('${sectionId}')" style="background:var(--gold);color:#0a0a0f;border:none;padding:6px 14px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer">💾 Salvar</button>
       </div>
       <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden">
-        <div style="padding:6px 12px;background:var(--surface2);border-bottom:1px solid var(--border);font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.5px">EDITOR — Markdown suportado</div>
+        <div style="padding:6px 12px;background:var(--surface2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+          <div style="font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.5px">EDITOR — Markdown suportado</div>
+          <label style="cursor:pointer;background:var(--surface);border:1px solid var(--border2);border-radius:5px;padding:3px 10px;font-size:10px;color:var(--text2);white-space:nowrap">📎 Importar .txt/.md<input type="file" accept=".txt,.md,.markdown" style="display:none" onchange="importKBFile(this,'${sectionId}')"></label>
+        </div>
         <textarea id="kb-editor-${sectionId}" style="width:100%;min-height:500px;background:transparent;border:none;color:var(--text);font-family:monospace;font-size:12px;line-height:1.7;padding:16px;resize:vertical;outline:none" oninput="autoSaveKB('${sectionId}')">${savedContent}</textarea>
       </div>
       <div style="margin-top:10px;font-size:10px;color:var(--text3);text-align:right" id="kb-save-status-${sectionId}">Auto-salvo</div>
@@ -7902,6 +8474,22 @@ Registre aqui o que funcionou e o que não funcionou. Este é o CÉREBRO ESTRAT�
       KB_DATA[sectionId] = KB_DEFAULT_CONTENT[sectionId] || '';
       kbSave(KB_DATA);
       renderKBContent(sectionId);
+    }
+
+    function importKBFile(input, sectionId) {
+      const file = input.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const ta = document.getElementById('kb-editor-' + sectionId);
+        if (!ta) return;
+        const separator = '\n\n---\n<!-- Importado: ' + file.name + ' -->\n\n';
+        ta.value = ta.value ? (ta.value + separator + e.target.result) : e.target.result;
+        autoSaveKB(sectionId);
+        const status = document.getElementById('kb-save-status-' + sectionId);
+        if (status) status.textContent = '📎 Arquivo importado e salvo!';
+      };
+      reader.readAsText(file, 'utf-8');
     }
     function exportKBContext() {
       const lines = ['# KNOWLEDGE BASE — IMPÉRIO DIGITAL\n'];
@@ -8792,7 +9380,7 @@ Registre aqui o que funcionou e o que não funcionou. Este é o CÉREBRO ESTRAT�
           </div>
           <div style="flex:1">
             <div class="brief-field"><div class="brief-label">Nome Completo</div><input class="brief-input" value="${ex.nome || ''}" placeholder="Nome do Expert" onblur="saveExpert('nome',this.value)"></div>
-            <div class="brief-field"><div class="brief-label">URL da Foto</div><input class="brief-input" value="${ex.foto || ''}" placeholder="https://..." onblur="saveExpert('foto',this.value);renderExpert()"></div>
+            <div class="brief-field"><div class="brief-label">Foto do Expert</div><div style="display:flex;gap:8px;align-items:center"><input class="brief-input" value="${ex.foto && !ex.foto.startsWith('data:') ? ex.foto : ''}" placeholder="https://..." onblur="saveExpert('foto',this.value);renderExpert()" style="flex:1"><label style="cursor:pointer;background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:5px 10px;font-size:11px;color:var(--text2);white-space:nowrap;flex-shrink:0">📂 Upload<input type="file" accept="image/*" style="display:none" onchange="uploadFotoExpert(this)"></label></div></div>
           </div>
         </div>
         <div class="brief-field"><div class="brief-label">Área de Atuação</div><input class="brief-input" value="${ex.area || ''}" placeholder="Ex: Saúde Integrativa, Imobiliário..." onblur="saveExpert('area',this.value)"></div>
@@ -8825,6 +9413,17 @@ Registre aqui o que funcionou e o que não funcionou. Este é o CÉREBRO ESTRAT�
     function saveExpert(key, val) {
       if (!currentProject.expert) currentProject.expert = {};
       currentProject.expert[key] = val;
+    }
+
+    function uploadFotoExpert(input) {
+      const file = input.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        saveExpert('foto', e.target.result);
+        renderExpert();
+      };
+      reader.readAsDataURL(file);
     }
 
     function exportExpertContexto() {
@@ -9190,75 +9789,159 @@ Registre aqui o que funcionou e o que não funcionou. Este é o CÉREBRO ESTRAT�
         { nome: 'n8n', valor: 40, dolar: true }
       ];
     }
-
     function saveCustos(c) { localStorage.setItem('imperio_custos', JSON.stringify(c)); }
 
-    const COTACAO_USD_BRL = 5.00;
+    function getFinancasConfig() {
+      const s = localStorage.getItem('imperio_financas_config');
+      return s ? JSON.parse(s) : { cotacao_usd: 5.00 };
+    }
+    function saveFinancasConfig(cfg) { localStorage.setItem('imperio_financas_config', JSON.stringify(cfg)); }
+
+    function getApiCustos() {
+      const s = localStorage.getItem('imperio_api_custos');
+      return s ? JSON.parse(s) : [
+        { nome: 'Claude API', valor: 0, moeda: 'USD' },
+        { nome: 'OpenAI API', valor: 0, moeda: 'USD' },
+        { nome: 'Google Gemini', valor: 0, moeda: 'USD' },
+        { nome: 'Google Ads', valor: 0, moeda: 'USD', is_ads: true }
+      ];
+    }
+    function saveApiCustos(arr) { localStorage.setItem('imperio_api_custos', JSON.stringify(arr)); }
 
     function showFinancas() {
       showSection('financas');
       document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
       const nav = document.getElementById('nav-financas');
       if (nav) nav.classList.add('active');
+      window._finTab = window._finTab || 'geral';
       renderFinancas();
     }
 
     function renderFinancas() {
       const el = document.getElementById('financas-body');
       if (!el) return;
-
+      const tab = window._finTab || 'geral';
+      const cfg = getFinancasConfig();
+      const cotacao = cfg.cotacao_usd || 5.00;
       const custos = getCustos();
-      const totalUSD = custos.reduce((sum, c) => sum + c.valor, 0);
-      const totalBRL = totalUSD * COTACAO_USD_BRL;
+      const apiCustos = getApiCustos();
+      const totalFerrUSD = custos.reduce((s, c) => s + (c.valor || 0), 0);
+      const totalApisUSD = apiCustos.reduce((s, c) => s + (c.valor || 0), 0);
+      const totalUSD = totalFerrUSD + totalApisUSD;
+      const tabLabels = { geral: '📊 Visão Geral', ferramentas: '🔧 Ferramentas', apis: '⚡ APIs & Ads' };
 
-      let html = `
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-          <div style="font-size:14px;font-weight:700;color:var(--text)">Custos Mensais</div>
-          <button onclick="addCusto()" style="background:var(--gold);border:none;color:var(--bg);padding:6px 14px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer">+ Adicionar</button>
-        </div>
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px">
-          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center">
-            <div style="font-size:24px;font-weight:700;color:var(--gold)">$${totalUSD}</div>
-            <div style="font-size:11px;color:var(--text3)">USD/mes</div>
-          </div>
-          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center">
-            <div style="font-size:24px;font-weight:700;color:var(--green-bright)">R$ ${totalBRL.toLocaleString('pt-BR')}</div>
-            <div style="font-size:11px;color:var(--text3)">BRL/mes</div>
-          </div>
-          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center">
-            <div style="font-size:24px;font-weight:700;color:var(--text)">R$ ${(totalBRL * 12).toLocaleString('pt-BR')}</div>
-            <div style="font-size:11px;color:var(--text3)">BRL/ano</div>
-          </div>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:8px">
-      `;
+      let html = `<div style="display:flex;gap:4px;margin-bottom:16px;border-bottom:1px solid var(--border);padding-bottom:12px">`;
+      ['geral', 'ferramentas', 'apis'].forEach(t => {
+        const active = tab === t;
+        html += `<button onclick="window._finTab='${t}';renderFinancas()" style="padding:6px 14px;border-radius:6px;border:1px solid ${active ? 'var(--gold)' : 'var(--border)'};background:${active ? 'rgba(212,175,55,.12)' : 'transparent'};color:${active ? 'var(--gold)' : 'var(--text3)'};font-size:12px;font-weight:${active ? '700' : '400'};cursor:pointer">${tabLabels[t]}</button>`;
+      });
+      html += `</div>`;
 
-      custos.forEach((c, idx) => {
-        const brl = c.valor * COTACAO_USD_BRL;
+      if (tab === 'geral') {
         html += `
-          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;display:flex;align-items:center;justify-content:space-between">
-            <div style="font-size:13px;color:var(--text)">${c.nome}</div>
-            <div style="display:flex;align-items:center;gap:12px">
-              <div style="text-align:right">
-                <div style="font-size:13px;font-weight:700;color:var(--gold)">$${c.valor}</div>
-                <div style="font-size:11px;color:var(--text3)">R$ ${brl.toLocaleString('pt-BR')}</div>
-              </div>
-              <button onclick="editCusto(${idx})" style="background:var(--surface3);border:1px solid var(--border);color:var(--text2);padding:4px 8px;border-radius:4px;font-size:10px;cursor:pointer">E</button>
-              <button onclick="deleteCusto(${idx})" style="background:var(--surface3);border:1px solid var(--red-bright);color:var(--red-bright);padding:4px 8px;border-radius:4px;font-size:10px;cursor:pointer">X</button>
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:12px;margin-bottom:16px">
+            <div style="font-size:12px;color:var(--text3);flex-shrink:0">💱 Cotação USD/BRL</div>
+            <input id="fin-cotacao" type="number" value="${cotacao}" step="0.05" min="1" style="background:var(--surface3);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:4px 8px;font-size:13px;font-weight:700;width:80px" onchange="saveFinancasConfig(Object.assign(getFinancasConfig(),{cotacao_usd:parseFloat(this.value)||5}));renderFinancas()">
+            <div style="font-size:11px;color:var(--text3)">R$ por $1 USD</div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:12px">
+            <div style="background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:14px">
+              <div style="font-size:11px;color:var(--text3);margin-bottom:4px">🔧 Ferramentas Fixas</div>
+              <div style="font-size:20px;font-weight:700;color:var(--gold)">$${totalFerrUSD.toFixed(0)}</div>
+              <div style="font-size:11px;color:var(--text3)">R$ ${(totalFerrUSD * cotacao).toLocaleString('pt-BR', {maximumFractionDigits:0})}/mês</div>
+            </div>
+            <div style="background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:14px">
+              <div style="font-size:11px;color:var(--text3);margin-bottom:4px">⚡ APIs & Ads</div>
+              <div style="font-size:20px;font-weight:700;color:var(--accent)">$${totalApisUSD.toFixed(0)}</div>
+              <div style="font-size:11px;color:var(--text3)">R$ ${(totalApisUSD * cotacao).toLocaleString('pt-BR', {maximumFractionDigits:0})}/mês</div>
             </div>
           </div>
-        `;
-      });
+          <div style="background:var(--surface2);border:2px solid var(--gold);border-radius:12px;padding:16px;text-align:center;margin-bottom:16px">
+            <div style="font-size:11px;color:var(--text3);margin-bottom:6px;letter-spacing:.05em">TOTAL MENSAL</div>
+            <div style="font-size:32px;font-weight:700;color:var(--gold)">R$ ${(totalUSD * cotacao).toLocaleString('pt-BR', {maximumFractionDigits:0})}</div>
+            <div style="font-size:12px;color:var(--text3);margin-top:4px">$${totalUSD.toFixed(0)} USD · R$ ${(totalUSD * cotacao * 12).toLocaleString('pt-BR', {maximumFractionDigits:0})}/ano</div>
+          </div>
+          <div style="font-size:11px;color:var(--text3);margin-bottom:8px;font-weight:600">Top gastos</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">`;
+        [...custos, ...apiCustos].sort((a, b) => (b.valor || 0) - (a.valor || 0)).slice(0, 6).forEach(c => {
+          html += `<div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px;display:flex;justify-content:space-between;align-items:center">
+            <div style="font-size:12px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:110px">${c.nome}</div>
+            <div style="font-size:12px;font-weight:700;color:var(--gold);flex-shrink:0">$${c.valor || 0}</div>
+          </div>`;
+        });
+        html += `</div>`;
 
-      html += '</div>';
+      } else if (tab === 'ferramentas') {
+        html += `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <div style="font-size:12px;color:var(--text3)">Assinaturas e ferramentas fixas mensais</div>
+          <button onclick="addCusto()" style="background:var(--gold);border:none;color:var(--bg);padding:6px 14px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer">+ Adicionar</button>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px">`;
+        if (custos.length === 0) html += `<div style="text-align:center;color:var(--text3);font-size:12px;padding:30px">Nenhuma ferramenta cadastrada</div>`;
+        custos.forEach((c, idx) => {
+          html += `<div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;display:flex;align-items:center;justify-content:space-between">
+            <div>
+              <div style="font-size:13px;color:var(--text)">${c.nome}</div>
+              <div style="font-size:11px;color:var(--text3)">R$ ${((c.valor || 0) * cotacao).toLocaleString('pt-BR', {maximumFractionDigits:0})}/mês</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div style="font-size:14px;font-weight:700;color:var(--gold)">$${c.valor}</div>
+              <button onclick="editCusto(${idx})" style="background:var(--surface3);border:1px solid var(--border);color:var(--text2);padding:4px 8px;border-radius:4px;font-size:10px;cursor:pointer">✏️</button>
+              <button onclick="deleteCusto(${idx})" style="background:transparent;border:1px solid var(--red-bright);color:var(--red-bright);padding:4px 8px;border-radius:4px;font-size:10px;cursor:pointer">🗑</button>
+            </div>
+          </div>`;
+        });
+        html += `</div>`;
+
+      } else {
+        const ocUrl = localStorage.getItem('openclaw_url');
+        const adsEntry = apiCustos.find(c => c.is_ads) || { valor: 0 };
+        const adsIdx = apiCustos.findIndex(c => c.is_ads);
+        html += `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <div style="font-size:12px;color:var(--text3)">Gastos variáveis com APIs e campanhas</div>
+          <button onclick="addApiCusto()" style="background:var(--gold);border:none;color:var(--bg);padding:6px 14px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer">+ API</button>
+        </div>
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+            <div>
+              <div style="font-size:13px;font-weight:700;color:var(--text)">📢 Google Ads</div>
+              <div style="font-size:11px;color:var(--text3)">Gasto do mês atual</div>
+            </div>
+            <button onclick="syncGoogleAds()" ${ocUrl ? '' : 'disabled'} style="background:${ocUrl ? 'var(--accent)' : 'var(--surface3)'};border:1px solid ${ocUrl ? 'var(--accent)' : 'var(--border)'};color:${ocUrl ? '#fff' : 'var(--text3)'};padding:6px 12px;border-radius:6px;font-size:11px;cursor:${ocUrl ? 'pointer' : 'not-allowed'}">🔄 ${ocUrl ? 'Sincronizar via OpenClaw' : 'OpenClaw (em breve)'}</button>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-size:13px;color:var(--text3);font-weight:700">$</span>
+            <input type="number" value="${adsEntry.valor || 0}" min="0" step="10" style="background:var(--surface3);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:6px 10px;font-size:16px;font-weight:700;width:120px" onchange="updateApiCusto(${adsIdx}, parseFloat(this.value)||0)">
+            <span style="font-size:12px;color:var(--text3)">≈ R$ ${((adsEntry.valor || 0) * cotacao).toLocaleString('pt-BR', {maximumFractionDigits:0})}</span>
+          </div>
+          ${!ocUrl ? `<div style="font-size:11px;color:var(--text3);margin-top:10px">⚙️ Configure a URL do OpenClaw nas Configurações para habilitar sincronização automática</div>` : ''}
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px">`;
+        apiCustos.forEach((c, idx) => {
+          if (c.is_ads) return;
+          html += `<div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;display:flex;align-items:center;justify-content:space-between">
+            <div>
+              <div style="font-size:13px;color:var(--text)">${c.nome}</div>
+              <div style="font-size:11px;color:var(--text3)">R$ ${((c.valor || 0) * cotacao).toLocaleString('pt-BR', {maximumFractionDigits:0})}/mês</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <input type="number" value="${c.valor || 0}" min="0" step="1" style="background:var(--surface3);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:4px 8px;font-size:13px;font-weight:700;width:80px" onchange="updateApiCusto(${idx}, parseFloat(this.value)||0)">
+              <span style="font-size:11px;color:var(--text3)">USD</span>
+              <button onclick="deleteApiCusto(${idx})" style="background:transparent;border:1px solid var(--red-bright);color:var(--red-bright);padding:4px 8px;border-radius:4px;font-size:10px;cursor:pointer">🗑</button>
+            </div>
+          </div>`;
+        });
+        html += `</div>`;
+      }
+
       el.innerHTML = html;
     }
 
     function addCusto() {
-      const n = prompt('Nome:');
+      const n = prompt('Nome da ferramenta:');
       if (!n) return;
-      const v = parseFloat(prompt('Valor USD:') || '0');
-      if (!v) return;
+      const v = parseFloat(prompt('Valor mensal (USD):', '0') || '0');
+      if (isNaN(v)) return;
       const custos = getCustos();
       custos.push({ nome: n, valor: v, dolar: true });
       saveCustos(custos);
@@ -9283,6 +9966,35 @@ Registre aqui o que funcionou e o que não funcionou. Este é o CÉREBRO ESTRAT�
       custos.splice(idx, 1);
       saveCustos(custos);
       renderFinancas();
+    }
+
+    function addApiCusto() {
+      const n = prompt('Nome da API:');
+      if (!n) return;
+      const v = parseFloat(prompt('Gasto estimado este mês (USD):', '0') || '0');
+      const arr = getApiCustos();
+      arr.push({ nome: n, valor: isNaN(v) ? 0 : v, moeda: 'USD' });
+      saveApiCustos(arr);
+      renderFinancas();
+    }
+
+    function updateApiCusto(idx, val) {
+      const arr = getApiCustos();
+      if (arr[idx] !== undefined) { arr[idx].valor = val; saveApiCustos(arr); }
+    }
+
+    function deleteApiCusto(idx) {
+      const arr = getApiCustos();
+      if (!arr[idx] || arr[idx].is_ads) return;
+      arr.splice(idx, 1);
+      saveApiCustos(arr);
+      renderFinancas();
+    }
+
+    function syncGoogleAds() {
+      const ocUrl = localStorage.getItem('openclaw_url');
+      if (!ocUrl) { alert('Configure a URL do OpenClaw nas Configurações primeiro.'); return; }
+      alert('Endpoint Google Ads via OpenClaw ainda não implementado.\nDigite o valor manualmente por enquanto.');
     }
 
     function renderSkills() {
@@ -9995,6 +10707,12 @@ TOM: Analítico. Prático. Orientado a resultados. Sem romantismo sobre o que n�
     function openMente(id) {
       _menteAtual = MENTES_DATA.find(m => m.id === id);
       if (!_menteAtual) return;
+      // Reset chat
+      _menteChatHistory = [];
+      const chatMsgs = document.getElementById('mm-chat-messages');
+      if (chatMsgs) chatMsgs.innerHTML = '<div style="text-align:center;font-size:11px;color:var(--text3);padding:20px">Inicie uma conversa com esta mente sintética</div>';
+      const chatInp = document.getElementById('mm-chat-input');
+      if (chatInp) chatInp.value = '';
       const m = _menteAtual;
       document.getElementById('mm-avatar').textContent = m.icon;
       document.getElementById('mm-name').textContent = m.nome;
@@ -10075,10 +10793,12 @@ TOM: Analítico. Prático. Orientado a resultados. Sem romantismo sobre o que n�
     }
 
     function showMenteTab(tab, el) {
-      ['geral', 'dna', 'comunicacao', 'proficiencias', 'prompts'].forEach(t => {
-        document.getElementById('mm-tab-' + t).style.display = 'none';
+      ['geral', 'dna', 'comunicacao', 'proficiencias', 'prompts', 'chat'].forEach(t => {
+        const el2 = document.getElementById('mm-tab-' + t);
+        if (el2) el2.style.display = 'none';
       });
-      document.getElementById('mm-tab-' + tab).style.display = tab === 'geral' ? 'grid' : 'block';
+      const displayMap = { geral: 'grid', chat: 'flex' };
+      document.getElementById('mm-tab-' + tab).style.display = displayMap[tab] || 'block';
       document.querySelectorAll('.mm-tab').forEach(t => {
         t.style.color = 'var(--text3)'; t.style.borderBottomColor = 'transparent';
       });
@@ -10095,6 +10815,85 @@ TOM: Analítico. Prático. Orientado a resultados. Sem romantismo sobre o que n�
         const btn = document.querySelector('#mm-tab-prompts button');
         if (btn) { const orig = btn.textContent; btn.textContent = '✅ Copiado!'; setTimeout(() => btn.textContent = orig, 2000); }
       });
+    }
+
+    // ─── Mapeamento nome de exibição → ID real no OpenRouter ────────────────
+    const MENTE_MODEL_MAP = {
+      'Claude Sonnet 4':   'anthropic/claude-sonnet-4-5',
+      'Claude Opus 4':     'anthropic/claude-opus-4-5',
+      'GPT-5':             'openai/gpt-4o',
+      'GPT-4o':            'openai/gpt-4o',
+      'Gemini 2.0 Flash':  'google/gemini-2.0-flash-001',
+      'DeepSeek V3':       'deepseek/deepseek-chat',
+      'Qwen3 Plus':        'qwen/qwen3-235b-a22b',
+      'Qwen3':             'qwen/qwen3-235b-a22b',
+    };
+
+    let _menteChatHistory = [];
+
+    async function sendMenteChat() {
+      if (!_menteAtual) return;
+      const input = document.getElementById('mm-chat-input');
+      const msg = (input?.value || '').trim();
+      if (!msg) return;
+
+      const apiKey = localStorage.getItem('openrouter_key') || localStorage.getItem('imphq_openrouter_key');
+      if (!apiKey) {
+        alert('Configure sua chave OpenRouter nas Configurações (ícone ⚙️) para usar o chat.');
+        return;
+      }
+
+      const modelDisplay = _menteAtual.modelo || 'Claude Sonnet 4';
+      const modelId = MENTE_MODEL_MAP[modelDisplay] || 'anthropic/claude-sonnet-4-5';
+
+      _menteChatHistory.push({ role: 'user', content: msg });
+      renderMenteChatMsg('user', msg);
+      input.value = '';
+
+      const sendBtn = document.getElementById('mm-chat-send');
+      if (sendBtn) { sendBtn.disabled = true; sendBtn.textContent = '...'; }
+
+      try {
+        const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}`, 'HTTP-Referer': window.location.href },
+          body: JSON.stringify({
+            model: modelId,
+            messages: [
+              { role: 'system', content: _menteAtual.prompt },
+              ..._menteChatHistory
+            ]
+          })
+        });
+        const data = await res.json();
+        if (data.error) throw new Error(data.error.message || 'Erro na API');
+        const reply = data.choices?.[0]?.message?.content || '';
+        _menteChatHistory.push({ role: 'assistant', content: reply });
+        renderMenteChatMsg('assistant', reply);
+      } catch (err) {
+        renderMenteChatMsg('error', '⚠️ Erro: ' + err.message);
+      } finally {
+        if (sendBtn) { sendBtn.disabled = false; sendBtn.textContent = 'Enviar'; }
+      }
+    }
+
+    function renderMenteChatMsg(role, text) {
+      const container = document.getElementById('mm-chat-messages');
+      if (!container) return;
+      // Remove placeholder
+      const placeholder = container.querySelector('[style*="Inicie uma conversa"]');
+      if (placeholder) placeholder.remove();
+
+      const isUser = role === 'user';
+      const isError = role === 'error';
+      const div = document.createElement('div');
+      div.style.cssText = `display:flex;flex-direction:column;align-items:${isUser ? 'flex-end' : 'flex-start'}`;
+      div.innerHTML = `
+        <div style="max-width:85%;padding:10px 14px;border-radius:${isUser ? '12px 12px 2px 12px' : '12px 12px 12px 2px'};background:${isUser ? 'var(--gold)' : isError ? '#e05c5c22' : 'var(--surface2)'};color:${isUser ? '#0a0a0f' : isError ? '#e05c5c' : 'var(--text)'};font-size:12px;line-height:1.6;white-space:pre-wrap;word-break:break-word;border:1px solid ${isUser ? 'transparent' : 'var(--border)'}">
+          ${text.replace(/</g, '&lt;').replace(/>/g, '&gt;')}
+        </div>`;
+      container.appendChild(div);
+      container.scrollTop = container.scrollHeight;
     }
 
     // ── Boot ──────────────────────────────────────────────────────
