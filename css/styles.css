@@ -2775,4 +2775,274 @@
       background: var(--gold-dim);
       color: var(--gold);
       border-color: rgba(201, 168, 76, .3);
-    }
+    }
+
+    /* ══════════════════════════════════════════════
+       OVERVIEW — Sophia Style
+    ══════════════════════════════════════════════ */
+
+    #view-overview.panel.active {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      overflow: hidden;
+      position: relative;
+      background: var(--bg);
+    }
+
+    #overview-canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .ov-center {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 32px;
+      flex-shrink: 0;
+    }
+
+    .ov-greeting {
+      font-size: 11px;
+      font-weight: 400;
+      letter-spacing: 5px;
+      text-transform: uppercase;
+      color: rgba(201, 168, 76, 0.55);
+      margin-bottom: 24px;
+      animation: ov-fade-in 1.2s ease;
+    }
+
+    @keyframes ov-fade-in {
+      from { opacity: 0; transform: translateY(-6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Orb wrapper & rings ── */
+    .ov-orb-wrapper {
+      position: relative;
+      width: 240px;
+      height: 240px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+    }
+
+    .ov-ring {
+      position: absolute;
+      border-radius: 50%;
+      border: 1px solid rgba(155, 93, 229, 0.15);
+      animation: ov-ring-pulse 3s ease-in-out infinite;
+      pointer-events: none;
+    }
+    .ring-1 { width: 196px; height: 196px; animation-delay: 0s; }
+    .ring-2 { width: 246px; height: 246px; animation-delay: 0.8s; }
+    .ring-3 { width: 296px; height: 296px; animation-delay: 1.6s; }
+
+    @keyframes ov-ring-pulse {
+      0%,100% { opacity: 0.15; transform: scale(1); }
+      50%      { opacity: 0.45; transform: scale(1.018); }
+    }
+
+    /* ── Main orb ── */
+    .ov-orb {
+      width: 168px;
+      height: 168px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 30%, #1e1040 0%, #08081a 65%, #0a0a0a 100%);
+      border: 1px solid rgba(155, 93, 229, 0.55);
+      box-shadow:
+        0 0 36px rgba(155, 93, 229, 0.38),
+        0 0 72px rgba(155, 93, 229, 0.16),
+        0 0 110px rgba(155, 93, 229, 0.07),
+        inset 0 0 28px rgba(201, 168, 76, 0.07),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: ov-orb-breathe 4.5s ease-in-out infinite;
+    }
+
+    @keyframes ov-orb-breathe {
+      0%,100% {
+        box-shadow:
+          0 0 36px rgba(155,93,229,0.38), 0 0 72px rgba(155,93,229,0.16),
+          0 0 110px rgba(155,93,229,0.07), inset 0 0 28px rgba(201,168,76,0.07),
+          inset 0 1px 0 rgba(255,255,255,0.05);
+      }
+      50% {
+        box-shadow:
+          0 0 52px rgba(155,93,229,0.55), 0 0 96px rgba(155,93,229,0.26),
+          0 0 145px rgba(155,93,229,0.12), inset 0 0 44px rgba(201,168,76,0.12),
+          inset 0 1px 0 rgba(255,255,255,0.08);
+      }
+    }
+
+    /* Wireframe lines clipped inside the orb */
+    .ov-wire {
+      position: absolute;
+      border-radius: 50%;
+      border: 1px solid rgba(82, 183, 136, 0.14);
+      pointer-events: none;
+    }
+    /* Latitude bands (wide horizontal ellipses) */
+    .ov-wire-1 { width: 300%; height: 55%;  top: 22%;  left: -100%; }
+    .ov-wire-2 { width: 220%; height: 78%;  top: 11%;  left: -60%;  opacity: 0.6; }
+    /* Longitude arcs (tall narrow ellipses, rotating) */
+    .ov-wire-3 {
+      width: 46%; height: 280%; top: -56%; left: 27%;
+      animation: ov-wire-spin 18s linear infinite;
+      transform-origin: center center;
+    }
+    .ov-wire-4 {
+      width: 46%; height: 280%; top: -56%; left: 27%;
+      animation: ov-wire-spin 24s linear infinite reverse;
+      transform: rotateZ(55deg);
+      transform-origin: center center;
+    }
+
+    @keyframes ov-wire-spin {
+      from { transform: rotateZ(0deg); }
+      to   { transform: rotateZ(360deg); }
+    }
+
+    .ov-orb-inner {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+    }
+
+    .ov-orb-brand {
+      font-size: 21px;
+      font-weight: 900;
+      letter-spacing: 5px;
+      color: var(--gold);
+      text-shadow: 0 0 18px rgba(201,168,76,0.65), 0 0 38px rgba(201,168,76,0.22);
+      line-height: 1;
+    }
+
+    .ov-orb-sub {
+      font-size: 11px;
+      font-weight: 300;
+      letter-spacing: 10px;
+      color: rgba(201, 168, 76, 0.48);
+      margin-top: 5px;
+    }
+
+    /* ── Subtitle ── */
+    .ov-subtitle {
+      font-size: 8.5px;
+      letter-spacing: 5px;
+      color: rgba(232, 232, 232, 0.22);
+      text-transform: uppercase;
+      margin-bottom: 22px;
+    }
+
+    /* ── Metrics pill ── */
+    .ov-metrics {
+      display: flex;
+      align-items: center;
+      gap: 22px;
+      margin-bottom: 22px;
+      padding: 13px 26px;
+      background: rgba(255,255,255,0.025);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 50px;
+      backdrop-filter: blur(14px);
+    }
+
+    .ov-metric { text-align: center; }
+
+    .ov-metric-num {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--gold);
+      line-height: 1;
+    }
+
+    .ov-metric-label {
+      font-size: 8.5px;
+      letter-spacing: 2px;
+      color: rgba(232,232,232,0.32);
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    .ov-metric-sep {
+      width: 1px;
+      height: 26px;
+      background: rgba(255,255,255,0.08);
+    }
+
+    /* ── Voice button ── */
+    .ov-voice-btn {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      border: 1px solid rgba(201, 168, 76, 0.22);
+      background: rgba(201, 168, 76, 0.04);
+      color: rgba(201, 168, 76, 0.55);
+      font-size: 15px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .ov-voice-btn:hover {
+      background: rgba(201, 168, 76, 0.11);
+      border-color: rgba(201, 168, 76, 0.5);
+      box-shadow: 0 0 18px rgba(201, 168, 76, 0.14);
+      color: var(--gold);
+    }
+
+    .ov-voice-btn::after {
+      content: 'em breve';
+      position: absolute;
+      bottom: -17px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 7.5px;
+      color: rgba(232,232,232,0.2);
+      white-space: nowrap;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    /* ── Projects section ── */
+    .ov-projects-section {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      padding: 0 20px 20px;
+      flex: 1;
+      overflow-y: auto;
+      margin-top: 20px;
+    }
+
+    .ov-projects-toggle {
+      font-size: 10px;
+      color: rgba(232,232,232,0.28);
+      padding: 10px 0 8px;
+      cursor: pointer;
+      border-top: 1px solid rgba(255,255,255,0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      transition: color 0.2s;
+      user-select: none;
+    }
+
+    .ov-projects-toggle:hover { color: rgba(232,232,232,0.6); }
+
+    #overview-projects.ov-collapsed { display: none; }

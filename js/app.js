@@ -12,11 +12,15 @@
       renderSidebar();
       renderOverviewProjects();
       updateMetrics();
+      updateOverviewGreeting();
+      initOverviewCanvas();
     }
 
     function updateMetrics() {
       const el = document.getElementById('metric-total-projetos');
       if (el) el.textContent = PROJECTS.length;
+      const elSell = document.getElementById('metric-selling');
+      if (elSell) elSell.textContent = PROJECTS.filter(p => p.vende).length;
     }
 
     function renderSidebar() {
@@ -83,6 +87,95 @@
       hideAllPanels();
       document.getElementById('view-overview').classList.add('active');
       document.getElementById('nav-overview').classList.add('active');
+      updateOverviewGreeting();
+      initOverviewCanvas();
+    }
+
+    // ── Overview: Greeting ──────────────────────────────────────
+    function updateOverviewGreeting() {
+      const h = new Date().getHours();
+      const g = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
+      const el = document.getElementById('ov-greeting');
+      if (el) el.textContent = g;
+    }
+
+    // ── Overview: Particle Canvas ───────────────────────────────
+    let _ovAnimFrame = null;
+
+    function initOverviewCanvas() {
+      if (_ovAnimFrame) { cancelAnimationFrame(_ovAnimFrame); _ovAnimFrame = null; }
+      const canvas = document.getElementById('overview-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+
+      function resize() {
+        canvas.width  = canvas.offsetWidth;
+        canvas.height = canvas.offsetHeight;
+      }
+      resize();
+
+      const N = 65;
+      const pts = Array.from({ length: N }, () => ({
+        x:  Math.random() * canvas.width,
+        y:  Math.random() * canvas.height,
+        r:  Math.random() * 1.2 + 0.3,
+        vx: (Math.random() - 0.5) * 0.22,
+        vy: (Math.random() - 0.5) * 0.22,
+        a:  Math.random() * 0.35 + 0.1
+      }));
+
+      function draw() {
+        if (!document.getElementById('view-overview').classList.contains('active')) return;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Radial glow centred behind the orb
+        const cx = canvas.width / 2;
+        const cy = Math.min(canvas.height * 0.37, 270);
+        const grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, 230);
+        grd.addColorStop(0, 'rgba(74,44,110,0.13)');
+        grd.addColorStop(1, 'rgba(74,44,110,0)');
+        ctx.fillStyle = grd;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Constellation lines between nearby particles
+        for (let i = 0; i < N; i++) {
+          for (let j = i + 1; j < N; j++) {
+            const dx = pts[i].x - pts[j].x, dy = pts[i].y - pts[j].y;
+            const d = Math.sqrt(dx * dx + dy * dy);
+            if (d < 95) {
+              ctx.beginPath();
+              ctx.moveTo(pts[i].x, pts[i].y);
+              ctx.lineTo(pts[j].x, pts[j].y);
+              ctx.strokeStyle = `rgba(201,168,76,${0.032 * (1 - d / 95)})`;
+              ctx.lineWidth = 0.5;
+              ctx.stroke();
+            }
+          }
+        }
+
+        // Particles
+        pts.forEach(p => {
+          p.x += p.vx; p.y += p.vy;
+          if (p.x < 0) p.x = canvas.width;  if (p.x > canvas.width)  p.x = 0;
+          if (p.y < 0) p.y = canvas.height; if (p.y > canvas.height) p.y = 0;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(201,168,76,${p.a})`;
+          ctx.fill();
+        });
+
+        _ovAnimFrame = requestAnimationFrame(draw);
+      }
+      draw();
+    }
+
+    // ── Overview: Toggle project list ───────────────────────────
+    function toggleOverviewProjects() {
+      const el   = document.getElementById('overview-projects');
+      const icon = document.getElementById('ov-toggle-icon');
+      if (!el) return;
+      const collapsed = el.classList.toggle('ov-collapsed');
+      if (icon) icon.textContent = collapsed ? '▸' : '▾';
     }
 
     function showSection(s) {

@@ -137,27 +137,57 @@
     <!-- MAIN -->
     <div id="main">
 
-      <!-- OVERVIEW -->
+      <!-- OVERVIEW — Sophia Style -->
       <div id="view-overview" class="panel active">
-        <div id="content" style="padding:20px">
-          <div class="grid3" style="margin-bottom:16px">
-            <div class="metric-card">
-              <div class="metric-num" id="metric-total-projetos">10</div>
-              <div class="metric-label">Projetos Ativos</div>
-            </div>
-            <div class="metric-card">
-              <div class="metric-num" style="color:var(--green-bright)">2</div>
-              <div class="metric-label">Vendendo Agora</div>
-            </div>
-            <div class="metric-card">
-              <div class="metric-num" style="color:var(--blue-bright)">6</div>
-              <div class="metric-label">Departamentos</div>
+        <canvas id="overview-canvas"></canvas>
+
+        <div class="ov-center">
+          <div class="ov-greeting" id="ov-greeting">Bom dia</div>
+
+          <div class="ov-orb-wrapper">
+            <div class="ov-ring ring-1"></div>
+            <div class="ov-ring ring-2"></div>
+            <div class="ov-ring ring-3"></div>
+            <div class="ov-orb">
+              <div class="ov-wire ov-wire-1"></div>
+              <div class="ov-wire ov-wire-2"></div>
+              <div class="ov-wire ov-wire-3"></div>
+              <div class="ov-wire ov-wire-4"></div>
+              <div class="ov-orb-inner">
+                <div class="ov-orb-brand">IMPÉRIO</div>
+                <div class="ov-orb-sub">HQ</div>
+              </div>
             </div>
           </div>
-          <div class="card">
-            <div class="card-title">📋 Todos os Projetos</div>
-            <div id="overview-projects"></div>
+
+          <div class="ov-subtitle">MARKETING OPERATING SYSTEM</div>
+
+          <div class="ov-metrics">
+            <div class="ov-metric">
+              <div class="ov-metric-num" id="metric-total-projetos">—</div>
+              <div class="ov-metric-label">Projetos</div>
+            </div>
+            <div class="ov-metric-sep"></div>
+            <div class="ov-metric">
+              <div class="ov-metric-num" id="metric-selling" style="color:var(--green-bright)">—</div>
+              <div class="ov-metric-label">Vendendo</div>
+            </div>
+            <div class="ov-metric-sep"></div>
+            <div class="ov-metric">
+              <div class="ov-metric-num" style="color:var(--purple-bright)">6</div>
+              <div class="ov-metric-label">Departs.</div>
+            </div>
           </div>
+
+          <button class="ov-voice-btn" title="Comando por voz — em breve">🎙</button>
+        </div>
+
+        <div class="ov-projects-section">
+          <div class="ov-projects-toggle" onclick="toggleOverviewProjects()">
+            <span>◈ Todos os Projetos</span>
+            <span id="ov-toggle-icon">▾</span>
+          </div>
+          <div id="overview-projects"></div>
         </div>
       </div>
 
