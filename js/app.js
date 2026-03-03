@@ -171,7 +171,9 @@
         </div>
         <div style="display:flex;gap:6px">
           <button class="btn btn-sm btn-gold" onclick="showTab('pipeline')">Ver Pipeline</button>
+          <button id="hero-save-btn" class="btn btn-sm btn-outline" onclick="saveProjectData()" style="border-color:var(--gold);color:var(--gold)" title="Salvar projeto">💾 Salvar</button>
           ${!p.parent_id ? `<button class="btn btn-sm btn-outline" onclick="openCreateProject('${p.id}')">+ Sub</button>` : ''}
+          ${p._custom ? `<button class="btn btn-sm btn-outline" onclick="openDeleteProject()" style="border-color:#e05c5c44;color:#e05c5c88;font-size:13px" title="Deletar projeto">🗑️</button>` : ''}
         </div>
       </div>
     </div>`;
@@ -285,8 +287,8 @@
         <div class="card" style="margin-bottom:12px">
           <div class="card-title">📁 Dados do Projeto</div>
           <div class="brief-field"><div class="brief-label">Nome do Projeto</div><input class="brief-input" value="${p.nome}" onblur="currentProject.nome=this.value;renderProjectHero()"></div>
-          <div class="brief-field"><div class="brief-label">Categoria</div><input class="brief-input" value="${p.categoria || ''}"></div>
-          <div class="brief-field"><div class="brief-label">Orçamento Tráfego</div><input class="brief-input" value="${p.orcamento_trafego || ''}"></div>
+          <div class="brief-field"><div class="brief-label">Categoria</div><input class="brief-input" value="${p.categoria || ''}" onblur="currentProject.categoria=this.value"></div>
+          <div class="brief-field"><div class="brief-label">Orçamento Tráfego</div><input class="brief-input" value="${p.orcamento_trafego || ''}" onblur="currentProject.orcamento_trafego=this.value"></div>
           <div class="brief-field"><div class="brief-label">Status Geral</div>
             <select class="brief-input" onchange="currentProject.status=this.value">
               <option ${p.status === 'Ativo' ? 'selected' : ''}>Ativo</option>
@@ -1142,14 +1144,20 @@
         custom[ci] = JSON.parse(JSON.stringify(currentProject));
         projectsSaveCustom(custom);
       }
-      var btn = document.getElementById('btn-save-project');
-      if (btn) {
-        var orig = btn.innerHTML;
-        btn.innerHTML = '✓ Salvo!';
-        btn.style.background = 'var(--green-bright)';
-        btn.style.color = '#0a0a0f';
-        setTimeout(function() { btn.innerHTML = orig; btn.style.background = ''; btn.style.color = ''; }, 1800);
-      }
+      // Flash feedback on all save buttons (concorrentes + hero)
+      ['btn-save-project', 'hero-save-btn'].forEach(function(btnId) {
+        var btn = document.getElementById(btnId);
+        if (btn) {
+          var orig = btn.innerHTML;
+          var origColor = btn.style.color;
+          var origBg = btn.style.background;
+          btn.innerHTML = '✓ Salvo!';
+          btn.style.background = 'var(--green-bright, #52b788)';
+          btn.style.color = '#0a0a0f';
+          btn.style.borderColor = 'transparent';
+          setTimeout(function() { btn.innerHTML = orig; btn.style.background = origBg; btn.style.color = origColor; btn.style.borderColor = ''; }, 1800);
+        }
+      });
     }
 
     // ── Competitor Section Render ──────────────────────────────────────────────
@@ -1510,6 +1518,52 @@
       currentProject.linksArr.splice(idx, 1);
       const tab = document.getElementById('tab-briefing');
       if (tab) { showTab('briefing'); }
+    }
+
+    // ═══════════════════════════════════════════════════════
+    //  DELETE PROJECT (senha protegida)
+    // ═══════════════════════════════════════════════════════
+    function openDeleteProject() {
+      var m = document.getElementById('delete-project-modal');
+      if (!m) return;
+      document.getElementById('dp-senha').value = '';
+      document.getElementById('dp-error').style.display = 'none';
+      document.getElementById('dp-project-name').textContent = currentProject ? currentProject.nome : '';
+      m.style.opacity = '1'; m.style.pointerEvents = 'auto';
+      setTimeout(function() { document.getElementById('dp-senha').focus(); }, 80);
+    }
+    function closeDeleteProject() {
+      var m = document.getElementById('delete-project-modal');
+      if (m) { m.style.opacity = '0'; m.style.pointerEvents = 'none'; }
+    }
+    function confirmDeleteProject() {
+      var senha = document.getElementById('dp-senha').value;
+      var errEl = document.getElementById('dp-error');
+      if (senha !== '464321') {
+        errEl.textContent = '❌ Senha incorreta.';
+        errEl.style.display = 'block';
+        document.getElementById('dp-senha').value = '';
+        document.getElementById('dp-senha').focus();
+        return;
+      }
+      var proj = currentProject;
+      if (!proj) { closeDeleteProject(); return; }
+      // 1. Remove from PROJECTS array
+      var idx = PROJECTS.findIndex(function(p) { return p.id === proj.id; });
+      if (idx !== -1) PROJECTS.splice(idx, 1);
+      // 2. Remove from localStorage
+      var custom = projectsGetCustom().filter(function(p) { return p.id !== proj.id; });
+      projectsSaveCustom(custom);
+      // 3. Remove from Supabase
+      if (typeof SB !== 'undefined' && SB.lett) SB.lett(proj.id);
+      // 4. Close modal, navigate home
+      closeDeleteProject();
+      currentProject = null;
+      document.getElementById('view-project').classList.remove('active');
+      document.getElementById('view-overview').classList.add('active');
+      renderSidebar();
+      if (typeof updateMetrics === 'function') updateMetrics();
+      if (typeof renderOverviewProjects === 'function') renderOverviewProjects();
     }
 
     // ═══════════════════════════════════════════════════════

@@ -2072,5 +2072,34 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="js/supabase.js"></script>
 
+  <!-- ═══ DELETE PROJECT MODAL ═══ -->
+  <div id="delete-project-modal"
+    style="position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;z-index:4000;padding:20px;opacity:0;pointer-events:none;transition:.2s">
+    <div style="background:var(--surface);border:1px solid #e05c5c55;border-radius:14px;width:100%;max-width:420px">
+      <div style="padding:16px 20px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center">
+        <div style="font-size:15px;font-weight:700;flex:1;color:#e05c5c">🗑️ Deletar Projeto</div>
+        <button onclick="closeDeleteProject()"
+          style="width:28px;height:28px;border-radius:7px;border:1px solid var(--border2);background:var(--surface2);color:var(--text2);cursor:pointer;font-size:15px">✕</button>
+      </div>
+      <div style="padding:20px;display:flex;flex-direction:column;gap:14px">
+        <div style="background:rgba(224,92,92,.08);border:1px solid rgba(224,92,92,.25);border-radius:8px;padding:12px 14px;font-size:13px;color:#e05c5c;line-height:1.5">
+          ⚠️ Você está prestes a deletar <strong id="dp-project-name"></strong>.<br>
+          <span style="color:var(--text3);font-size:12px">Esta ação é irreversível — todos os dados do projeto serão removidos.</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <label style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">Senha de confirmação</label>
+          <input id="dp-senha" type="password" class="brief-input" placeholder="Digite a senha para confirmar"
+            onkeydown="if(event.key==='Enter')confirmDeleteProject();if(event.key==='Escape')closeDeleteProject()">
+          <div id="dp-error" style="display:none;font-size:12px;color:#e05c5c;margin-top:2px"></div>
+        </div>
+        <div style="display:flex;gap:10px;justify-content:flex-end">
+          <button onclick="closeDeleteProject()" class="btn btn-sm btn-outline">Cancelar</button>
+          <button onclick="confirmDeleteProject()"
+            style="background:#e05c5c;color:#fff;border:none;padding:7px 18px;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer">Deletar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>
