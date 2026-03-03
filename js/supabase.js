@@ -75,10 +75,12 @@
         const { error } = await _sb.from('imphq_projects').upsert(row, { onConflict: 'id' });
         if (error) console.warn('[SB] upsertProject', error);
       },
-      async lett(id) {
+      async deleteProject(id) {
         const { error } = await _sb.from('imphq_projects').delete().eq('id', id);
         if (error) console.warn('[SB] deleteProject', error);
         else console.log('[SB] 🗑 Projeto deletado do Supabase:', id);
+      },
+      async lett(id) { return this.deleteProject(id);
       },
 
       // ── KANBAN ───────────────────────────────────────────────────
