@@ -3,9 +3,191 @@
       document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
       const nav = document.getElementById('nav-whatsapp');
       if (nav) nav.classList.add('active');
-      // Show active badge
       const badge = document.getElementById('wa-active-badge');
       if (badge) { badge.style.display = 'inline-flex'; badge.textContent = '3'; }
+      // Check all session statuses on open
+      waCheckAllStatuses();
+    }
+
+    // ── WhatsApp Bridge API ──────────────────────────────────────
+    const WA_API = 'http://localhost:3000/wa';
+
+    async function waFetch(path, opts = {}) {
+      const r = await fetch(WA_API + path, opts);
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      return r.json();
+    }
+
+    // Check a single session status and update UI
+    async function waCheckStatus(session) {
+      const el = document.getElementById(`wa-session-${session}`);
+      if (el) el.textContent = 'Verificando...';
+      try {
+        const data = await waFetch(`/status?session=${session}`);
+        if (el) {
+          el.textContent = data.connected ? '✅ Conectado' : '⚠ Desconectado';
+          el.style.color = data.connected ? 'var(--green-bright)' : 'var(--text3)';
+        }
+        return data.connected;
+      } catch {
+        if (el) { el.textContent = '○ Bridge offline'; el.style.color = 'var(--text3)'; }
+        return false;
+      }
+    }
+
+    function waCheckAllStatuses() {
+      ['forex', 'igaming', 'eu'].forEach(s => waCheckStatus(s));
+    }
+
+    // Generate QR code for a session — main entry point
+    async function waGenerateQR(session, force = false) {
+      const btn = document.getElementById(`wa-qr-btn-${session}`);
+      if (btn) { btn.disabled = true; btn.textContent = '⏳ Gerando...'; }
+
+      try {
+        const data = await waFetch(`/qr?session=${session}&force=${force ? 1 : 0}`, { method: 'POST' });
+
+        if (data.qrDataUrl) {
+          waShowQRModal(session, data.qrDataUrl);
+          waPollStatus(session);           // start polling in background
+        } else {
+          // Already connected or other message
+          const el = document.getElementById(`wa-session-${session}`);
+          if (el) { el.textContent = data.message; el.style.color = 'var(--gold)'; }
+          if (data.message?.toLowerCase().includes('already linked') ||
+              data.message?.toLowerCase().includes('já conectado')) {
+            waCheckStatus(session);
+          }
+        }
+      } catch (err) {
+        alert(`❌ Bridge offline ou clawdbot não instalado.\n\nCertifique-se que o server.js está rodando.\n\nDetalhe: ${err.message}`);
+      } finally {
+        if (btn) { btn.disabled = false; btn.textContent = '📱 QR'; }
+      }
+    }
+
+    // Start bot (for now same as QR but can be extended)
+    function waStartBot(session) {
+      waGenerateQR(session);
+    }
+
+    // ── QR Modal ─────────────────────────────────────────────────
+    function waShowQRModal(session, qrDataUrl) {
+      // Build modal if it doesn't exist
+      let modal = document.getElementById('wa-qr-modal');
+      if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'wa-qr-modal';
+        modal.style.cssText = `
+          position:fixed;inset:0;z-index:9999;
+          background:rgba(0,0,0,0.85);
+          display:flex;align-items:center;justify-content:center;
+          backdrop-filter:blur(6px);
+        `;
+        modal.onclick = e => { if (e.target === modal) waCloseQRModal(); };
+        document.body.appendChild(modal);
+      }
+
+      const labels = { forex: '📈 Forex', igaming: '🎰 iGaming', eu: '👤 Pessoal' };
+      const label  = labels[session] || session;
+
+      modal.innerHTML = `
+        <div style="
+          background:var(--surface,#111);
+          border:1px solid rgba(201,168,76,.3);
+          border-radius:16px;
+          padding:28px;
+          max-width:360px;
+          width:100%;
+          text-align:center;
+          position:relative;
+          box-shadow:0 0 60px rgba(201,168,76,.12);
+        ">
+          <button onclick="waCloseQRModal()" style="
+            position:absolute;top:12px;right:12px;
+            background:transparent;border:none;
+            font-size:18px;color:var(--text3,#888);cursor:pointer;
+          ">✕</button>
+
+          <div style="font-size:13px;font-weight:700;letter-spacing:2px;
+                      color:var(--gold,#c9a84c);margin-bottom:6px;text-transform:uppercase">
+            ${label} — Scan QR
+          </div>
+          <div style="font-size:11px;color:var(--text3,#888);margin-bottom:16px">
+            Abra WhatsApp → Dispositivos conectados → Conectar dispositivo
+          </div>
+
+          <div id="wa-qr-img-wrap" style="
+            background:#fff;border-radius:12px;padding:12px;display:inline-block;
+            box-shadow:0 0 30px rgba(255,255,255,.05);
+          ">
+            <img src="${qrDataUrl}" style="width:220px;height:220px;display:block" alt="QR Code">
+          </div>
+
+          <div id="wa-qr-status" style="
+            font-size:11px;color:var(--text3,#888);
+            margin-top:14px;
+          ">⏳ Aguardando scan... (expira em 3 min)</div>
+
+          <div style="display:flex;gap:8px;margin-top:16px">
+            <button onclick="waGenerateQR('${session}', true)" style="
+              flex:1;padding:8px;border-radius:8px;
+              border:1px solid rgba(201,168,76,.3);
+              background:rgba(201,168,76,.08);
+              color:var(--gold,#c9a84c);
+              font-size:11px;font-weight:700;cursor:pointer;
+            ">🔄 Novo QR</button>
+            <button onclick="waCloseQRModal()" style="
+              flex:1;padding:8px;border-radius:8px;
+              border:1px solid var(--border,#333);
+              background:transparent;color:var(--text3,#888);
+              font-size:11px;cursor:pointer;
+            ">Fechar</button>
+          </div>
+        </div>`;
+
+      modal.style.display = 'flex';
+      // Store current session
+      modal.dataset.session = session;
+    }
+
+    function waCloseQRModal() {
+      const modal = document.getElementById('wa-qr-modal');
+      if (modal) { modal.style.display = 'none'; modal.dataset.session = ''; }
+      if (_waPollTimer) { clearInterval(_waPollTimer); _waPollTimer = null; }
+    }
+
+    // ── Status polling after QR display ─────────────────────────
+    let _waPollTimer = null;
+
+    function waPollStatus(session) {
+      if (_waPollTimer) clearInterval(_waPollTimer);
+      const startAt = Date.now();
+
+      _waPollTimer = setInterval(async () => {
+        const modal = document.getElementById('wa-qr-modal');
+        const statusEl = document.getElementById('wa-qr-status');
+
+        // Stop if modal closed or 3 min elapsed
+        if (!modal || modal.style.display === 'none' || !modal.dataset.session) {
+          clearInterval(_waPollTimer); _waPollTimer = null; return;
+        }
+        if (Date.now() - startAt > 3 * 60 * 1000) {
+          if (statusEl) statusEl.textContent = '⏰ QR expirado — clique em "Novo QR"';
+          clearInterval(_waPollTimer); _waPollTimer = null; return;
+        }
+
+        try {
+          const data = await waFetch(`/status?session=${session}`);
+          if (data.connected) {
+            if (statusEl) { statusEl.textContent = '✅ Conectado com sucesso!'; statusEl.style.color = 'var(--green-bright)'; }
+            waCheckStatus(session);
+            // Close modal after 2s
+            setTimeout(() => waCloseQRModal(), 2000);
+            clearInterval(_waPollTimer); _waPollTimer = null;
+          }
+        } catch { /* bridge may be busy */ }
+      }, 3000);
     }
 
     function goOCStep(n) {
