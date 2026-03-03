@@ -46,7 +46,8 @@
             pipeline: rich.pipeline || { avatar: 0, funil: 0, copy: 0, prompts: 0, design: 0, trafego: 0 },
             branding: rich.branding || { arquetipo: '', manifesto: '', mecanismo_key: '', inimigo_comum: '', linguagem: { usa: [], evita: [] }, cores: '', personalidade: '' },
             kpis: rich.kpis || { thumbstop: null, ctr: null, cpm: null, cpc: null, roas: null, ltv: null, cac: null, cvr: null, meta: { roas_target: null, cpa_target: null } },
-            assets: rich.assets || []
+            assets: rich.assets || [],
+            concorrentes: rich.concorrentes || []
           };
         });
         // Supabase é a fonte da verdade para evitar duplicatas por resquício local
@@ -60,7 +61,8 @@
           preco: proj.preco, objetivo: proj.objetivo, contexto: proj.contexto,
           orcamento_trafego: proj.orcamento_trafego, links: proj.links,
           avatar: proj.avatar, pipeline: proj.pipeline, branding: proj.branding,
-          kpis: proj.kpis, assets: proj.assets
+          kpis: proj.kpis, assets: proj.assets,
+          concorrentes: proj.concorrentes || []
         };
         const row = {
           id: proj.id, name: proj.nome || proj.name,

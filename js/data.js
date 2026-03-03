@@ -421,7 +421,119 @@
         assets: [
           { tipo: 'doc', icon: '📋', nome: 'Diretrizes Estratégicas para IA de Conteúdo', agente: 'Vanessa', data: '25/02/2026', status: 'Aprovado' },
           { tipo: 'doc', icon: '📋', nome: 'Diretrizes Oficiais para IA de Conteúdo', agente: 'Vanessa', data: '25/02/2026', status: 'Aprovado' },
-          { tipo: 'brand', icon: '🎨', nome: 'Paleta de Cores EquilibreON', agente: 'Branding', data: '25/02/2026', status: 'Aprovado' }
+          { tipo: 'brand', icon: '🎨', nome: 'Paleta de Cores EquilibreON', agente: 'Branding', data: '25/02/2026', status: 'Aprovado' },
+          { tipo: 'research', icon: '🥊', nome: 'Relatório de Inteligência de Mercado — 25 Concorrentes', agente: 'Funnel Hacking', data: '02/03/2026', status: 'Concluído' },
+          { tipo: 'research', icon: '📊', nome: 'Ranking de Escala — Top 10 Concorrentes', agente: 'Funnel Hacking', data: '02/03/2026', status: 'Concluído' },
+          { tipo: 'research', icon: '🔍', nome: 'Dossiê Carol Faria — Nutri da SOP (Score 13/15)', agente: 'Funnel Hacking', data: '02/03/2026', status: 'Concluído' },
+          { tipo: 'research', icon: '🔍', nome: 'Dossiê Pri Riciardi — Metabolismo Hormonal (Score 10/15)', agente: 'Funnel Hacking', data: '02/03/2026', status: 'Concluído' },
+          { tipo: 'research', icon: '🔍', nome: 'Dossiê Vida Veda / NILAYA — Ayurveda (Score 9/15)', agente: 'Funnel Hacking', data: '02/03/2026', status: 'Concluído' },
+          { tipo: 'research', icon: '🔍', nome: 'Dossiê Rita Castro — Ciclos da Mulher (Score 8/15)', agente: 'Funnel Hacking', data: '02/03/2026', status: 'Concluído' },
+          { tipo: 'research', icon: '🔍', nome: 'Dossiê Nutri Bianca Campos — Endo+SOP (Score 6/15)', agente: 'Funnel Hacking', data: '02/03/2026', status: 'Concluído' }
+        ],
+        concorrentes: [
+          {
+            nome: 'Carol Faria — Nutri da SOP', url: 'nutricionistacarolfaria.com.br',
+            diferencial: '865K seguidores, 13.000+ mulheres ajudadas — maior autoridade no nicho SOP',
+            fraqueza: 'Programa em massa sem personalização, reclamações Reclame Aqui sobre suporte',
+            canais: 'Instagram, Hotmart, Meta Ads', nicho: 'SOP / Síndrome dos Ovários Policísticos',
+            publico_alvo: 'Mulheres com SOP buscando solução natural sem medicação',
+            mecanismo: 'Desafio 30 Dias Contra a SOP — aulas com endocrinologista, ginecologista e psicóloga',
+            headline: 'Já ajudei + de 13.000 mulheres a vencer a SOP naturalmente',
+            hook: 'Você não precisa de medicamento para controlar a SOP',
+            cta: 'Entrar no Desafio 30 Dias',
+            oferta_principal: 'Desafio 30 Dias Contra a SOP (Hotmart)',
+            preco: 'Não divulgado', garantia: '7 dias',
+            bonus: 'Comunidade/grupo de suporte, aulas com especialistas',
+            dossie: { score_escala: 13, ads_ativos: true, trafego_estimado: 'Alto (865K IG)', stack: ['Hotmart', 'Instagram', 'Meta Ads'], paginas_funil: ['LP', 'CK'], palavras_chave: ['SOP', 'síndrome ovários policísticos', 'natural', 'desafio', 'Instagram'], insights: 'DOMINANTE. Funil: orgânico IG → link bio → Hotmart. Fraqueza: suporte genérico em grupo. Oportunidade Equilibre On: 1:1 personalizado vs. grupo de 13k pessoas.', importado_em: '2026-03-02T00:00:00.000Z' }
+          },
+          {
+            nome: 'Pri Riciardi', url: 'pririciardi.com.br',
+            diferencial: '212K seguidores, método próprio Ciclo das Sementes, plataforma Woman\'s Academy, lead magnet ativo',
+            fraqueza: 'Múltiplos produtos diluem foco; método Ciclo das Sementes pode ser nichado demais',
+            canais: 'Instagram, Hotmart, Site próprio, Email marketing', nicho: 'Nutrição funcional / ciclos femininos',
+            publico_alvo: 'Mulheres buscando equilíbrio hormonal via nutrição e autoconhecimento do ciclo',
+            mecanismo: 'Ciclo das Sementes — rotação de sementes por fase do ciclo para equilíbrio hormonal',
+            headline: 'Descubra como usar seu ciclo como aliado da sua saúde',
+            hook: 'Seu ciclo é um mapa — aprenda a lê-lo',
+            cta: 'Baixar o Guia Gratuito Ciclo das Sementes',
+            oferta_principal: 'Ciclos da Mulher + Woman\'s Academy',
+            preco: 'Não divulgado', garantia: '7 dias',
+            bonus: 'Guia Ciclo das Sementes gratuito',
+            dossie: { score_escala: 10, ads_ativos: true, trafego_estimado: 'Médio-Alto (212K IG)', stack: ['Hotmart', 'WordPress', 'Plataforma própria'], paginas_funil: ['LP', 'CK'], palavras_chave: ['ciclos femininos', 'metabolismo hormonal', 'sementes', 'nutrição funcional'], insights: 'Funil bem estruturado: lead magnet gratuito → email → oferta paga. Upsell via múltiplos produtos. Diferencial Equilibre On: tracking personalizado vs. programa genérico de ciclos.', importado_em: '2026-03-02T00:00:00.000Z' }
+          },
+          {
+            nome: 'Vida Veda / NILAYA', url: 'vidaveda.org',
+            diferencial: 'Maior comunidade Ayurveda em PT, modelo de assinatura recorrente (NILAYA), 6 especialistas',
+            fraqueza: 'Foco Ayurveda afasta público que busca abordagem científica/médica',
+            canais: 'Site, SEO, Blog, Cursos gratuitos', nicho: 'Ayurveda / saúde integrativa feminina',
+            publico_alvo: 'Mulheres interessadas em saúde holística e medicina ancestral',
+            mecanismo: 'Multidisciplinariedade: Ayurveda + ginecologia + yoga tântrica + endocrinologia',
+            headline: 'Saúde feminina integrativa com a maior comunidade Ayurveda do Brasil',
+            hook: 'O que a medicina ocidental não te conta sobre saúde hormonal',
+            cta: 'Fazer parte da comunidade NILAYA',
+            oferta_principal: 'NILAYA (assinatura) + Curso Equilíbrio Hormonal Feminino',
+            preco: 'Contribuição consciente', garantia: 'Não identificada',
+            bonus: 'Cursos gratuitos, artigos, comunidade',
+            dossie: { score_escala: 9, ads_ativos: false, trafego_estimado: 'Médio (SEO + comunidade)', stack: ['Site próprio', 'Plataforma de cursos', 'Email'], paginas_funil: ['LP', 'MB'], palavras_chave: ['Ayurveda', 'saúde hormonal', 'holístico', 'comunidade', 'assinatura'], insights: 'Modelo assinatura = receita recorrente interessante. Nicho Ayurveda é limitante. Equilibre On usa linguagem científica + empática com alcance maior.', importado_em: '2026-03-02T00:00:00.000Z' }
+          },
+          {
+            nome: 'Rita Castro', url: 'ritacastro.com.br',
+            diferencial: 'Estrutura de bônus forte (R$1.291 em valor declarado), encontros ao vivo na Lua Nova',
+            fraqueza: 'Lançamento periódico (lista de espera), abordagem mais ancestral/ritual',
+            canais: 'Instagram (@mulherpontocom), Hotmart', nicho: 'Saúde feminina natural / ciclos / menopausa',
+            publico_alvo: 'Mulheres 16-70 anos buscando soluções naturais para TPM, cólicas, menopausa, pós-pílula',
+            mecanismo: 'Ciclos da Mulher — 7 módulos com rituais, ervas e ciclo lunar integrado',
+            headline: 'Saúde feminina natural e prática para cada fase da sua vida',
+            hook: 'Seu corpo tem uma sabedoria que a medicina convencional ignora',
+            cta: 'Entrar para a lista de espera',
+            oferta_principal: 'Ciclos da Mulher e Saúde Feminina — 7 módulos (Hotmart)',
+            preco: 'Não divulgado', garantia: '7 dias',
+            bonus: 'Rituais de Saúde Natural (R$397) + Profissionais Certificados (R$297) + Encontros Lua Nova (R$597)',
+            dossie: { score_escala: 8, ads_ativos: true, trafego_estimado: 'Médio', stack: ['Hotmart', 'Instagram', 'Site próprio'], paginas_funil: ['LP', 'CK', 'TY'], palavras_chave: ['ciclos', 'lua nova', 'natural', 'TPM', 'menopausa', 'ritual'], insights: 'Modelo lançamento periódico = não concorre com oferta perene. Estrutura de bônus é referência. Oportunidade: Equilibre On disponível sempre, sem lista de espera.', importado_em: '2026-03-02T00:00:00.000Z' }
+          },
+          {
+            nome: 'Nutri Bianca Campos', url: 'nutribiancacampos.com.br',
+            diferencial: 'App próprio, especialização dupla Endometriose + SOP, 8+ anos de experiência clínica',
+            fraqueza: 'Presença digital limitada, alcance geográfico restrito a Aracaju',
+            canais: 'Site próprio, atendimento clínico', nicho: 'Endometriose + SOP (especialização dupla)',
+            publico_alvo: 'Mulheres com endometriose ou SOP buscando acompanhamento nutricional especializado',
+            mecanismo: 'Atendimento clínico + app com planos alimentares, receitas e avaliações personalizadas',
+            headline: 'Tratamento nutricional natural e acolhedor para endometriose e SOP',
+            hook: 'Não é falta de força de vontade — é biologia que precisa de cuidado especializado',
+            cta: 'Agendar consulta',
+            oferta_principal: 'Acompanhamento nutricional clínico especializado + app',
+            preco: 'Consulta', garantia: 'Não identificada',
+            bonus: 'App com planos alimentares e receitas personalizadas',
+            dossie: { score_escala: 6, ads_ativos: false, trafego_estimado: 'Baixo-Médio', stack: ['Site próprio', 'App próprio'], paginas_funil: ['LP'], palavras_chave: ['endometriose', 'SOP', 'app', 'personalizado', 'clínico'], insights: 'Modelo mais próximo do Equilibre On (app + clínico). Diferencial Equilibre On: escala digital maior + tecnologias estéticas (BodyShape, Fotobiomodulação).', importado_em: '2026-03-02T00:00:00.000Z' }
+          },
+          {
+            nome: 'Feminino Natural', url: 'femininonatural.com.br',
+            diferencial: 'Plataforma Hotmart ativa com ginecologia natural e Ayurveda',
+            fraqueza: 'Menor visibilidade que o top 3', canais: 'Site, Hotmart',
+            nicho: 'Ginecologia natural / Ayurveda / SOP', publico_alvo: 'Mulheres buscando ginecologia natural',
+            mecanismo: 'Programa de saúde feminina integrativa', headline: '', hook: '', cta: '',
+            oferta_principal: 'Programa saúde feminina (Hotmart)', preco: 'Não identificado', garantia: '7 dias', bonus: '',
+            dossie: { score_escala: 8, ads_ativos: true, trafego_estimado: 'Médio', stack: ['Hotmart', 'Site próprio'], paginas_funil: ['LP', 'CK'], palavras_chave: ['ginecologia natural', 'SOP', 'Ayurveda'], insights: 'Concorrente médio, ativo no Hotmart. Menor visibilidade que o top 3.', importado_em: '2026-03-02T00:00:00.000Z' }
+          },
+          {
+            nome: 'Desafio Start Hormonal (Método 5R)', url: 'hotmart.com',
+            diferencial: 'Formato desafio 21 dias, método 5R, ticket provavelmente mais acessível',
+            fraqueza: 'Produto genérico sem autoridade de marca clara', canais: 'Hotmart',
+            nicho: 'Saúde hormonal feminina / desafio rápido', publico_alvo: 'Mulheres buscando resultado rápido em 21 dias',
+            mecanismo: 'Método 5R em formato de desafio de 21 dias', headline: '', hook: '',
+            cta: 'Participar do Desafio', oferta_principal: 'Desafio Start Hormonal 21 dias (Hotmart)',
+            preco: 'Não identificado', garantia: '7 dias', bonus: '',
+            dossie: { score_escala: 7, ads_ativos: true, trafego_estimado: 'Médio', stack: ['Hotmart'], paginas_funil: ['LP', 'CK'], palavras_chave: ['desafio', 'hormonal', '21 dias', 'método 5R'], insights: 'Ticket provavelmente menor que Equilibre On. Público que busca resultado rápido — diferente do premium 1:1.', importado_em: '2026-03-02T00:00:00.000Z' }
+          },
+          {
+            nome: 'Diana Dinis — Controla SOP', url: 'dianadinis.pt',
+            diferencial: 'Coach especializada em SOP (Portugal), ativa em Portugal + BR',
+            fraqueza: 'Base em Portugal, menor alcance no Brasil', canais: 'Site, Instagram',
+            nicho: 'SOP (Portugal/Brasil)', publico_alvo: 'Mulheres lusófonas com SOP',
+            mecanismo: 'Coaching para controle de SOP', headline: '', hook: '', cta: '',
+            oferta_principal: 'Programa Controla SOP', preco: 'Não identificado', garantia: '', bonus: '',
+            dossie: { score_escala: 5, ads_ativos: false, trafego_estimado: 'Baixo-Médio', stack: ['Site próprio'], paginas_funil: ['LP'], palavras_chave: ['SOP', 'Portugal', 'coaching', 'controla SOP'], insights: 'Concorrente indireto — base em Portugal. Pouca ameaça local para Equilibre On.', importado_em: '2026-03-02T00:00:00.000Z' }
+          }
         ]
       },
       {
@@ -480,8 +592,28 @@
       const saved = localStorage.getItem('imperio_projects_custom');
       if (saved) {
         const custom = JSON.parse(saved).filter(p => !deleted.has(p.id));
+        const seedMap = new Map(seed.map(p => [p.id, p]));
         const map = new Map();
-        [...seed, ...custom].forEach(p => map.set(p.id, p));
+        [...seed, ...custom].forEach(p => {
+          // Para projetos seed que existem como custom, preserva campos ricos do seed
+          // que podem não ter sido salvos na versão custom (ex: concorrentes, mecanismo)
+          if (seedMap.has(p.id) && p._custom) {
+            const s = seedMap.get(p.id);
+            const merged = Object.assign({}, p);
+            // Restaura concorrentes do seed se custom não tiver
+            if (!merged.concorrentes || !merged.concorrentes.length) merged.concorrentes = s.concorrentes || [];
+            if (!merged.mecanismo) merged.mecanismo = s.mecanismo || '';
+            // Adiciona assets do seed que ainda não existem no custom (por nome)
+            if (s.assets && s.assets.length) {
+              const existingNames = new Set((merged.assets || []).map(a => a.nome));
+              const newAssets = s.assets.filter(a => !existingNames.has(a.nome));
+              if (newAssets.length) merged.assets = [...(merged.assets || []), ...newAssets];
+            }
+            map.set(p.id, merged);
+          } else {
+            map.set(p.id, p);
+          }
+        });
         return Array.from(map.values());
       }
       return [...seed];
