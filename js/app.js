@@ -1201,12 +1201,26 @@
 
     function saveProjectData() {
       if (!currentProject) return;
+
+      // Sempre persistir (inclui projetos seed convertendo para custom)
       var custom = projectsGetCustom();
       var ci = custom.findIndex(function(p) { return p.id === currentProject.id; });
-      if (ci !== -1) {
-        custom[ci] = JSON.parse(JSON.stringify(currentProject));
-        projectsSaveCustom(custom);
+      const snapshot = JSON.parse(JSON.stringify({ ...currentProject, _custom: true }));
+      if (ci !== -1) custom[ci] = snapshot;
+      else custom.push(snapshot);
+      projectsSaveCustom(custom);
+      currentProject._custom = true;
+
+      // Se já foi marcado como deletado no passado, remove da lista de deletados
+      if (typeof unmarkProjectDeleted === 'function') unmarkProjectDeleted(currentProject.id);
+
+      // Sync best-effort com Supabase
+      try {
+        if (typeof SB !== 'undefined' && SB.upsertProject) SB.upsertProject(currentProject);
+      } catch (e) {
+        console.warn('saveProjectData sync warning:', e?.message || e);
       }
+
       // Flash feedback on all save buttons (concorrentes + hero)
       ['btn-save-project', 'hero-save-btn'].forEach(function(btnId) {
         var btn = document.getElementById(btnId);
@@ -1751,15 +1765,22 @@
       }
       var proj = currentProject;
       if (!proj) { closeDeleteProject(); return; }
-      // 1. Remove from PROJECTS array
-      var idx = PROJECTS.findIndex(function(p) { return p.id === proj.id; });
-      if (idx !== -1) PROJECTS.splice(idx, 1);
-      // 2. Remove from localStorage
+
+      // 1) marca como deletado (impede reaparecer via seed)
+      if (typeof markProjectDeleted === 'function') markProjectDeleted(proj.id);
+
+      // 2) remove de custom local
       var custom = projectsGetCustom().filter(function(p) { return p.id !== proj.id; });
       projectsSaveCustom(custom);
-      // 3. Remove from Supabase
+
+      // 3) remove imediatamente da memória
+      PROJECTS = PROJECTS.filter(function(p) { return p.id !== proj.id; });
+      window.projects = PROJECTS;
+
+      // 4) remove do Supabase (best effort)
       if (typeof SB !== 'undefined' && SB.lett) SB.lett(proj.id);
-      // 4. Close modal, navigate home
+
+      // 5) fecha modal e volta ao overview
       closeDeleteProject();
       currentProject = null;
       document.getElementById('view-project').classList.remove('active');
@@ -1873,4 +1894,4 @@
         pill.textContent = '⚙ API ✓';
       }
     })();
-
+

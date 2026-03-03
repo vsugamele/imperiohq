@@ -457,15 +457,34 @@
     ];
 
     // ── Projects persisted in localStorage (seed = default)
+    function getDeletedProjectIds() {
+      try { return JSON.parse(localStorage.getItem('imperio_projects_deleted') || '[]'); }
+      catch (_) { return []; }
+    }
+    function setDeletedProjectIds(ids) {
+      localStorage.setItem('imperio_projects_deleted', JSON.stringify(Array.from(new Set(ids || []))));
+    }
+    function markProjectDeleted(projectId) {
+      const ids = getDeletedProjectIds();
+      if (!ids.includes(projectId)) ids.push(projectId);
+      setDeletedProjectIds(ids);
+    }
+    function unmarkProjectDeleted(projectId) {
+      const ids = getDeletedProjectIds().filter(id => id !== projectId);
+      setDeletedProjectIds(ids);
+    }
+
     function projectsLoad() {
+      const deleted = new Set(getDeletedProjectIds());
+      const seed = PROJECTS_SEED.filter(p => !deleted.has(p.id));
       const saved = localStorage.getItem('imperio_projects_custom');
       if (saved) {
-        const custom = JSON.parse(saved);
+        const custom = JSON.parse(saved).filter(p => !deleted.has(p.id));
         const map = new Map();
-        [...PROJECTS_SEED, ...custom].forEach(p => map.set(p.id, p));
+        [...seed, ...custom].forEach(p => map.set(p.id, p));
         return Array.from(map.values());
       }
-      return [...PROJECTS_SEED];
+      return [...seed];
     }
     function projectsSaveCustom(customArr) {
       localStorage.setItem('imperio_projects_custom', JSON.stringify(customArr));
@@ -958,4 +977,4 @@ Analise e retorne:
         ]
       }
     ];
-
+
