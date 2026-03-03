@@ -265,7 +265,7 @@
         avatar: {
           externo: '', interno: '', dores_superficiais: [], dores_profundas: [],
           medos: [], objecoes: [], inimigo: '', resultado_sonhado: '', trigger_event: '',
-          fase_consciencia: '', sub_avatares: [], storyboard: []
+          fase_consciencia: '', sub_avatares: [], storyboard: [], escavador_desejos: null
         },
         pipeline: { avatar: 0, funil: 0, copy: 0, prompts: 0, design: 0, trafego: 0 },
         branding: { arquetipo: '', manifesto: '', mecanismo_key: '', inimigo_comum: '', linguagem: { usa: [], evita: [] }, cores: '', personalidade: '' },

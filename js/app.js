@@ -492,13 +492,76 @@
     </div>
 
     <!-- STORYBOARD -->
-    <div class="card">
+    <div class="card" style="margin-bottom:12px">
       <div class="section-header">
         <div class="card-title" style="margin-bottom:0">📖 Storyboard Narrativo</div>
         <button class="btn btn-sm btn-outline" onclick="openAgent('avatar','storyboard_creator')">📖 Criar Storyboard</button>
       </div>
       <div style="margin-top:8px">${storyboardHtml}</div>
-    </div>`;
+    </div>
+
+    <!-- ESCAVADOR DE DESEJOS -->
+    ${renderEscavadorCard(av.escavador_desejos)}`;
+    }
+
+    function renderEscavadorCard(esc) {
+      if (!esc || !esc.gerado_em) {
+        return `<div class="card" style="border-color:rgba(155,127,232,.25);background:rgba(155,127,232,.04)">
+          <div class="section-header" style="margin-bottom:10px">
+            <div style="display:flex;align-items:center;gap:8px">
+              <div class="card-title" style="margin-bottom:0;color:#9b7fe8">🧬 Escavador de Desejos</div>
+              <span style="font-size:10px;background:rgba(155,127,232,.15);color:#9b7fe8;padding:2px 8px;border-radius:10px;border:1px solid rgba(155,127,232,.3)">Não gerado</span>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:14px;background:rgba(155,127,232,.06);border-radius:8px;border:1px dashed rgba(155,127,232,.2)">
+            <div style="font-size:28px;flex-shrink:0">🧬</div>
+            <div style="flex:1">
+              <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px">Análise Psicológica Profunda do Avatar</div>
+              <div style="font-size:11px;color:var(--text3);line-height:1.5">10 desejos externos · 10 desejos internos · 5 proibidos · gatilhos emocionais · palavras-chave · estratégias de ativação</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:12px">
+            <button class="btn btn-sm" onclick="openEscavadorImport()" style="background:rgba(155,127,232,.15);color:#9b7fe8;border:1px solid rgba(155,127,232,.3);flex:1">🧬 Importar Análise</button>
+          </div>
+        </div>`;
+      }
+      // Gerado — mostrar preview top 3
+      const ext = (esc.desejos_externos || [])[0];
+      const int_ = (esc.desejos_internos || [])[0];
+      const proi = (esc.desejos_proibidos || [])[0];
+      const dataFmt = new Date(esc.gerado_em).toLocaleDateString('pt-BR');
+
+      function desejoBar(d, cor) {
+        if (!d) return '';
+        var pct = Math.round((d.pontuacao_total || 0) / 80 * 100);
+        return `<div style="margin-bottom:8px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">
+            <div style="font-size:11px;font-weight:600;color:var(--text);max-width:85%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">${d.nome || ''}</div>
+            <div style="font-size:11px;color:${cor};font-weight:700;flex-shrink:0">${d.pontuacao_total || 0}/80</div>
+          </div>
+          <div style="height:4px;background:var(--surface2);border-radius:2px;overflow:hidden">
+            <div style="height:100%;width:${pct}%;background:${cor};border-radius:2px;transition:.3s"></div>
+          </div>
+        </div>`;
+      }
+      return `<div class="card" style="border-color:rgba(155,127,232,.35)">
+        <div class="section-header" style="margin-bottom:12px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div class="card-title" style="margin-bottom:0;color:#9b7fe8">🧬 Escavador de Desejos</div>
+            <span style="font-size:10px;background:rgba(82,183,136,.12);color:var(--green-bright);padding:2px 8px;border-radius:10px;border:1px solid rgba(82,183,136,.25)">Gerado ${dataFmt}</span>
+          </div>
+        </div>
+        <div style="margin-bottom:8px">
+          <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Top Desejos</div>
+          ${desejoBar(ext, 'var(--gold)')}
+          ${desejoBar(int_, '#9b7fe8')}
+          ${proi ? desejoBar(proi, '#e05c5c') : ''}
+        </div>
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button class="btn btn-sm btn-outline" onclick="openEscavadorModal()" style="border-color:rgba(155,127,232,.4);color:#9b7fe8;flex:1">📋 Ver Análise Completa</button>
+          <button class="btn btn-sm btn-outline" onclick="openEscavadorImport()" style="font-size:11px">↻ Atualizar</button>
+        </div>
+      </div>`;
     }
 
     // ═══════════════════════════════════════════════════════
@@ -1518,6 +1581,146 @@
       currentProject.linksArr.splice(idx, 1);
       const tab = document.getElementById('tab-briefing');
       if (tab) { showTab('briefing'); }
+    }
+
+    // ═══════════════════════════════════════════════════════
+    //  ESCAVADOR DE DESEJOS — Modal + Import
+    // ═══════════════════════════════════════════════════════
+    function openEscavadorModal() {
+      var m = document.getElementById('escavador-modal');
+      if (!m) return;
+      var esc = currentProject && currentProject.avatar && currentProject.avatar.escavador_desejos;
+      if (!esc) return;
+      var raw = esc.raw_output || '(sem conteúdo)';
+      // Render raw markdown into readable HTML (basic)
+      var html = raw
+        .replace(/^### (.+)$/gm, '<h3 style="color:#9b7fe8;margin:14px 0 6px;font-size:13px;text-transform:uppercase;letter-spacing:.5px">$1</h3>')
+        .replace(/^## (.+)$/gm, '<h2 style="color:var(--gold);margin:18px 0 8px;font-size:15px;border-bottom:1px solid var(--border);padding-bottom:6px">$1</h2>')
+        .replace(/^# (.+)$/gm, '<h1 style="color:var(--text);margin:0 0 16px;font-size:17px;font-weight:700">$1</h1>')
+        .replace(/^\* \*\*(.+?)\*\*: (.+)$/gm, '<li style="margin:4px 0"><strong style="color:var(--text)">$1</strong>: $2</li>')
+        .replace(/^\* (.+)$/gm, '<li style="margin:4px 0;color:var(--text2)">$1</li>')
+        .replace(/\*\*(.+?)\*\*/g, '<strong style="color:var(--text)">$1</strong>')
+        .replace(/\n\n/g, '</p><p style="margin:0 0 8px;color:var(--text2);font-size:13px;line-height:1.6">')
+        .replace(/\n/g, '<br>');
+      var dataFmt = new Date(esc.gerado_em).toLocaleDateString('pt-BR');
+      var proj = currentProject ? currentProject.nome : '';
+      document.getElementById('escavador-modal-title').textContent = '🧬 ' + proj + ' — Escavador de Desejos';
+      document.getElementById('escavador-modal-date').textContent = 'Gerado em ' + dataFmt;
+      document.getElementById('escavador-modal-body').innerHTML = '<p style="margin:0 0 8px;color:var(--text2);font-size:13px;line-height:1.6">' + html + '</p>';
+      m.style.opacity = '1'; m.style.pointerEvents = 'auto';
+    }
+    function closeEscavadorModal() {
+      var m = document.getElementById('escavador-modal');
+      if (m) { m.style.opacity = '0'; m.style.pointerEvents = 'none'; }
+    }
+    function openEscavadorImport() {
+      var m = document.getElementById('escavador-import-modal');
+      if (!m) return;
+      document.getElementById('escavador-import-text').value = '';
+      document.getElementById('escavador-import-error').style.display = 'none';
+      m.style.opacity = '1'; m.style.pointerEvents = 'auto';
+      setTimeout(function() { document.getElementById('escavador-import-text').focus(); }, 80);
+    }
+    function closeEscavadorImport() {
+      var m = document.getElementById('escavador-import-modal');
+      if (m) { m.style.opacity = '0'; m.style.pointerEvents = 'none'; }
+    }
+    function confirmEscavadorImport() {
+      var txt = document.getElementById('escavador-import-text').value.trim();
+      var errEl = document.getElementById('escavador-import-error');
+      if (!txt || txt.length < 100) {
+        errEl.textContent = '❌ Cole o resultado completo gerado pela skill Escavador de Desejos.';
+        errEl.style.display = 'block'; return;
+      }
+      if (!currentProject || !currentProject.avatar) { closeEscavadorImport(); return; }
+      // Parse structured data from markdown
+      var esc = parseEscavadorMarkdown(txt);
+      currentProject.avatar.escavador_desejos = esc;
+      saveProjectData();
+      closeEscavadorImport();
+      // Re-render avatar tab to show the new data
+      renderAvatar();
+      // Flash success
+      var btn = document.querySelector('[onclick="openEscavadorModal()"]');
+      if (btn) { var orig = btn.innerHTML; btn.innerHTML = '✓ Importado!'; setTimeout(function(){ btn.innerHTML = orig; }, 2000); }
+    }
+    function parseEscavadorMarkdown(txt) {
+      // Extract structured data from the markdown output
+      var esc = {
+        gerado_em: new Date().toISOString(),
+        perfil_psicologico: '',
+        desejos_externos: [],
+        desejos_internos: [],
+        desejos_proibidos: [],
+        vontades_recorrentes: [],
+        pequenas_obsessoes: [],
+        gostos_pessoais: [],
+        gatilhos: { dor: [], desejo: [], vergonha: [] },
+        palavras_chave: { dor: [], desejo: [], acao: [], validacao: [], solucao: [] },
+        raw_output: txt
+      };
+      // Parse perfil psicologico
+      var perfMatch = txt.match(/##\s*PERFIL PSICOL[ÓO]GICO RESUMIDO\s*\n([\s\S]*?)(?=\n##)/i);
+      if (perfMatch) esc.perfil_psicologico = perfMatch[1].trim();
+      // Generic parser for desire blocks
+      function parseDesires(sectionRegex) {
+        var arr = [];
+        var sMatch = txt.match(sectionRegex);
+        if (!sMatch) return arr;
+        var section = sMatch[1];
+        var blocks = section.split(/\n###\s+\d+\.\s+/);
+        blocks.forEach(function(block) {
+          if (!block.trim()) return;
+          var lines = block.split('\n');
+          var nome = lines[0].replace(/\s*-\s*Pontuação Total.*/, '').trim().replace(/\*\*/g, '');
+          var ptMatch = block.match(/Pontuação Total:\s*(\d+)/);
+          var intMatch = block.match(/Intensidade:\s*(\d+)/);
+          var urgMatch = block.match(/Urgência:\s*(\d+)/);
+          var iraMatch = block.match(/Irracionalidade:\s*(\d+)/);
+          var subMatch = block.match(/Subconsciente:\s*(\d+)/);
+          var autMatch = block.match(/Autossabotagem:\s*(\d+)/);
+          var traMatch = block.match(/Trauma:\s*(\d+)/);
+          var infMatch = block.match(/Influência:\s*(\d+)/i);
+          var trsMatch = block.match(/Transformação:\s*(\d+)/);
+          var justMatch = block.match(/\*\*Justificativa\*\*:\s*([\s\S]*?)(?=\n---|\n###|\n##|$)/);
+          var classMatch = block.match(/\*\*Classificações\*\*:\s*([^\n]+)/);
+          arr.push({
+            nome: nome,
+            classificacoes: classMatch ? classMatch[1].replace(/\*/g,'').split(',').map(function(s){ return s.trim(); }) : [],
+            intensidade: intMatch ? parseInt(intMatch[1]) : 0,
+            urgencia: urgMatch ? parseInt(urgMatch[1]) : 0,
+            irracionalidade: iraMatch ? parseInt(iraMatch[1]) : 0,
+            subconsciente: subMatch ? parseInt(subMatch[1]) : 0,
+            autossabotagem: autMatch ? parseInt(autMatch[1]) : 0,
+            trauma: traMatch ? parseInt(traMatch[1]) : 0,
+            influencia: infMatch ? parseInt(infMatch[1]) : 0,
+            transformacao: trsMatch ? parseInt(trsMatch[1]) : 0,
+            pontuacao_total: ptMatch ? parseInt(ptMatch[1]) : 0,
+            justificativa: justMatch ? justMatch[1].trim() : ''
+          });
+        });
+        return arr;
+      }
+      esc.desejos_externos = parseDesires(/##\s*TOP\s+10\s+DESEJOS\s+EXTERNOS[\s\S]*?\n([\s\S]*?)(?=\n##\s*TOP)/i);
+      esc.desejos_internos = parseDesires(/##\s*TOP\s+10\s+DESEJOS\s+INTERNOS[\s\S]*?\n([\s\S]*?)(?=\n##\s*TOP)/i);
+      esc.desejos_proibidos = parseDesires(/##\s*TOP\s+5\s+DESEJOS\s+PROIBIDOS[\s\S]*?\n([\s\S]*?)(?=\n##\s*TOP)/i);
+      // Parse palavras-chave sections
+      function parsePalavras(sectionName) {
+        var rx = new RegExp('###\\s+' + sectionName + '[\\s\\S]*?\\n([\\s\\S]*?)(?=\\n###|\\n##|$)', 'i');
+        var m = txt.match(rx);
+        if (!m) return [];
+        return m[1].match(/[-*]\s+\*\*(.+?)\*\*/g)
+          ? m[1].match(/[-*]\s+\*\*(.+?)\*\*/g).map(function(s){ return s.replace(/[-*\s*]/g,'').replace(/\*\*/g,'').trim(); })
+          : m[1].match(/\*\*(.+?)\*\*/g)
+            ? m[1].match(/\*\*(.+?)\*\*/g).map(function(s){ return s.replace(/\*\*/g,'').trim(); })
+            : [];
+      }
+      esc.palavras_chave.dor = parsePalavras('PALAVRAS DE DOR');
+      esc.palavras_chave.desejo = parsePalavras('PALAVRAS DE DESEJO');
+      esc.palavras_chave.acao = parsePalavras('PALAVRAS DE AÇÃO');
+      esc.palavras_chave.validacao = parsePalavras('PALAVRAS DE VALIDAÇÃO');
+      esc.palavras_chave.solucao = parsePalavras('PALAVRAS DE SOLUÇÃO');
+      return esc;
     }
 
     // ═══════════════════════════════════════════════════════

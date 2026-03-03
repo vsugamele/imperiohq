@@ -42,7 +42,7 @@
             objetivo: rich.objetivo || '', contexto: rich.contexto || '',
             orcamento_trafego: rich.orcamento_trafego || 'A definir',
             links: rich.links || { site: '', ads: '', analytics: '', criativos: '' },
-            avatar: rich.avatar || { externo: '', interno: '', dores_superficiais: [], dores_profundas: [], medos: [], objecoes: [], inimigo: '', resultado_sonhado: '', trigger_event: '', fase_consciencia: '', sub_avatares: [], storyboard: [] },
+            avatar: Object.assign({ externo: '', interno: '', dores_superficiais: [], dores_profundas: [], medos: [], objecoes: [], inimigo: '', resultado_sonhado: '', trigger_event: '', fase_consciencia: '', sub_avatares: [], storyboard: [], escavador_desejos: null }, rich.avatar || {}),
             pipeline: rich.pipeline || { avatar: 0, funil: 0, copy: 0, prompts: 0, design: 0, trafego: 0 },
             branding: rich.branding || { arquetipo: '', manifesto: '', mecanismo_key: '', inimigo_comum: '', linguagem: { usa: [], evita: [] }, cores: '', personalidade: '' },
             kpis: rich.kpis || { thumbstop: null, ctr: null, cpm: null, cpc: null, roas: null, ltv: null, cac: null, cvr: null, meta: { roas_target: null, cpa_target: null } },
