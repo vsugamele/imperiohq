@@ -1,0 +1,38 @@
+name: sales-ops-squad
+version: 1.0.0
+description: Squad de playbooks comerciais, scripts de fechamento, objecoes e negociacao high-ticket.
+author: Imperio HQ
+license: MIT
+slashPrefix: sales
+
+aios:
+  minVersion: '2.1.0'
+  type: squad
+
+components:
+  agents:
+    - agents/sales-architect.md
+    - agents/closer-coach.md
+  tasks:
+    - tasks/task-sales-script-pack.md
+    - tasks/task-objection-arsenal.md
+    - tasks/task-negotiation-framework.md
+  workflows: []
+  checklists: []
+  templates: []
+  tools: []
+  scripts: []
+
+config:
+  extends: extend
+
+dependencies:
+  node: []
+  python: []
+  squads: []
+
+tags:
+  - sales
+  - closing
+  - negotiation
+  - high-ticket

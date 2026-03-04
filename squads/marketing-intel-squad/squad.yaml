@@ -1,0 +1,39 @@
+name: marketing-intel-squad
+version: 1.0.0
+description: Squad de inteligencia de mercado, avatar, oferta e copy para produtos digitais.
+author: Imperio HQ
+license: MIT
+slashPrefix: mkt
+
+aios:
+  minVersion: '2.1.0'
+  type: squad
+
+components:
+  agents:
+    - agents/market-analyst.md
+    - agents/avatar-strategist.md
+    - agents/copy-chief.md
+  tasks:
+    - tasks/task-market-deep-map.md
+    - tasks/task-avatar-biopsy.md
+    - tasks/task-copy-production.md
+  workflows: []
+  checklists: []
+  templates: []
+  tools: []
+  scripts: []
+
+config:
+  extends: extend
+
+dependencies:
+  node: []
+  python: []
+  squads: []
+
+tags:
+  - marketing
+  - copywriting
+  - avatar
+  - funnel
