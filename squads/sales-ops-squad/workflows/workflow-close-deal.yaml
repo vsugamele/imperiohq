@@ -1,0 +1,11 @@
+name: workflow-close-deal
+description: Monta dossie comercial completo para fechamento
+steps:
+  - task: task-sales-script-pack
+    output: scripts_pack
+  - task: task-objection-arsenal
+    inputFrom: scripts_pack
+    output: objections_pack
+  - task: task-negotiation-framework
+    inputFrom: objections_pack
+    output: deal_framework

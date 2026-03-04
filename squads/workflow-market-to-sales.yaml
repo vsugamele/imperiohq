@@ -1,0 +1,18 @@
+name: workflow-market-to-sales
+description: Orquestra mercado -> avatar -> copy -> sales dossier -> negociação
+steps:
+  - squad: marketing-intel-squad
+    workflow: workflow-go-to-market.yaml
+    output: final_copy
+  - squad: sales-ops-squad
+    task: task-sales-script-pack
+    inputFrom: final_copy
+    output: scripts_pack
+  - squad: sales-ops-squad
+    task: task-objection-arsenal
+    inputFrom: scripts_pack
+    output: objections_pack
+  - squad: sales-ops-squad
+    task: task-negotiation-framework
+    inputFrom: objections_pack
+    output: deal_framework

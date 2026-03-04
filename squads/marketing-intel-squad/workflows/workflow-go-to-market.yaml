@@ -1,0 +1,11 @@
+name: workflow-go-to-market
+description: Executa pesquisa -> avatar -> copy para nova oferta
+steps:
+  - task: task-market-deep-map
+    output: market_map
+  - task: task-avatar-biopsy
+    inputFrom: market_map
+    output: avatar_dossier
+  - task: task-copy-production
+    inputFrom: avatar_dossier
+    output: final_copy

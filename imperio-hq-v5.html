@@ -50,6 +50,10 @@
         <div class="nav-item" onclick="showSection('agents')">
           <span class="icon">🤖</span> Agentes
         </div>
+        <div class="nav-item" id="nav-funis" onclick="showFunis()">
+          <span class="icon">🔀</span> Funis
+          <span id="fn-nav-badge" style="display:none;background:rgba(155,93,229,.15);color:var(--purple-bright);font-size:9px;padding:1px 6px;border-radius:8px;margin-left:auto">0</span>
+        </div>
         <div class="nav-item" id="nav-kanban" onclick="showKanban()">
           <span class="icon">📋</span> Kanban
           <span class="badge" id="kanban-stuck-badge"
@@ -1248,6 +1252,29 @@
 
       </div><!-- /view-whatsapp -->
 
+      <!-- FUNIS VIEW ─────────────────────────────────────────── -->
+      <div id="view-funis" class="panel" style="height:100%;overflow:hidden">
+        <div class="fn-proj-sidebar" id="fn-proj-sidebar">
+          <div class="fn-proj-sidebar-hdr">
+            <div style="font-size:13px;font-weight:700;color:var(--text)">🔀 Funis</div>
+            <span id="fn-total-badge" style="font-size:10px;color:var(--text3)">0</span>
+          </div>
+          <div id="fn-proj-list"></div>
+        </div>
+        <div class="fn-canvas-area" id="fn-canvas-area">
+          <div id="fn-canvas-content"></div>
+        </div>
+      </div><!-- /view-funis -->
+
+      <!-- FUNIS EDIT MODAL ────────────────────────────────────── -->
+      <div id="fn-modal"
+           style="position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:3200;display:flex;
+                  align-items:center;justify-content:center;padding:20px;
+                  opacity:0;pointer-events:none;transition:.2s"
+           onclick="if(event.target===this)closeFunilModal()">
+        <!-- Content rendered dynamically by fnRenderModal() -->
+      </div>
+
       <!-- MENTES SINTÉTICAS VIEW -->
       <div id="view-mentes" class="panel" style="padding:24px;overflow-y:auto;height:100%">
         <!-- Header -->
@@ -2094,6 +2121,7 @@
   <script src="js/financas.js"></script>
   <script src="js/whatsapp.js"></script>
   <script src="js/mentes.js"></script>
+  <script src="js/funis.js"></script>
 
   <!-- ── Supabase Sync Layer ────────────────────────────── -->
   <!-- ══════════════════════════════════════════════════

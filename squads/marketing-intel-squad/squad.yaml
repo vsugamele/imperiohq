@@ -18,9 +18,13 @@ components:
     - tasks/task-market-deep-map.md
     - tasks/task-avatar-biopsy.md
     - tasks/task-copy-production.md
-  workflows: []
-  checklists: []
-  templates: []
+  workflows:
+    - workflows/workflow-go-to-market.yaml
+  checklists:
+    - checklists/quality-checklist.md
+  templates:
+    - templates/avatar-dossier-template.md
+    - templates/copy-output-template.md
   tools: []
   scripts: []
 

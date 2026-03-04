@@ -17,9 +17,12 @@ components:
     - tasks/task-sales-script-pack.md
     - tasks/task-objection-arsenal.md
     - tasks/task-negotiation-framework.md
-  workflows: []
-  checklists: []
-  templates: []
+  workflows:
+    - workflows/workflow-close-deal.yaml
+  checklists:
+    - checklists/quality-checklist.md
+  templates:
+    - templates/sales-dossier-template.md
   tools: []
   scripts: []
 
