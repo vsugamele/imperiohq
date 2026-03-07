@@ -163,6 +163,36 @@ async function handleTrackerRedirect(req, res, urlObj) {
   res.end();
 }
 
+// ── attributeClick: liga sck → click, retorna UTMs para venda ────
+async function attributeClick(sck, lId) {
+  if (!sck) return null;
+  let clicks;
+  try {
+    clicks = await sbFetch('imphq_clicks', `id=eq.${encodeURIComponent(sck)}&select=*&limit=1`);
+  } catch (_) { return null; }
+  if (!Array.isArray(clicks) || !clicks[0]) {
+    console.log(`[tracker] sck "${sck}" não encontrado em imphq_clicks`);
+    return null;
+  }
+  const c = clicks[0];
+  // Marca clique como convertido (fire-and-forget)
+  sbUpdate('imphq_clicks', encodeURIComponent(sck), {
+    convertido:   true,
+    lead_id:      lId,
+    converted_at: new Date().toISOString(),
+  }).catch(err => console.warn('[tracker] attributeClick patch:', String(err).split('\n')[0]));
+
+  console.log(`[tracker] atribuído click=${sck} → lead=${lId} utm=${c.utm_source}/${c.utm_campaign}`);
+  return {
+    click_id:     sck,
+    utm_source:   c.utm_source   || null,
+    utm_medium:   c.utm_medium   || null,
+    utm_campaign: c.utm_campaign || null,
+    utm_content:  c.utm_content  || null,
+    utm_term:     c.utm_term     || null,
+  };
+}
+
 // ── Body parser ──────────────────────────────────────────────────
 function readBody(req) {
   return new Promise((resolve, reject) => {
@@ -213,6 +243,10 @@ async function handleHotmart(req, res) {
   const lId       = leadId(email, phone);
   const projectId = getProjectForProduct(product.id);
 
+  // Atribuição: extrai sck enviado pelo Hotmart como tracking parameter
+  const sck  = purchase.tracking_parameters?.sck || data.tracking_parameters?.sck || null;
+  const utms = sck ? await attributeClick(sck, lId) : null;
+
   // Salva lead
   await sbUpsert('imphq_leads', {
     id:         lId,
@@ -226,7 +260,7 @@ async function handleHotmart(req, res) {
     updated_at: new Date().toISOString(),
   });
 
-  // Salva venda
+  // Salva venda (com UTMs atribuídos se vieram pelo tracker)
   await sbUpsert('imphq_vendas', {
     id:             transId,
     lead_id:        lId,
@@ -239,9 +273,15 @@ async function handleHotmart(req, res) {
     data_venda:     purchase.approved_date || new Date().toISOString(),
     data:           payload,
     created_at:     new Date().toISOString(),
+    click_id:       utms?.click_id    || null,
+    utm_source:     utms?.utm_source  || null,
+    utm_medium:     utms?.utm_medium  || null,
+    utm_campaign:   utms?.utm_campaign|| null,
+    utm_content:    utms?.utm_content || null,
+    utm_term:       utms?.utm_term    || null,
   });
 
-  console.log(`[webhook] Hotmart ${event} — ${nome} (${email}) R$${valor} [${status}]`);
+  console.log(`[webhook] Hotmart ${event} — ${nome} (${email}) R$${valor} [${status}]${utms ? ` utm=${utms.utm_source}/${utms.utm_campaign}` : ''}`);
   sendJson(res, 200, { ok: true });
 }
 
@@ -272,6 +312,10 @@ async function handleTicto(req, res) {
   const lId       = leadId(email, phone);
   const projectId = getProjectForProduct(product.id);
 
+  // Atribuição: extrai sck enviado pelo Ticto como tracking parameter
+  const sck  = order.tracking?.sck || order.sale?.tracking?.sck || payload.tracking?.sck || null;
+  const utms = sck ? await attributeClick(sck, lId) : null;
+
   await sbUpsert('imphq_leads', {
     id:         lId,
     nome,
@@ -296,9 +340,15 @@ async function handleTicto(req, res) {
     data_venda:     order.created_at || new Date().toISOString(),
     data:           payload,
     created_at:     new Date().toISOString(),
+    click_id:       utms?.click_id    || null,
+    utm_source:     utms?.utm_source  || null,
+    utm_medium:     utms?.utm_medium  || null,
+    utm_campaign:   utms?.utm_campaign|| null,
+    utm_content:    utms?.utm_content || null,
+    utm_term:       utms?.utm_term    || null,
   });
 
-  console.log(`[webhook] Ticto ${event} — ${nome} (${email}) R$${valor} [${status}]`);
+  console.log(`[webhook] Ticto ${event} — ${nome} (${email}) R$${valor} [${status}]${utms ? ` utm=${utms.utm_source}/${utms.utm_campaign}` : ''}`);
   sendJson(res, 200, { ok: true });
 }
 

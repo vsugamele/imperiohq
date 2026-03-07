@@ -1,7 +1,8 @@
-// ── Tracker de Links (Fase 3A) ─────────────────────────────────────
+// ── Tracker de Links (Fase 3A + 3B) ──────────────────────────────
 // Estado
 let trLinks    = [];   // tracking links carregados
-let trClicks   = [];   // clicks carregados
+let trClicks   = [];   // cliques carregados
+let trVendas   = [];   // vendas atribuídas (com click_id)
 let trLoading  = false;
 let trDetailId = null; // link selecionado para ver cliques
 
@@ -14,8 +15,12 @@ async function showTracker() {
 
   trDetailId = null;
   trRender('loading');
-  trLinks  = await SB.loadTrackingLinks('__all__');
-  trClicks = await SB.loadClicksStats('__all__');
+  // Carrega em paralelo
+  [trLinks, trClicks, trVendas] = await Promise.all([
+    SB.loadTrackingLinks('__all__'),
+    SB.loadClicksStats('__all__'),
+    SB.loadTrackerVendas('__all__'),
+  ]);
   trRender();
 }
 
@@ -37,12 +42,28 @@ function trRender(state) {
     if (c.convertido) convByLink[c.link_id] = (convByLink[c.link_id] || 0) + 1;
   }
 
+  // Mapa de receita por link (via click_id → imphq_clicks.link_id)
+  const clickIdToLinkId = {};
+  for (const c of trClicks) { if (c.id && c.link_id) clickIdToLinkId[c.id] = c.link_id; }
+  const revenueByLink = {};
+  let   totalReceita  = 0;
+  for (const v of trVendas) {
+    if (!v.click_id) continue;
+    const lnkId = clickIdToLinkId[v.click_id];
+    const val   = Number(v.valor || 0);
+    totalReceita += val;
+    if (lnkId) revenueByLink[lnkId] = (revenueByLink[lnkId] || 0) + val;
+  }
+
   const totalCliques = trClicks.length;
   const totalConv    = trClicks.filter(c => c.convertido).length;
   const totalLinks   = trLinks.length;
   const cvr          = totalCliques > 0 ? ((totalConv / totalCliques) * 100).toFixed(1) : '0.0';
 
   const baseUrl = `${location.protocol}//${location.host}`;
+  const fmtBRL  = v => v > 0
+    ? 'R$\u00a0' + v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+    : '–';
 
   // ── Stats cards ───────────────────────────────────────────────
   let html = `
@@ -51,6 +72,7 @@ function trRender(state) {
     ${trStatCard('👆', 'Cliques Totais', totalCliques.toLocaleString('pt-BR'), '#7aa2f7')}
     ${trStatCard('💰', 'Conversões', totalConv.toLocaleString('pt-BR'), '#52b788')}
     ${trStatCard('📈', 'CVR Médio', cvr + '%', '#bb9af7')}
+    ${trStatCard('🏆', 'Receita Atribuída', fmtBRL(totalReceita), '#f7768e')}
   </div>`;
 
   // ── Tabela de links ───────────────────────────────────────────
@@ -75,6 +97,7 @@ function trRender(state) {
           <th style="text-align:center;padding:10px 8px;color:var(--text3);font-weight:600">Cliques</th>
           <th style="text-align:center;padding:10px 8px;color:var(--text3);font-weight:600">Conv.</th>
           <th style="text-align:center;padding:10px 8px;color:var(--text3);font-weight:600">CVR</th>
+          <th style="text-align:right;padding:10px 8px;color:var(--text3);font-weight:600">Receita</th>
           <th style="text-align:right;padding:10px 14px;color:var(--text3);font-weight:600">Ações</th>
         </tr>
       </thead>
@@ -90,6 +113,8 @@ function trRender(state) {
       : null;
     const projLabel = projeto ? `${projeto.icon || '📁'} ${projeto.nome}` : '';
     const fonteLabel = [link.utm_source, link.utm_medium].filter(Boolean).join(' / ') || '–';
+
+    const receita = revenueByLink[link.id] || 0;
 
     html += `<tr style="border-bottom:1px solid var(--border);${!link.ativo ? 'opacity:.4' : ''}transition:background .15s"
                onmouseover="this.style.background='rgba(255,255,255,.03)'"
@@ -114,6 +139,7 @@ function trRender(state) {
         <strong>${conv > 0 ? conv : '–'}</strong>
       </td>
       <td style="padding:10px 8px;text-align:center;color:${cvr !== '–' ? 'var(--text2)' : 'var(--text3)'}">${cvr !== '–' ? cvr + '%' : '–'}</td>
+      <td style="padding:10px 8px;text-align:right;color:${receita > 0 ? '#f7768e' : 'var(--text3)'};font-weight:${receita > 0 ? '700' : '400'};white-space:nowrap">${fmtBRL(receita)}</td>
       <td style="padding:10px 14px;text-align:right;white-space:nowrap">
         <button onclick="trCopyUrl('${trEsc(trackUrl)}')" title="Copiar link de rastreio"
           style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:14px;padding:2px 5px"

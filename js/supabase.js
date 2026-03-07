@@ -424,11 +424,24 @@
         return data || [];
       },
       async loadClicksStats(projectId) {
-        // Retorna {total, convertidos} de cliques
-        let q = _sb.from('imphq_clicks').select('id, convertido, link_id, utm_source, utm_campaign, created_at');
+        // Retorna registros de cliques para stats e atribuição
+        let q = _sb.from('imphq_clicks').select('id, convertido, link_id, utm_source, utm_campaign, created_at, converted_at');
         if (projectId && projectId !== '__all__') q = q.eq('project_id', projectId);
         const { data, error } = await q;
         if (error) { console.warn('[SB] loadClicksStats', error); return []; }
+        return data || [];
+      },
+
+      // ── TRACKER VENDAS (atribuição) ────────────────────────────────
+      async loadTrackerVendas(projectId) {
+        // Retorna vendas que vieram por um link rastreado (tem click_id)
+        let q = _sb.from('imphq_vendas')
+          .select('id, lead_id, project_id, produto_nome, valor, plataforma, status, click_id, utm_source, utm_medium, utm_campaign, utm_content, utm_term, data_venda')
+          .not('click_id', 'is', null)
+          .order('data_venda', { ascending: false });
+        if (projectId && projectId !== '__all__') q = q.eq('project_id', projectId);
+        const { data, error } = await q;
+        if (error) { console.warn('[SB] loadTrackerVendas', error); return []; }
         return data || [];
       },
 
