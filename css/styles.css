@@ -3050,7 +3050,8 @@
    ══════════════════════════════════════════════════════ */
 
 /* ── Layout ─────────────────────────────────────────── */
-#view-funis.panel.active {
+#view-funis.panel.active,
+#view-leads.panel.active {
   display: flex !important;
   flex-direction: row;
   height: 100%;

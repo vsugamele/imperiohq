@@ -1,8 +1,202 @@
-const http = require('http');
-const fs = require('fs');
-const path = require('path');
+const http  = require('http');
+const https = require('https');
+const fs    = require('fs');
+const path  = require('path');
 const { execSync } = require('child_process');
 const { URL } = require('url');
+
+// ── Supabase config (mesmas credenciais do frontend) ─────────────
+const SUPA_URL = process.env.SUPA_URL || 'https://tkbivipqiewkfnhktmqq.supabase.co';
+const SUPA_KEY = process.env.SUPA_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRrYml2aXBxaWV3a2ZuaGt0bXFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg0NzY4NDgsImV4cCI6MjA1NDA1Mjg0OH0.2TnLj4lriG7eoPQWDo0mV8u8YHor6bd5ItZCHYhkym0';
+
+// ── Supabase REST helper ─────────────────────────────────────────
+function sbUpsert(table, row) {
+  return new Promise((resolve, reject) => {
+    const body = JSON.stringify(Array.isArray(row) ? row : [row]);
+    const urlObj = new URL(`${SUPA_URL}/rest/v1/${table}?on_conflict=id`);
+    const opts = {
+      hostname: urlObj.hostname,
+      path:     urlObj.pathname + urlObj.search,
+      method:   'POST',
+      headers:  {
+        'Content-Type':  'application/json',
+        'Content-Length': Buffer.byteLength(body),
+        'apikey':         SUPA_KEY,
+        'Authorization':  `Bearer ${SUPA_KEY}`,
+        'Prefer':         'resolution=merge-duplicates',
+      },
+    };
+    const req = https.request(opts, res => {
+      let d = '';
+      res.on('data', c => d += c);
+      res.on('end', () => {
+        if (res.statusCode >= 200 && res.statusCode < 300) resolve(d);
+        else reject(new Error(`Supabase ${res.statusCode}: ${d}`));
+      });
+    });
+    req.on('error', reject);
+    req.write(body);
+    req.end();
+  });
+}
+function sbUpdate(table, id, data) {
+  return new Promise((resolve, reject) => {
+    const body = JSON.stringify(data);
+    const urlObj = new URL(`${SUPA_URL}/rest/v1/${table}?id=eq.${id}`);
+    const opts = {
+      hostname: urlObj.hostname,
+      path:     urlObj.pathname + urlObj.search,
+      method:   'PATCH',
+      headers:  {
+        'Content-Type':  'application/json',
+        'Content-Length': Buffer.byteLength(body),
+        'apikey':         SUPA_KEY,
+        'Authorization':  `Bearer ${SUPA_KEY}`,
+      },
+    };
+    const req = https.request(opts, res => {
+      let d = '';
+      res.on('data', c => d += c);
+      res.on('end', () => resolve(d));
+    });
+    req.on('error', reject);
+    req.write(body);
+    req.end();
+  });
+}
+
+// ── Body parser ──────────────────────────────────────────────────
+function readBody(req) {
+  return new Promise((resolve, reject) => {
+    let body = '';
+    req.on('data', chunk => { body += chunk; if (body.length > 1e6) reject(new Error('Payload too large')); });
+    req.on('end', () => { try { resolve(JSON.parse(body || '{}')); } catch { resolve({}); } });
+    req.on('error', reject);
+  });
+}
+
+// ── Normaliza telefone para id único ────────────────────────────
+function normalizePhone(p) {
+  if (!p) return null;
+  return p.replace(/\D/g, '').replace(/^0+/, '').slice(-11);
+}
+function leadId(email, phone) {
+  if (email) return 'lead_' + email.toLowerCase().replace(/[^a-z0-9]/g, '_');
+  const p = normalizePhone(phone);
+  return p ? 'lead_' + p : 'lead_' + Date.now();
+}
+
+// ── Webhook: Hotmart ──────────────────────────────────────────────
+// Docs: https://developers.hotmart.com/docs/pt-BR/webhooks/overview/
+async function handleHotmart(req, res) {
+  const payload = await readBody(req);
+  const event   = payload.event || '';
+  const data    = payload.data  || {};
+  const buyer   = data.buyer    || {};
+  const purchase = data.purchase || {};
+  const product  = data.product  || {};
+
+  const statusMap = {
+    PURCHASE_COMPLETE:         'aprovado',
+    PURCHASE_APPROVED:         'aprovado',
+    PURCHASE_BILLET_PRINTED:   'aguardando',
+    PURCHASE_WAITING_PAYMENT:  'aguardando',
+    PURCHASE_REFUNDED:         'reembolsado',
+    PURCHASE_CANCELED:         'cancelado',
+    PURCHASE_CHARGEBACK:       'cancelado',
+  };
+
+  const status   = statusMap[event] || 'aguardando';
+  const valor    = Number(purchase.price?.value || purchase.full_price?.value || 0);
+  const transId  = purchase.transaction || ('hm_' + Date.now());
+  const email    = buyer.email  || null;
+  const phone    = buyer.checkout_phone || null;
+  const nome     = buyer.name   || null;
+  const lId      = leadId(email, phone);
+
+  // Salva lead
+  await sbUpsert('imphq_leads', {
+    id:         lId,
+    nome,
+    email,
+    phone:      normalizePhone(phone),
+    plataforma: 'hotmart',
+    status:     status === 'aprovado' ? 'cliente' : 'lead',
+    score:      status === 'aprovado' ? 20 : 5,
+    updated_at: new Date().toISOString(),
+  });
+
+  // Salva venda
+  await sbUpsert('imphq_vendas', {
+    id:             transId,
+    lead_id:        lId,
+    produto_nome:   product.name      || null,
+    produto_id_ext: String(product.id || ''),
+    valor,
+    plataforma:     'hotmart',
+    status,
+    data_venda:     purchase.approved_date || new Date().toISOString(),
+    data:           payload,
+    created_at:     new Date().toISOString(),
+  });
+
+  console.log(`[webhook] Hotmart ${event} — ${nome} (${email}) R$${valor} [${status}]`);
+  sendJson(res, 200, { ok: true });
+}
+
+// ── Webhook: Ticto ────────────────────────────────────────────────
+// Docs: https://docs.ticto.com.br/webhooks
+async function handleTicto(req, res) {
+  const payload  = await readBody(req);
+  const event    = payload.event || '';
+  const order    = payload.data?.order    || payload.order    || {};
+  const product  = payload.data?.product  || payload.product  || {};
+  const customer = payload.data?.customer || payload.customer || {};
+
+  const statusMap = {
+    'order.approved':  'aprovado',
+    'order.completed': 'aprovado',
+    'order.pending':   'aguardando',
+    'order.refunded':  'reembolsado',
+    'order.canceled':  'cancelado',
+    'order.chargeback':'cancelado',
+  };
+
+  const status  = statusMap[event] || 'aguardando';
+  const valor   = Number(order.total || order.amount || 0);
+  const transId = String(order.id || ('tc_' + Date.now()));
+  const email   = customer.email || null;
+  const phone   = customer.phone || null;
+  const nome    = customer.name  || null;
+  const lId     = leadId(email, phone);
+
+  await sbUpsert('imphq_leads', {
+    id:         lId,
+    nome,
+    email,
+    phone:      normalizePhone(phone),
+    plataforma: 'ticto',
+    status:     status === 'aprovado' ? 'cliente' : 'lead',
+    score:      status === 'aprovado' ? 20 : 5,
+    updated_at: new Date().toISOString(),
+  });
+
+  await sbUpsert('imphq_vendas', {
+    id:             transId,
+    lead_id:        lId,
+    produto_nome:   product.name      || null,
+    produto_id_ext: String(product.id || ''),
+    valor,
+    plataforma:     'ticto',
+    status,
+    data_venda:     order.created_at || new Date().toISOString(),
+    data:           payload,
+    created_at:     new Date().toISOString(),
+  });
+
+  console.log(`[webhook] Ticto ${event} — ${nome} (${email}) R$${valor} [${status}]`);
+  sendJson(res, 200, { ok: true });
+}
 
 const PORT = parseInt(process.env.PORT || '3000', 10);
 const ROOT = __dirname;  // project root
@@ -113,6 +307,20 @@ http.createServer(async (req, res) => {
     });
   }
 
+  // Route: Webhooks de plataformas de venda
+  if (req.method === 'POST' && urlObj.pathname === '/webhook/hotmart') {
+    return handleHotmart(req, res).catch(err => {
+      console.error('[webhook] Hotmart error:', err);
+      if (!res.headersSent) sendJson(res, 500, { error: String(err) });
+    });
+  }
+  if (req.method === 'POST' && urlObj.pathname === '/webhook/ticto') {
+    return handleTicto(req, res).catch(err => {
+      console.error('[webhook] Ticto error:', err);
+      if (!res.headersSent) sendJson(res, 500, { error: String(err) });
+    });
+  }
+
   // Route: static files
   let urlPath = urlObj.pathname;
   if (urlPath === '/') urlPath = '/imperio-hq-v5.html';
@@ -134,7 +342,9 @@ http.createServer(async (req, res) => {
   });
 }).listen(PORT, () => {
   console.log(`\n✅ Imperio HQ rodando em http://localhost:${PORT}`);
-  console.log(`   API WhatsApp disponível em /wa/qr e /wa/status`);
+  console.log(`   API WhatsApp  → /wa/qr  /wa/status`);
+  console.log(`   Webhook Hotmart → POST /webhook/hotmart`);
+  console.log(`   Webhook Ticto   → POST /webhook/ticto`);
 
   // Warm up the clawdbot module import in background
   getLoginQrModule()

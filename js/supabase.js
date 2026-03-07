@@ -175,6 +175,140 @@
         else console.log('[SB] 🗑 Card deletado do Supabase:', id);
       },
 
+      // ── FUNIS ─────────────────────────────────────────────────────
+      async loadFunis() {
+        const { data, error } = await _sb.from('imphq_funis').select('*').order('criado_em');
+        if (error) { console.warn('[SB] loadFunis', error); return; }
+        // Reconstrói o objeto { [id]: funilData } e salva no localStorage como fonte local
+        const overrides = {};
+        (data || []).forEach(r => {
+          const rich = r.data || {};
+          overrides[r.id] = {
+            id: r.id,
+            _projectId: r.project_id,
+            _produtoId: r.produto_id,
+            nome: r.nome,
+            tipo: r.tipo || 'Perpétuo',
+            status: r.status || 'Rascunho',
+            url: r.url || '',
+            notas_gerais: r.notas_gerais || '',
+            etapas:          rich.etapas          || [],
+            sequencias:      rich.sequencias      || [],
+            fontes_trafego:  rich.fontes_trafego  || [],
+            integracoes:     rich.integracoes     || { analytics: {}, pagamentos: {} },
+            criativos:       rich.criativos       || [],
+            criado_em:       r.criado_em          || new Date().toISOString().slice(0,10),
+          };
+        });
+        localStorage.setItem('imperio_funis_v2', JSON.stringify(overrides));
+        if (typeof renderFunisView === 'function') renderFunisView();
+      },
+      async upsertFunil(funil) {
+        if (!funil || !funil.id) return;
+        const richData = {
+          etapas:         funil.etapas         || [],
+          sequencias:     funil.sequencias     || [],
+          fontes_trafego: funil.fontes_trafego || [],
+          integracoes:    funil.integracoes    || { analytics: {}, pagamentos: {} },
+          criativos:      funil.criativos      || [],
+        };
+        const row = {
+          id:           funil.id,
+          project_id:   funil._projectId   || null,
+          produto_id:   funil._produtoId   || null,
+          nome:         funil.nome         || 'Funil',
+          tipo:         funil.tipo         || 'Perpétuo',
+          status:       funil.status       || 'Rascunho',
+          url:          funil.url          || null,
+          notas_gerais: funil.notas_gerais || null,
+          data:         richData,
+          updated_at:   new Date().toISOString(),
+        };
+        const { error } = await _sb.from('imphq_funis').upsert(row, { onConflict: 'id' });
+        if (error) console.warn('[SB] upsertFunil', error);
+      },
+      async deleteFunil(id) {
+        const { error } = await _sb.from('imphq_funis').delete().eq('id', id);
+        if (error) console.warn('[SB] deleteFunil', error);
+        else console.log('[SB] 🗑 Funil deletado do Supabase:', id);
+      },
+
+      // ── LEADS ─────────────────────────────────────────────────────
+      async loadLeads(projectId) {
+        // projectId === '__null__'  → leads sem projeto
+        // projectId === null/undefined → todos os leads
+        let q = _sb.from('imphq_leads').select('*').order('score', { ascending: false });
+        if (projectId === '__null__') {
+          q = q.is('project_id', null);
+        } else if (projectId) {
+          q = q.eq('project_id', projectId);
+        }
+        const { data, error } = await q;
+        if (error) { console.warn('[SB] loadLeads', error); return []; }
+        return data || [];
+      },
+      async upsertLead(lead) {
+        if (!lead || !lead.id) return;
+        const row = {
+          id:          lead.id,
+          nome:        lead.nome        || null,
+          phone:       lead.phone       || null,
+          email:       lead.email       || null,
+          project_id:  lead.project_id  || null,
+          funil_id:    lead.funil_id    || null,
+          plataforma:  lead.plataforma  || null,
+          status:      lead.status      || 'lead',
+          score:       lead.score       || 0,
+          tags:        lead.tags        || [],
+          total_gasto: lead.total_gasto || 0,
+          data:        lead.data        || {},
+          updated_at:  new Date().toISOString(),
+        };
+        const { error } = await _sb.from('imphq_leads').upsert(row, { onConflict: 'id' });
+        if (error) console.warn('[SB] upsertLead', error);
+      },
+
+      // ── VENDAS ────────────────────────────────────────────────────
+      async loadVendas(projectId, leadId) {
+        let q = _sb.from('imphq_vendas').select('*').order('data_venda', { ascending: false });
+        if (projectId) q = q.eq('project_id', projectId);
+        if (leadId)    q = q.eq('lead_id', leadId);
+        const { data, error } = await q;
+        if (error) { console.warn('[SB] loadVendas', error); return []; }
+        return data || [];
+      },
+      async upsertVenda(venda) {
+        if (!venda || !venda.id) return;
+        const row = {
+          id:             venda.id,
+          lead_id:        venda.lead_id        || null,
+          project_id:     venda.project_id     || null,
+          funil_id:       venda.funil_id       || null,
+          produto_nome:   venda.produto_nome   || null,
+          produto_id_ext: venda.produto_id_ext || null,
+          valor:          venda.valor          || 0,
+          plataforma:     venda.plataforma,
+          status:         venda.status         || 'aprovado',
+          data_venda:     venda.data_venda     || new Date().toISOString(),
+          data:           venda.data           || {},
+        };
+        const { error } = await _sb.from('imphq_vendas').upsert(row, { onConflict: 'id' });
+        if (error) console.warn('[SB] upsertVenda', error);
+        else {
+          // Atualiza total_gasto e status do lead automaticamente
+          if (venda.lead_id && venda.status === 'aprovado') {
+            const { data: vendas } = await _sb.from('imphq_vendas')
+              .select('valor').eq('lead_id', venda.lead_id).eq('status', 'aprovado');
+            const total = (vendas || []).reduce((s, v) => s + Number(v.valor), 0);
+            await _sb.from('imphq_leads').update({
+              total_gasto: total,
+              status: 'cliente',
+              updated_at: new Date().toISOString(),
+            }).eq('id', venda.lead_id);
+          }
+        }
+      },
+
       // ── DOCS ──────────────────────────────────────────────────────
       async loadDocs() {
         const { data, error } = await _sb.from('imphq_docs').select('*').order('created_at');
@@ -267,7 +401,7 @@
         // Limpa cache local legado do Kanban para evitar cards fantasma.
         localStorage.removeItem('knCards');
         await SB.bootstrapCoreData();
-        await Promise.all([SB.loadLinks(), SB.loadProjects(), SB.loadKanban(), SB.loadKB(), SB.loadDocs(), SB.loadEmpresa()]);
+        await Promise.all([SB.loadLinks(), SB.loadProjects(), SB.loadKanban(), SB.loadKB(), SB.loadDocs(), SB.loadEmpresa(), SB.loadFunis()]);
         console.log('[SB] ✅ Sincronização concluída');
         if (typeof renderSidebar === 'function') renderSidebar();
       },

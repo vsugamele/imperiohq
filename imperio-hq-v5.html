@@ -54,6 +54,10 @@
           <span class="icon">🔀</span> Funis
           <span id="fn-nav-badge" style="display:none;background:rgba(155,93,229,.15);color:var(--purple-bright);font-size:9px;padding:1px 6px;border-radius:8px;margin-left:auto">0</span>
         </div>
+        <div class="nav-item" id="nav-leads" onclick="showLeads()">
+          <span class="icon">👤</span> Leads
+          <span id="ld-nav-badge" style="display:none;background:rgba(82,183,136,.15);color:#52b788;font-size:9px;padding:1px 6px;border-radius:8px;margin-left:auto">0</span>
+        </div>
         <div class="nav-item" id="nav-kanban" onclick="showKanban()">
           <span class="icon">📋</span> Kanban
           <span class="badge" id="kanban-stuck-badge"
@@ -1266,6 +1270,20 @@
         </div>
       </div><!-- /view-funis -->
 
+      <!-- LEADS VIEW ──────────────────────────────────────────── -->
+      <div id="view-leads" class="panel" style="height:100%;overflow:hidden;display:flex">
+        <div class="fn-proj-sidebar" id="ld-proj-sidebar">
+          <div class="fn-proj-sidebar-hdr">
+            <div style="font-size:13px;font-weight:700;color:var(--text)">👤 Leads</div>
+            <span id="ld-total-badge" style="font-size:10px;color:var(--text3)">0</span>
+          </div>
+          <div id="ld-proj-list"></div>
+        </div>
+        <div class="fn-canvas-area" id="ld-canvas-area" style="padding:0">
+          <div id="ld-canvas-content" style="height:100%;display:flex;flex-direction:column"></div>
+        </div>
+      </div><!-- /view-leads -->
+
       <!-- FUNIS EDIT MODAL ────────────────────────────────────── -->
       <div id="fn-modal"
            style="position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:3200;display:flex;
@@ -2122,6 +2140,7 @@
   <script src="js/whatsapp.js"></script>
   <script src="js/mentes.js"></script>
   <script src="js/funis.js"></script>
+  <script src="js/leads.js"></script>
 
   <!-- ── Supabase Sync Layer ────────────────────────────── -->
   <!-- ══════════════════════════════════════════════════

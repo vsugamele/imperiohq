@@ -18,13 +18,17 @@ function fnSaveOverrides(o) {
   localStorage.setItem('imperio_funis_v2', JSON.stringify(o));
 }
 function fnSaveFunil(funil) {
+  // Salva localmente (imediato) e persiste no Supabase
   const overrides = fnLoadOverrides();
   overrides[funil.id] = funil;
   fnSaveOverrides(overrides);
+  if (typeof SB !== 'undefined' && SB.upsertFunil) {
+    SB.upsertFunil(funil).catch(e => console.warn('[funis] upsertFunil', e));
+  }
 }
 function fnDeleteFunil(funilId) {
   const overrides = fnLoadOverrides();
-  // Find and remove from project produtos.funis too
+  // Remove do projeto também
   const all = getAllFunnelsFlat();
   const entry = all.find(x => x.funil.id === funilId);
   if (entry) {
@@ -34,6 +38,9 @@ function fnDeleteFunil(funilId) {
   }
   delete overrides[funilId];
   fnSaveOverrides(overrides);
+  if (typeof SB !== 'undefined' && SB.deleteFunil) {
+    SB.deleteFunil(funilId).catch(e => console.warn('[funis] deleteFunil', e));
+  }
 }
 function fnUid() {
   return 'fn_' + Math.random().toString(36).slice(2, 10) + '_' + Date.now().toString(36);
