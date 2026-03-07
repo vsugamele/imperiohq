@@ -6,6 +6,22 @@ const crypto = require('crypto');
 const { execSync } = require('child_process');
 const { URL } = require('url');
 
+// ── .env loader (sem dependência externa) ────────────────────────
+try {
+  const envPath = path.join(__dirname, '.env');
+  if (fs.existsSync(envPath)) {
+    fs.readFileSync(envPath, 'utf8').split('\n').forEach(line => {
+      const m = line.match(/^\s*([A-Z_][A-Z0-9_]*)\s*=\s*(.*)$/);
+      if (m && !process.env[m[1]]) process.env[m[1]] = m[2].trim().replace(/^['"]|['"]$/g, '');
+    });
+  }
+} catch (_) {}
+
+// ── Facebook CAPI config ─────────────────────────────────────────
+const FB_PIXEL_ID        = process.env.FB_PIXEL_ID        || '';
+const FB_ACCESS_TOKEN    = process.env.FB_ACCESS_TOKEN    || '';
+const FB_TEST_EVENT_CODE = process.env.FB_TEST_EVENT_CODE || '';
+
 // ── Supabase config (mesmas credenciais do frontend) ─────────────
 const SUPA_URL = process.env.SUPA_URL || 'https://tkbivipqiewkfnhktmqq.supabase.co';
 const SUPA_KEY = process.env.SUPA_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRrYml2aXBxaWV3a2ZuaGt0bXFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg0NzY4NDgsImV4cCI6MjA1NDA1Mjg0OH0.2TnLj4lriG7eoPQWDo0mV8u8YHor6bd5ItZCHYhkym0';
@@ -193,6 +209,53 @@ async function attributeClick(sck, lId) {
   };
 }
 
+// ── Facebook Conversions API ─────────────────────────────────────
+function sha256(str) {
+  if (!str) return null;
+  return crypto.createHash('sha256').update(str.trim().toLowerCase()).digest('hex');
+}
+
+// Envia evento CAPI para o Facebook Pixel (fire-and-forget, não bloqueia webhook)
+function sendFBEvent(eventName, userData = {}, customData = {}) {
+  if (!FB_PIXEL_ID || !FB_ACCESS_TOKEN) return;
+
+  const ud = {};
+  if (userData.email) ud.em = [sha256(userData.email)];
+  if (userData.phone) ud.ph = [sha256('55' + userData.phone)]; // E.164 BR sem '+'
+  if (userData.nome)  ud.fn = [sha256(userData.nome.split(' ')[0])];
+
+  const payload = {
+    data: [{
+      event_name:    eventName,
+      event_time:    Math.floor(Date.now() / 1000),
+      action_source: 'website',
+      user_data:     ud,
+      custom_data:   customData,
+    }],
+  };
+  if (FB_TEST_EVENT_CODE) payload.test_event_code = FB_TEST_EVENT_CODE;
+
+  const body   = JSON.stringify(payload);
+  const fbReq  = https.request({
+    hostname: 'graph.facebook.com',
+    path:     `/v19.0/${FB_PIXEL_ID}/events?access_token=${encodeURIComponent(FB_ACCESS_TOKEN)}`,
+    method:   'POST',
+    headers:  { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) },
+  }, fbRes => {
+    let d = '';
+    fbRes.on('data', c => d += c);
+    fbRes.on('end', () => {
+      if (fbRes.statusCode >= 200 && fbRes.statusCode < 300)
+        console.log(`[fb-capi] ✓ ${eventName} enviado`);
+      else
+        console.warn(`[fb-capi] ✗ ${eventName} status=${fbRes.statusCode} →`, d.slice(0, 200));
+    });
+  });
+  fbReq.on('error', err => console.warn('[fb-capi] erro de rede:', String(err).split('\n')[0]));
+  fbReq.write(body);
+  fbReq.end();
+}
+
 // ── Body parser ──────────────────────────────────────────────────
 function readBody(req) {
   return new Promise((resolve, reject) => {
@@ -281,6 +344,12 @@ async function handleHotmart(req, res) {
     utm_term:       utms?.utm_term    || null,
   });
 
+  // Facebook CAPI — Purchase / InitiateCheckout (fire-and-forget)
+  const fbUser   = { email, phone: normalizePhone(phone), nome };
+  const fbCustom = { currency: 'BRL', value: valor, content_name: product.name || undefined };
+  if (status === 'aprovado')   sendFBEvent('Purchase',         fbUser, fbCustom);
+  if (status === 'aguardando') sendFBEvent('InitiateCheckout', fbUser, fbCustom);
+
   console.log(`[webhook] Hotmart ${event} — ${nome} (${email}) R$${valor} [${status}]${utms ? ` utm=${utms.utm_source}/${utms.utm_campaign}` : ''}`);
   sendJson(res, 200, { ok: true });
 }
@@ -347,6 +416,12 @@ async function handleTicto(req, res) {
     utm_content:    utms?.utm_content || null,
     utm_term:       utms?.utm_term    || null,
   });
+
+  // Facebook CAPI — Purchase / InitiateCheckout (fire-and-forget)
+  const fbUser   = { email, phone: normalizePhone(phone), nome };
+  const fbCustom = { currency: 'BRL', value: valor, content_name: product.name || undefined };
+  if (status === 'aprovado')   sendFBEvent('Purchase',         fbUser, fbCustom);
+  if (status === 'aguardando') sendFBEvent('InitiateCheckout', fbUser, fbCustom);
 
   console.log(`[webhook] Ticto ${event} — ${nome} (${email}) R$${valor} [${status}]${utms ? ` utm=${utms.utm_source}/${utms.utm_campaign}` : ''}`);
   sendJson(res, 200, { ok: true });
@@ -516,6 +591,7 @@ http.createServer(async (req, res) => {
   console.log(`   API WhatsApp  → /wa/qr  /wa/status`);
   console.log(`   Webhook Hotmart → POST /webhook/hotmart`);
   console.log(`   Webhook Ticto   → POST /webhook/ticto`);
+  console.log(`   FB CAPI → ${FB_PIXEL_ID ? `pixel ${FB_PIXEL_ID.slice(0,8)}… ✓` : '⚠ FB_PIXEL_ID não configurado — edite .env'}`);
 
   // Load produto→projeto map at startup and refresh every 5 min
   refreshProdutoMap().catch(() => {});
