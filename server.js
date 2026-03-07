@@ -65,6 +65,51 @@ function sbUpdate(table, id, data) {
   });
 }
 
+// ── Supabase GET helper ──────────────────────────────────────────
+function sbFetch(table, query) {
+  return new Promise((resolve, reject) => {
+    const urlObj = new URL(`${SUPA_URL}/rest/v1/${table}?${query}`);
+    const opts = {
+      hostname: urlObj.hostname,
+      path:     urlObj.pathname + urlObj.search,
+      method:   'GET',
+      headers:  { 'apikey': SUPA_KEY, 'Authorization': `Bearer ${SUPA_KEY}` },
+    };
+    const req = https.request(opts, res => {
+      let d = '';
+      res.on('data', c => d += c);
+      res.on('end', () => { try { resolve(JSON.parse(d)); } catch { resolve([]); } });
+    });
+    req.on('error', reject);
+    req.end();
+  });
+}
+
+// ── Produto → Projeto map ────────────────────────────────────────
+let _produtoMap = {};   // { produto_id_ext → project_id }
+
+async function refreshProdutoMap() {
+  try {
+    const projects = await sbFetch('imphq_projects', 'select=id,data');
+    const map = {};
+    for (const p of (Array.isArray(projects) ? projects : [])) {
+      const ids = (p.data && Array.isArray(p.data.produto_ids_ext)) ? p.data.produto_ids_ext : [];
+      for (const id of ids) {
+        if (id) map[String(id)] = p.id;
+      }
+    }
+    _produtoMap = map;
+    const n = Object.keys(map).length;
+    if (n > 0) console.log(`[produto-map] ${n} mapeamento${n !== 1 ? 's' : ''} carregado${n !== 1 ? 's' : ''}`);
+  } catch (err) {
+    console.warn('[produto-map] Erro ao carregar:', String(err).split('\n')[0]);
+  }
+}
+
+function getProjectForProduct(produtoIdExt) {
+  return _produtoMap[String(produtoIdExt || '')] || null;
+}
+
 // ── Body parser ──────────────────────────────────────────────────
 function readBody(req) {
   return new Promise((resolve, reject) => {
@@ -106,13 +151,14 @@ async function handleHotmart(req, res) {
     PURCHASE_CHARGEBACK:       'cancelado',
   };
 
-  const status   = statusMap[event] || 'aguardando';
-  const valor    = Number(purchase.price?.value || purchase.full_price?.value || 0);
-  const transId  = purchase.transaction || ('hm_' + Date.now());
-  const email    = buyer.email  || null;
-  const phone    = buyer.checkout_phone || null;
-  const nome     = buyer.name   || null;
-  const lId      = leadId(email, phone);
+  const status    = statusMap[event] || 'aguardando';
+  const valor     = Number(purchase.price?.value || purchase.full_price?.value || 0);
+  const transId   = purchase.transaction || ('hm_' + Date.now());
+  const email     = buyer.email  || null;
+  const phone     = buyer.checkout_phone || null;
+  const nome      = buyer.name   || null;
+  const lId       = leadId(email, phone);
+  const projectId = getProjectForProduct(product.id);
 
   // Salva lead
   await sbUpsert('imphq_leads', {
@@ -121,6 +167,7 @@ async function handleHotmart(req, res) {
     email,
     phone:      normalizePhone(phone),
     plataforma: 'hotmart',
+    project_id: projectId,
     status:     status === 'aprovado' ? 'cliente' : 'lead',
     score:      status === 'aprovado' ? 20 : 5,
     updated_at: new Date().toISOString(),
@@ -130,6 +177,7 @@ async function handleHotmart(req, res) {
   await sbUpsert('imphq_vendas', {
     id:             transId,
     lead_id:        lId,
+    project_id:     projectId,
     produto_nome:   product.name      || null,
     produto_id_ext: String(product.id || ''),
     valor,
@@ -162,13 +210,14 @@ async function handleTicto(req, res) {
     'order.chargeback':'cancelado',
   };
 
-  const status  = statusMap[event] || 'aguardando';
-  const valor   = Number(order.total || order.amount || 0);
-  const transId = String(order.id || ('tc_' + Date.now()));
-  const email   = customer.email || null;
-  const phone   = customer.phone || null;
-  const nome    = customer.name  || null;
-  const lId     = leadId(email, phone);
+  const status    = statusMap[event] || 'aguardando';
+  const valor     = Number(order.total || order.amount || 0);
+  const transId   = String(order.id || ('tc_' + Date.now()));
+  const email     = customer.email || null;
+  const phone     = customer.phone || null;
+  const nome      = customer.name  || null;
+  const lId       = leadId(email, phone);
+  const projectId = getProjectForProduct(product.id);
 
   await sbUpsert('imphq_leads', {
     id:         lId,
@@ -176,6 +225,7 @@ async function handleTicto(req, res) {
     email,
     phone:      normalizePhone(phone),
     plataforma: 'ticto',
+    project_id: projectId,
     status:     status === 'aprovado' ? 'cliente' : 'lead',
     score:      status === 'aprovado' ? 20 : 5,
     updated_at: new Date().toISOString(),
@@ -184,6 +234,7 @@ async function handleTicto(req, res) {
   await sbUpsert('imphq_vendas', {
     id:             transId,
     lead_id:        lId,
+    project_id:     projectId,
     produto_nome:   product.name      || null,
     produto_id_ext: String(product.id || ''),
     valor,
@@ -307,6 +358,15 @@ http.createServer(async (req, res) => {
     });
   }
 
+  // Route: API produto-map
+  if (req.method === 'GET' && urlObj.pathname === '/api/produto-map') {
+    return sendJson(res, 200, _produtoMap);
+  }
+  if (req.method === 'POST' && urlObj.pathname === '/api/refresh-produto-map') {
+    refreshProdutoMap().catch(() => {});
+    return sendJson(res, 200, { ok: true });
+  }
+
   // Route: Webhooks de plataformas de venda
   if (req.method === 'POST' && urlObj.pathname === '/webhook/hotmart') {
     return handleHotmart(req, res).catch(err => {
@@ -345,6 +405,10 @@ http.createServer(async (req, res) => {
   console.log(`   API WhatsApp  → /wa/qr  /wa/status`);
   console.log(`   Webhook Hotmart → POST /webhook/hotmart`);
   console.log(`   Webhook Ticto   → POST /webhook/ticto`);
+
+  // Load produto→projeto map at startup and refresh every 5 min
+  refreshProdutoMap().catch(() => {});
+  setInterval(refreshProdutoMap, 5 * 60 * 1000);
 
   // Warm up the clawdbot module import in background
   getLoginQrModule()

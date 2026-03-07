@@ -38,30 +38,51 @@ function ldRenderProjectList() {
   const list = document.getElementById('ld-proj-list');
   if (!list) return;
 
-  function projItem(id, icon, nome, isActive) {
+  function projItem(id, icon, nome, isActive, isSpecial) {
     const count = ldLeadsCache[id] !== undefined ? ldLeadsCache[id].length : '';
     const countEl = count !== ''
-      ? `<span style="margin-left:auto;font-size:10px;background:rgba(82,183,136,.15);color:#52b788;padding:1px 6px;border-radius:8px">${count}</span>`
+      ? `<span style="margin-left:auto;font-size:10px;background:rgba(82,183,136,.15);color:#52b788;padding:1px 6px;border-radius:8px;flex-shrink:0">${count}</span>`
+      : '';
+    const cfgBtn = !isSpecial
+      ? `<span onclick="event.stopPropagation();ldToggleProdutoConfig('${id}')"
+           title="Vincular IDs de produto"
+           style="cursor:pointer;color:var(--text3);opacity:.5;font-size:10px;margin-left:4px;flex-shrink:0;line-height:1"
+           onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.5">⚙</span>`
+      : '';
+    const cfgPanel = !isSpecial
+      ? `<div id="ld-prod-cfg-${id}" style="display:none;padding:8px 10px 10px;background:rgba(0,0,0,.18);border-bottom:1px solid var(--border)">
+           <div style="font-size:10px;color:var(--text3);margin-bottom:5px">IDs de produto (Hotmart / Ticto) — separados por vírgula:</div>
+           <div style="display:flex;gap:5px">
+             <input id="ld-prod-ids-${id}" type="text" placeholder="ex: 12345, 67890"
+               style="flex:1;background:var(--surface);border:1px solid var(--border2);border-radius:6px;padding:4px 8px;font-size:11px;color:var(--text);outline:none"
+               onkeydown="if(event.key==='Enter')ldSaveProdutoIds('${id}')">
+             <button id="ld-prod-save-${id}" onclick="ldSaveProdutoIds('${id}')"
+               style="background:rgba(82,183,136,.15);border:1px solid rgba(82,183,136,.3);color:#52b788;padding:3px 10px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer">Salvar</button>
+           </div>
+         </div>`
       : '';
     return `
-      <div class="fn-proj-item-hdr"
-           style="${isActive ? 'background:rgba(212,168,67,.08);color:var(--gold)' : ''}"
-           onclick="ldSelectProject('${id}')">
-        <span style="font-size:13px">${icon}</span>
-        <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px">${nome}</span>
-        ${countEl}
+      <div>
+        <div class="fn-proj-item-hdr"
+             style="${isActive ? 'background:rgba(212,168,67,.08);color:var(--gold)' : ''}"
+             onclick="ldSelectProject('${id}')">
+          <span style="font-size:13px">${icon}</span>
+          <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px">${nome}</span>
+          ${countEl}${cfgBtn}
+        </div>
+        ${cfgPanel}
       </div>`;
   }
 
   const items = [];
   // Entradas especiais
-  items.push(projItem('__all__',  '🌐', 'Todos os leads',  ldActiveProjectId === '__all__'));
-  items.push(projItem('__null__', '📭', 'Sem projeto',     ldActiveProjectId === '__null__'));
+  items.push(projItem('__all__',  '🌐', 'Todos os leads', ldActiveProjectId === '__all__',  true));
+  items.push(projItem('__null__', '📭', 'Sem projeto',    ldActiveProjectId === '__null__', true));
   // Separador
   items.push('<div style="border-top:1px solid var(--border);margin:4px 0"></div>');
   // Projetos reais
   projects.forEach(proj => {
-    items.push(projItem(proj.id, proj.cor || '📁', proj.nome, proj.id === ldActiveProjectId));
+    items.push(projItem(proj.id, proj.icon || '📁', proj.nome, proj.id === ldActiveProjectId, false));
   });
 
   list.innerHTML = items.join('');
@@ -460,6 +481,56 @@ function ldSort(field) {
     ldSortDir   = field === 'criado_em' ? 'desc' : 'asc';
   }
   if (ldActiveProjectId) ldRenderLeadsTable(ldActiveProjectId);
+}
+
+// ── Produto IDs Config ────────────────────────────────────────────
+function ldToggleProdutoConfig(projectId) {
+  const el = document.getElementById(`ld-prod-cfg-${projectId}`);
+  if (!el) return;
+  const isOpen = el.style.display !== 'none';
+  // Close all other config panels first
+  document.querySelectorAll('[id^="ld-prod-cfg-"]').forEach(p => { p.style.display = 'none'; });
+  if (!isOpen) {
+    el.style.display = 'block';
+    // Pre-fill with existing IDs from PROJECTS
+    const proj = (typeof PROJECTS !== 'undefined' ? PROJECTS : []).find(p => p.id === projectId);
+    const input = document.getElementById(`ld-prod-ids-${projectId}`);
+    if (input && proj) input.value = (proj.produto_ids_ext || []).join(', ');
+    if (input) input.focus();
+  }
+}
+
+async function ldSaveProdutoIds(projectId) {
+  const input  = document.getElementById(`ld-prod-ids-${projectId}`);
+  const saveBtn = document.getElementById(`ld-prod-save-${projectId}`);
+  if (!input) return;
+
+  const ids = input.value.split(',').map(s => s.trim()).filter(Boolean);
+
+  // Update local PROJECTS cache
+  const proj = (typeof PROJECTS !== 'undefined' ? PROJECTS : []).find(p => p.id === projectId);
+  if (proj) proj.produto_ids_ext = ids;
+
+  if (saveBtn) { saveBtn.textContent = '…'; saveBtn.disabled = true; }
+
+  // Persist to Supabase
+  if (typeof SB !== 'undefined' && SB.updateProdutoIds) {
+    const ok = await SB.updateProdutoIds(projectId, ids);
+    if (!ok) {
+      if (saveBtn) { saveBtn.textContent = '✗ Erro'; saveBtn.disabled = false; }
+      setTimeout(() => { if (saveBtn) { saveBtn.textContent = 'Salvar'; } }, 2000);
+      return;
+    }
+  }
+
+  // Notify server to refresh its in-memory map
+  try { await fetch('/api/refresh-produto-map', { method: 'POST' }); } catch(_) {}
+
+  // Close panel and give feedback
+  const el = document.getElementById(`ld-prod-cfg-${projectId}`);
+  if (el) el.style.display = 'none';
+  if (saveBtn) { saveBtn.textContent = 'Salvar'; saveBtn.disabled = false; }
+  console.log(`[leads] produto_ids_ext salvo para ${projectId}:`, ids);
 }
 
 // ── Utilities ─────────────────────────────────────────────────────

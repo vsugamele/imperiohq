@@ -47,7 +47,8 @@
             branding: rich.branding || { arquetipo: '', manifesto: '', mecanismo_key: '', inimigo_comum: '', linguagem: { usa: [], evita: [] }, cores: '', personalidade: '' },
             kpis: rich.kpis || { thumbstop: null, ctr: null, cpm: null, cpc: null, roas: null, ltv: null, cac: null, cvr: null, meta: { roas_target: null, cpa_target: null } },
             assets: rich.assets || [],
-            concorrentes: rich.concorrentes || []
+            concorrentes: rich.concorrentes || [],
+            produto_ids_ext: rich.produto_ids_ext || []
           };
         });
         // Supabase é a fonte da verdade para evitar duplicatas por resquício local
@@ -62,7 +63,8 @@
           orcamento_trafego: proj.orcamento_trafego, links: proj.links,
           avatar: proj.avatar, pipeline: proj.pipeline, branding: proj.branding,
           kpis: proj.kpis, assets: proj.assets,
-          concorrentes: proj.concorrentes || []
+          concorrentes: proj.concorrentes || [],
+          produto_ids_ext: proj.produto_ids_ext || []
         };
         const row = {
           id: proj.id, name: proj.nome || proj.name,
@@ -81,6 +83,16 @@
         else console.log('[SB] 🗑 Projeto deletado do Supabase:', id);
       },
       async lett(id) { return this.deleteProject(id);
+      },
+      async updateProdutoIds(projectId, ids) {
+        const { data, error } = await _sb.from('imphq_projects').select('data').eq('id', projectId).single();
+        if (error) { console.warn('[SB] updateProdutoIds fetch', error); return false; }
+        const richData = Object.assign({}, data?.data || {}, { produto_ids_ext: ids });
+        const { error: e2 } = await _sb.from('imphq_projects')
+          .update({ data: richData, updated_at: new Date().toISOString() })
+          .eq('id', projectId);
+        if (e2) { console.warn('[SB] updateProdutoIds update', e2); return false; }
+        return true;
       },
 
       // ── KANBAN ───────────────────────────────────────────────────
