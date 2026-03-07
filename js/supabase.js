@@ -384,6 +384,54 @@
         if (data && data.length) localStorage.setItem('imphq_empresa', JSON.stringify(data));
       },
 
+      // ── TRACKING LINKS ────────────────────────────────────────────
+      async loadTrackingLinks(projectId) {
+        let q = _sb.from('imphq_tracking_links').select('*').order('created_at', { ascending: false });
+        if (projectId && projectId !== '__all__') q = q.eq('project_id', projectId);
+        const { data, error } = await q;
+        if (error) { console.warn('[SB] loadTrackingLinks', error); return []; }
+        return data || [];
+      },
+      async upsertTrackingLink(link) {
+        const row = {
+          id:           link.id,
+          nome:         link.nome         || null,
+          destino:      link.destino      || '',
+          project_id:   link.project_id   || null,
+          utm_source:   link.utm_source   || null,
+          utm_medium:   link.utm_medium   || null,
+          utm_campaign: link.utm_campaign  || null,
+          utm_content:  link.utm_content   || null,
+          utm_term:     link.utm_term      || null,
+          ativo:        link.ativo !== false,
+          updated_at:   new Date().toISOString(),
+        };
+        if (!row.created_at) row.created_at = new Date().toISOString();
+        const { error } = await _sb.from('imphq_tracking_links').upsert(row, { onConflict: 'id' });
+        if (error) { console.warn('[SB] upsertTrackingLink', error); return false; }
+        return true;
+      },
+      async deleteTrackingLink(id) {
+        const { error } = await _sb.from('imphq_tracking_links').delete().eq('id', id);
+        if (error) { console.warn('[SB] deleteTrackingLink', error); return false; }
+        return true;
+      },
+      async loadClicks(linkId) {
+        let q = _sb.from('imphq_clicks').select('*').order('created_at', { ascending: false });
+        if (linkId) q = q.eq('link_id', linkId);
+        const { data, error } = await q.limit(500);
+        if (error) { console.warn('[SB] loadClicks', error); return []; }
+        return data || [];
+      },
+      async loadClicksStats(projectId) {
+        // Retorna {total, convertidos} de cliques
+        let q = _sb.from('imphq_clicks').select('id, convertido, link_id, utm_source, utm_campaign, created_at');
+        if (projectId && projectId !== '__all__') q = q.eq('project_id', projectId);
+        const { data, error } = await q;
+        if (error) { console.warn('[SB] loadClicksStats', error); return []; }
+        return data || [];
+      },
+
       // ── BOOTSTRAP (seed inicial quando tabelas estão vazias) ──────
       async _countTable(table) {
         const { count, error } = await _sb.from(table).select('*', { count: 'exact', head: true });

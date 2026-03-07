@@ -1,7 +1,8 @@
-const http  = require('http');
-const https = require('https');
-const fs    = require('fs');
-const path  = require('path');
+const http   = require('http');
+const https  = require('https');
+const fs     = require('fs');
+const path   = require('path');
+const crypto = require('crypto');
 const { execSync } = require('child_process');
 const { URL } = require('url');
 
@@ -108,6 +109,58 @@ async function refreshProdutoMap() {
 
 function getProjectForProduct(produtoIdExt) {
   return _produtoMap[String(produtoIdExt || '')] || null;
+}
+
+// ── Tracker: redirect + click logging ────────────────────────────
+async function handleTrackerRedirect(req, res, urlObj) {
+  const slug = urlObj.pathname.replace(/^\/r\//, '').split('?')[0];
+  if (!slug) { res.writeHead(302, { Location: '/' }); return res.end(); }
+
+  // Busca o link pelo slug (id)
+  let links;
+  try {
+    links = await sbFetch('imphq_tracking_links', `id=eq.${encodeURIComponent(slug)}&select=*&limit=1`);
+  } catch (_) { links = []; }
+
+  if (!Array.isArray(links) || !links[0] || !links[0].ativo) {
+    res.writeHead(404, { 'Content-Type': 'text/plain' });
+    return res.end('Link não encontrado ou inativo');
+  }
+
+  const link    = links[0];
+  const clickId = crypto.randomUUID();
+
+  // Monta URL de destino com sck embutido
+  let dest;
+  try { dest = new URL(link.destino); } catch {
+    res.writeHead(302, { Location: link.destino }); return res.end();
+  }
+  dest.searchParams.set('sck', clickId);
+  dest.searchParams.set('src', clickId); // Ticto usa 'src'
+
+  // Registra o clique (fire-and-forget — não bloqueia o redirect)
+  const clickRow = {
+    id:           clickId,
+    link_id:      link.id,
+    project_id:   link.project_id  || null,
+    utm_source:   link.utm_source  || null,
+    utm_medium:   link.utm_medium  || null,
+    utm_campaign: link.utm_campaign || null,
+    utm_content:  link.utm_content  || null,
+    utm_term:     link.utm_term     || null,
+    ip:     req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket.remoteAddress || null,
+    ua:     req.headers['user-agent'] || null,
+    referer: req.headers['referer'] || null,
+    convertido:  false,
+    created_at:  new Date().toISOString(),
+  };
+  sbUpsert('imphq_clicks', clickRow).catch(err =>
+    console.warn('[tracker] erro ao salvar clique:', String(err).split('\n')[0])
+  );
+
+  console.log(`[tracker] /r/${slug} → ${dest.hostname} click=${clickId}`);
+  res.writeHead(302, { Location: dest.toString() });
+  res.end();
 }
 
 // ── Body parser ──────────────────────────────────────────────────
@@ -355,6 +408,14 @@ http.createServer(async (req, res) => {
   if (urlObj.pathname.startsWith('/wa/')) {
     return handleWaRoute(req, res, urlObj).catch(err => {
       if (!res.headersSent) sendJson(res, 500, { error: String(err) });
+    });
+  }
+
+  // Route: Tracking redirect  GET /r/:slug
+  if (req.method === 'GET' && urlObj.pathname.startsWith('/r/')) {
+    return handleTrackerRedirect(req, res, urlObj).catch(err => {
+      console.error('[tracker] redirect error:', err);
+      if (!res.headersSent) { res.writeHead(302, { Location: '/' }); res.end(); }
     });
   }
 
