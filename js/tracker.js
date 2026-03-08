@@ -1,9 +1,9 @@
 // ── Tracker de Links (Fase 3A + 3B) ──────────────────────────────
 // Estado
-let trLinks    = [];   // tracking links carregados
-let trClicks   = [];   // cliques carregados
-let trVendas   = [];   // vendas atribuídas (com click_id)
-let trLoading  = false;
+let trLinks = [];   // tracking links carregados
+let trClicks = [];   // cliques carregados
+let trVendas = [];   // vendas atribuídas (com click_id)
+let trLoading = false;
 let trDetailId = null; // link selecionado para ver cliques
 
 // ── Entry point ───────────────────────────────────────────────────
@@ -35,7 +35,7 @@ function trRender(state) {
 
   // Mapa de cliques por link
   const clicksByLink = {};
-  const convByLink   = {};
+  const convByLink = {};
   for (const c of trClicks) {
     if (!c.link_id) continue;
     clicksByLink[c.link_id] = (clicksByLink[c.link_id] || 0) + 1;
@@ -46,22 +46,22 @@ function trRender(state) {
   const clickIdToLinkId = {};
   for (const c of trClicks) { if (c.id && c.link_id) clickIdToLinkId[c.id] = c.link_id; }
   const revenueByLink = {};
-  let   totalReceita  = 0;
+  let totalReceita = 0;
   for (const v of trVendas) {
     if (!v.click_id) continue;
     const lnkId = clickIdToLinkId[v.click_id];
-    const val   = Number(v.valor || 0);
+    const val = Number(v.valor || 0);
     totalReceita += val;
     if (lnkId) revenueByLink[lnkId] = (revenueByLink[lnkId] || 0) + val;
   }
 
   const totalCliques = trClicks.length;
-  const totalConv    = trClicks.filter(c => c.convertido).length;
-  const totalLinks   = trLinks.length;
-  const cvr          = totalCliques > 0 ? ((totalConv / totalCliques) * 100).toFixed(1) : '0.0';
+  const totalConv = trClicks.filter(c => c.convertido).length;
+  const totalLinks = trLinks.length;
+  const cvr = totalCliques > 0 ? ((totalConv / totalCliques) * 100).toFixed(1) : '0.0';
 
   const baseUrl = `${location.protocol}//${location.host}`;
-  const fmtBRL  = v => v > 0
+  const fmtBRL = v => v > 0
     ? 'R$\u00a0' + v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
     : '–';
 
@@ -82,12 +82,21 @@ function trRender(state) {
              padding:6px 14px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer">
       + Novo Link
     </button>
-    <button onclick="trOpenFbConfig()"
-      style="background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--text3);
-             padding:6px 12px;border-radius:7px;font-size:11px;cursor:pointer;display:flex;align-items:center;gap:5px"
-      onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text3)'">
-      ⚙️ Facebook Pixel
-    </button>
+    <div style="display:flex;gap:8px">
+      <button onclick="trCopyFbParams()"
+        style="background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--text3);
+               padding:6px 12px;border-radius:7px;font-size:11px;cursor:pointer;display:flex;align-items:center;gap:5px"
+        onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text3)'"
+        title="Copiar parâmetros dinâmicos para a URL no Meta Ads">
+        📋 UTMs Meta Ads
+      </button>
+      <button onclick="trOpenFbConfig()"
+        style="background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--text3);
+               padding:6px 12px;border-radius:7px;font-size:11px;cursor:pointer;display:flex;align-items:center;gap:5px"
+        onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text3)'">
+        ⚙️ Facebook Pixel
+      </button>
+    </div>
   </div>`;
 
   // ── Tabela de links ───────────────────────────────────────────
@@ -120,10 +129,10 @@ function trRender(state) {
 
   trLinks.forEach((link, i) => {
     const clicks = clicksByLink[link.id] || 0;
-    const conv   = convByLink[link.id]   || 0;
-    const cvr    = clicks > 0 ? ((conv / clicks) * 100).toFixed(1) : '–';
+    const conv = convByLink[link.id] || 0;
+    const cvr = clicks > 0 ? ((conv / clicks) * 100).toFixed(1) : '–';
     const trackUrl = `${baseUrl}/r/${link.id}`;
-    const projeto  = typeof PROJECTS !== 'undefined'
+    const projeto = typeof PROJECTS !== 'undefined'
       ? (PROJECTS.find(p => p.id === link.project_id) || null)
       : null;
     const projLabel = projeto ? `${projeto.icon || '📁'} ${projeto.nome}` : '';
@@ -196,8 +205,8 @@ function trClicksPanel() {
   const rows = clicks.length === 0
     ? `<div style="padding:20px;text-align:center;color:var(--text3);font-size:12px">Nenhum clique registrado ainda</div>`
     : clicks.slice(0, 100).map(c => {
-        const dt = c.created_at ? new Date(c.created_at).toLocaleString('pt-BR') : '–';
-        return `<tr style="border-bottom:1px solid var(--border)">
+      const dt = c.created_at ? new Date(c.created_at).toLocaleString('pt-BR') : '–';
+      return `<tr style="border-bottom:1px solid var(--border)">
           <td style="padding:7px 12px;font-size:11px;color:var(--text2)">${dt}</td>
           <td style="padding:7px 8px;font-size:11px;color:var(--text3);font-family:monospace">${trEsc((c.id || '').slice(0, 12))}…</td>
           <td style="padding:7px 8px;font-size:11px;color:var(--text2)">${trEsc(c.utm_source || '–')}</td>
@@ -206,7 +215,7 @@ function trClicksPanel() {
             ${c.convertido ? '<span style="color:#52b788;font-size:11px">✓</span>' : '<span style="color:var(--text3);font-size:11px">–</span>'}
           </td>
         </tr>`;
-      }).join('');
+    }).join('');
 
   return `
   <div style="margin-top:20px;background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden">
@@ -297,10 +306,10 @@ function trOpenModal(editId) {
         <div style="background:rgba(0,0,0,.15);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:10px">
           <div style="font-size:11px;color:var(--text3);font-weight:700;margin-bottom:2px">🏷 UTM PARAMETERS</div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-            ${trField('tr-f-src',      'utm_source',   'facebook',   link.utm_source   || '')}
-            ${trField('tr-f-med',      'utm_medium',   'paid',       link.utm_medium   || '')}
-            ${trField('tr-f-camp',     'utm_campaign', 'jan-2026',   link.utm_campaign  || '')}
-            ${trField('tr-f-content',  'utm_content',  'criativo-1', link.utm_content   || '')}
+            ${trField('tr-f-src', 'utm_source', 'facebook', link.utm_source || '')}
+            ${trField('tr-f-med', 'utm_medium', 'paid', link.utm_medium || '')}
+            ${trField('tr-f-camp', 'utm_campaign', 'jan-2026', link.utm_campaign || '')}
+            ${trField('tr-f-content', 'utm_content', 'criativo-1', link.utm_content || '')}
           </div>
         </div>
 
@@ -342,12 +351,12 @@ function trAutoSlug(nome) {
 }
 
 async function trSave(editId) {
-  const nome    = document.getElementById('tr-f-nome')?.value.trim();
-  const id      = document.getElementById('tr-f-id')?.value.trim().replace(/\s+/g, '-');
+  const nome = document.getElementById('tr-f-nome')?.value.trim();
+  const id = document.getElementById('tr-f-id')?.value.trim().replace(/\s+/g, '-');
   const destino = document.getElementById('tr-f-destino')?.value.trim();
-  const projEl  = document.getElementById('tr-f-projeto');
+  const projEl = document.getElementById('tr-f-projeto');
 
-  if (!id)      { alert('Informe o slug do link'); return; }
+  if (!id) { alert('Informe o slug do link'); return; }
   if (!destino) { alert('Informe a URL de destino'); return; }
 
   const btn = document.getElementById('tr-save-btn');
@@ -355,15 +364,15 @@ async function trSave(editId) {
 
   const link = {
     id,
-    nome:         nome || id,
+    nome: nome || id,
     destino,
-    project_id:   projEl?.value || null,
-    utm_source:   document.getElementById('tr-f-src')?.value.trim()     || null,
-    utm_medium:   document.getElementById('tr-f-med')?.value.trim()     || null,
-    utm_campaign: document.getElementById('tr-f-camp')?.value.trim()    || null,
-    utm_content:  document.getElementById('tr-f-content')?.value.trim() || null,
-    ativo:        editId ? (document.getElementById('tr-f-ativo')?.checked !== false) : true,
-    created_at:   editId
+    project_id: projEl?.value || null,
+    utm_source: document.getElementById('tr-f-src')?.value.trim() || null,
+    utm_medium: document.getElementById('tr-f-med')?.value.trim() || null,
+    utm_campaign: document.getElementById('tr-f-camp')?.value.trim() || null,
+    utm_content: document.getElementById('tr-f-content')?.value.trim() || null,
+    ativo: editId ? (document.getElementById('tr-f-ativo')?.checked !== false) : true,
+    created_at: editId
       ? (trLinks.find(l => l.id === editId)?.created_at || new Date().toISOString())
       : new Date().toISOString(),
   };
@@ -375,7 +384,7 @@ async function trSave(editId) {
   }
 
   trCloseModal();
-  trLinks  = await SB.loadTrackingLinks('__all__');
+  trLinks = await SB.loadTrackingLinks('__all__');
   trClicks = await SB.loadClicksStats('__all__');
   trRender();
 }
@@ -384,7 +393,7 @@ async function trDelete(id) {
   const link = trLinks.find(l => l.id === id);
   if (!confirm(`Excluir link "${link?.nome || id}"? Todos os cliques associados serão removidos.`)) return;
   await SB.deleteTrackingLink(id);
-  trLinks  = trLinks.filter(l => l.id !== id);
+  trLinks = trLinks.filter(l => l.id !== id);
   trClicks = trClicks.filter(c => c.link_id !== id);
   if (trDetailId === id) trDetailId = null;
   trRender();
@@ -396,6 +405,15 @@ function trCopyUrl(url) {
     trToast('🔗 Link copiado!');
   }).catch(() => {
     prompt('Copie o link:', url);
+  });
+}
+
+function trCopyFbParams() {
+  const params = 'utm_source={{site_source_name}}&utm_medium={{placement}}&utm_campaign={{campaign.name}}&utm_content={{adset.name}}&utm_term={{ad.name}}';
+  navigator.clipboard.writeText(params).then(() => {
+    trToast('🏷️ Parâmetros do Meta Ads copiados!');
+  }).catch(() => {
+    prompt('Copie os parâmetros:', params);
   });
 }
 
@@ -414,7 +432,7 @@ function trToast(msg) {
 
 // ── Helpers ───────────────────────────────────────────────────────
 function trEsc(s) {
-  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 function trDomain(url) {
   try { return new URL(url).hostname.replace('www.', ''); } catch { return url; }
@@ -434,15 +452,15 @@ function trField(id, label, placeholder, value) {
 // ── Facebook CAPI config modal (Fase 3E — pixel por projeto) ─────
 async function trOpenFbConfig(initProjectId) {
   const projects = typeof PROJECTS !== 'undefined' ? PROJECTS : [];
-  const selId    = initProjectId || '';
+  const selId = initProjectId || '';
 
   // Busca config inicial
   let cfg = {};
   try {
     const qs = selId ? `?project_id=${encodeURIComponent(selId)}` : '';
-    const r  = await fetch(`/api/fb-config${qs}`);
+    const r = await fetch(`/api/fb-config${qs}`);
     if (r.ok) cfg = await r.json();
-  } catch (_) {}
+  } catch (_) { }
 
   const projOpts = [
     `<option value="">🌐 Global (padrão de todos os projetos)</option>`,
@@ -531,9 +549,9 @@ async function trFbCfgChangeProj() {
   let cfg = {};
   try {
     const qs = projId ? `?project_id=${encodeURIComponent(projId)}` : '';
-    const r  = await fetch(`/api/fb-config${qs}`);
+    const r = await fetch(`/api/fb-config${qs}`);
     if (r.ok) cfg = await r.json();
-  } catch (_) {}
+  } catch (_) { }
 
   if (fields) fields.innerHTML = trFbCfgFields(cfg);
   // Atualiza hasExistingToken no botão salvar
@@ -547,9 +565,9 @@ function trCloseFbConfig() {
 }
 
 async function trSaveFbConfig(hasExistingToken) {
-  const pixelId   = document.getElementById('fb-cfg-pixel')?.value.trim();
-  const tokenRaw  = document.getElementById('fb-cfg-token')?.value.trim();
-  const testCode  = document.getElementById('fb-cfg-test')?.value.trim();
+  const pixelId = document.getElementById('fb-cfg-pixel')?.value.trim();
+  const tokenRaw = document.getElementById('fb-cfg-token')?.value.trim();
+  const testCode = document.getElementById('fb-cfg-test')?.value.trim();
   const projectId = document.getElementById('fb-cfg-proj')?.value || null;
 
   if (!pixelId) { alert('Informe o Pixel ID'); return; }
@@ -557,16 +575,16 @@ async function trSaveFbConfig(hasExistingToken) {
 
   const payload = { pixel_id: pixelId, test_event_code: testCode };
   if (projectId) payload.project_id = projectId;
-  if (tokenRaw)  payload.access_token = tokenRaw; // só envia se preenchido
+  if (tokenRaw) payload.access_token = tokenRaw; // só envia se preenchido
 
   const btn = document.getElementById('fb-cfg-save-btn');
   if (btn) { btn.textContent = '…'; btn.disabled = true; }
 
   try {
     const r = await fetch('/api/fb-config', {
-      method:  'POST',
+      method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify(payload),
+      body: JSON.stringify(payload),
     });
     if (!r.ok) throw new Error(await r.text());
     trCloseFbConfig();
