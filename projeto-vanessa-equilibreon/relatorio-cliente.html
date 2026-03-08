@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Relatório Completo — Projeto Equilibre On | Vanessa</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --gold: #c9a04e;
+      --gold-light: #e8c97a;
+      --cream: #faf8f4;
+      --dark: #1a1612;
+      --dark-card: #221e18;
+      --mid: #2e2820;
+      --text: #d4cfc6;
+      --text-muted: #9a9086;
+      --accent: #8b5e3c;
+      --border: rgba(201,160,78,0.25);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--dark);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      line-height: 1.75;
+    }
+
+    /* HERO */
+    .hero {
+      background: linear-gradient(160deg, #1a1612 0%, #2a200f 50%, #1a1612 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 80px 40px 60px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: radial-gradient(ellipse 70% 50% at 50% 0%, rgba(201,160,78,0.12), transparent);
+      pointer-events: none;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      border: 1px solid var(--border);
+      color: var(--gold);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      padding: 6px 20px;
+      border-radius: 50px;
+      margin-bottom: 28px;
+    }
+
+    .hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2rem, 5vw, 3.4rem);
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.2;
+      margin-bottom: 16px;
+    }
+
+    .hero h1 span {
+      background: linear-gradient(90deg, var(--gold), var(--gold-light), var(--gold));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-sub {
+      color: var(--text-muted);
+      font-size: 14px;
+      letter-spacing: 1px;
+    }
+
+    .hero-meta {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      margin-top: 40px;
+      flex-wrap: wrap;
+    }
+
+    .hero-meta-item {
+      text-align: center;
+    }
+
+    .hero-meta-item .label {
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .hero-meta-item .value {
+      font-weight: 600;
+      color: var(--gold);
+      font-size: 15px;
+    }
+
+    /* INDEX */
+    .index-bar {
+      background: var(--dark-card);
+      border-bottom: 1px solid var(--border);
+      padding: 20px 40px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .index-bar a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 6px 14px;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      transition: all 0.2s;
+    }
+
+    .index-bar a:hover {
+      color: var(--gold);
+      border-color: var(--border);
+    }
+
+    /* MAIN */
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 60px 32px;
+    }
+
+    /* MODULE CARD */
+    .module {
+      margin-bottom: 64px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      background: var(--dark-card);
+    }
+
+    .module-header {
+      background: linear-gradient(135deg, var(--mid), #1e1a14);
+      border-bottom: 1px solid var(--border);
+      padding: 28px 36px;
+      display: flex;
+      align-items: flex-start;
+      gap: 20px;
+    }
+
+    .module-num {
+      font-family: 'Playfair Display', serif;
+      font-size: 3rem;
+      font-weight: 700;
+      color: var(--border);
+      line-height: 1;
+      flex-shrink: 0;
+      min-width: 56px;
+    }
+
+    .module-header-text h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+
+    .module-header-text .subtitle {
+      color: var(--gold);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .module-body {
+      padding: 36px;
+    }
+
+    /* SECTION INSIDE MODULE */
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      color: var(--gold-light);
+      margin-bottom: 16px;
+      margin-top: 32px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section-title:first-child { margin-top: 0; }
+
+    /* TABLE */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 14px;
+    }
+
+    th {
+      background: var(--mid);
+      color: var(--gold);
+      font-size: 11px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      font-weight: 600;
+      padding: 10px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    td {
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(201,160,78,0.1);
+      color: var(--text);
+      vertical-align: top;
+    }
+
+    tr:last-child td { border-bottom: none; }
+
+    tr:hover td { background: rgba(201,160,78,0.04); }
+
+    .score-badge {
+      background: rgba(201,160,78,0.15);
+      color: var(--gold);
+      font-weight: 700;
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    /* QUOTE */
+    blockquote {
+      border-left: 3px solid var(--gold);
+      background: rgba(201,160,78,0.06);
+      padding: 20px 24px;
+      border-radius: 0 8px 8px 0;
+      margin: 16px 0;
+      color: var(--cream);
+      font-style: italic;
+      font-size: 15px;
+      line-height: 1.8;
+    }
+
+    /* LIST */
+    ul, ol {
+      padding-left: 20px;
+      margin: 12px 0;
+    }
+
+    li {
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+
+    li strong { color: var(--gold-light); }
+
+    /* HIGHLIGHT BOX */
+    .highlight-box {
+      background: linear-gradient(135deg, rgba(201,160,78,0.1), rgba(201,160,78,0.04));
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px 24px;
+      margin: 16px 0;
+    }
+
+    .highlight-box p { margin-bottom: 6px; }
+    .highlight-box p:last-child { margin-bottom: 0; }
+
+    /* ACT CARDS */
+    .act-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin: 16px 0;
+    }
+
+    .act-item {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      background: var(--mid);
+      border: 1px solid rgba(201,160,78,0.12);
+      border-radius: 8px;
+      padding: 16px 20px;
+      transition: border-color 0.2s;
+    }
+
+    .act-item:hover { border-color: var(--border); }
+
+    .act-num {
+      background: rgba(201,160,78,0.2);
+      color: var(--gold);
+      font-weight: 700;
+      font-size: 12px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .act-content strong {
+      color: var(--gold-light);
+      display: block;
+      margin-bottom: 4px;
+      font-size: 14px;
+    }
+
+    .act-content em {
+      color: var(--text-muted);
+      font-style: italic;
+      font-size: 14px;
+    }
+
+    /* AD CARD */
+    .ad-card {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+
+    .ad-card-header {
+      background: linear-gradient(90deg, var(--mid), #1e1a14);
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .ad-tag {
+      background: var(--gold);
+      color: var(--dark);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 3px 10px;
+      border-radius: 4px;
+    }
+
+    .ad-card-header span {
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .ad-card-body {
+      padding: 20px 24px;
+    }
+
+    .ad-card-body p {
+      color: var(--cream);
+      font-size: 15px;
+      line-height: 1.8;
+      font-style: italic;
+    }
+
+    /* COMPETITOR GRID */
+    .competitor-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 16px 0;
+    }
+
+    @media (max-width: 600px) {
+      .competitor-grid { grid-template-columns: 1fr; }
+    }
+
+    .competitor-card {
+      background: var(--mid);
+      border: 1px solid rgba(201,160,78,0.15);
+      border-radius: 10px;
+      padding: 20px;
+    }
+
+    .competitor-card h4 {
+      color: var(--gold-light);
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .competitor-card .c-item {
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+
+    .competitor-card .c-label {
+      color: var(--text-muted);
+      font-size: 11px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    .brecha {
+      background: rgba(139,94,60,0.2);
+      border: 1px solid rgba(139,94,60,0.4);
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 13px;
+      color: #d4956a;
+      margin-top: 8px;
+    }
+
+    /* DORK */
+    .dork-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin: 12px 0;
+    }
+
+    .dork {
+      background: #0e0c09;
+      border: 1px solid rgba(201,160,78,0.15);
+      border-radius: 6px;
+      padding: 10px 16px;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      color: var(--gold-light);
+    }
+
+    /* PSYCH BOX */
+    .psych-box {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 16px 0;
+    }
+
+    @media (max-width: 600px) { .psych-box { grid-template-columns: 1fr; } }
+
+    .psych-item {
+      background: var(--mid);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .psych-item .icon {
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+
+    .psych-item .psych-label {
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .psych-item .psych-value {
+      color: var(--cream);
+      font-style: italic;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    /* STATUS TABLE */
+    .status-table td:last-child {
+      text-align: center;
+    }
+
+    .badge-done {
+      background: rgba(80,180,100,0.15);
+      color: #72e08a;
+      border: 1px solid rgba(80,180,100,0.3);
+      border-radius: 20px;
+      padding: 2px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    /* NEXT STEPS */
+    .next-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin: 16px 0;
+    }
+
+    .next-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: var(--mid);
+      border: 1px solid rgba(201,160,78,0.12);
+      border-radius: 8px;
+      padding: 14px 18px;
+    }
+
+    .next-icon {
+      font-size: 1.3rem;
+      flex-shrink: 0;
+    }
+
+    .next-text strong { color: var(--gold-light); display: block; font-size: 14px; }
+    .next-text span { color: var(--text-muted); font-size: 13px; }
+
+    /* MECHANISM */
+    .mechanism {
+      background: linear-gradient(135deg, rgba(201,160,78,0.08), rgba(201,160,78,0.02));
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 28px;
+      text-align: center;
+      margin: 16px 0;
+    }
+
+    .mechanism h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      color: var(--gold);
+      margin-bottom: 12px;
+    }
+
+    .mechanism p {
+      color: var(--text);
+      max-width: 580px;
+      margin: 0 auto 8px;
+    }
+
+    .mechanism .tag {
+      display: inline-block;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      color: var(--text-muted);
+      font-size: 12px;
+      padding: 4px 14px;
+      margin-top: 12px;
+    }
+
+    /* FOOTER */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 32px 40px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    footer span { color: var(--gold); }
+
+    p { margin-bottom: 8px; }
+
+    strong { color: var(--gold-light); }
+  </style>
+</head>
+<body>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="hero-badge">Relatório Estratégico Completo</div>
+  <h1>Projeto <span>Equilibre On</span></h1>
+  <p class="hero-sub">Entregáveis Consolidados — Cliente: Vanessa</p>
+  <div class="hero-meta">
+    <div class="hero-meta-item">
+      <div class="label">Módulos Entregues</div>
+      <div class="value">5 de 5</div>
+    </div>
+    <div class="hero-meta-item">
+      <div class="label">Status</div>
+      <div class="value">✅ Concluído</div>
+    </div>
+    <div class="hero-meta-item">
+      <div class="label">Mecanismo Único</div>
+      <div class="value">SE-360™</div>
+    </div>
+    <div class="hero-meta-item">
+      <div class="label">Data</div>
+      <div class="value">Março 2026</div>
+    </div>
+  </div>
+</header>
+
+<!-- NAV INDEX -->
+<nav class="index-bar">
+  <a href="#estrategia">01 Estratégia</a>
+  <a href="#avatar">02 Dossiê do Avatar</a>
+  <a href="#concorrencia">03 Funnel Hacking</a>
+  <a href="#copy">04 Copy / VSL</a>
+  <a href="#ads">05 Anúncios</a>
+  <a href="#status">Status & Próximos Passos</a>
+</nav>
+
+<main class="container">
+
+  <!-- ─── MÓDULO 01 ─── -->
+  <section class="module" id="estrategia">
+    <div class="module-header">
+      <div class="module-num">01</div>
+      <div class="module-header-text">
+        <div class="subtitle">Módulo 01 · estrategia-central.md</div>
+        <h2>Estratégia Central</h2>
+      </div>
+    </div>
+    <div class="module-body">
+
+      <h3 class="section-title">Mecanismo Único: Sincronia Epigenética 360™ (SE-360)</h3>
+
+      <div class="mechanism">
+        <h3>Sincronia Epigenética 360™</h3>
+        <p><strong>O que é:</strong> Um protocolo de 3 camadas que limpa a <em>surdez celular</em> antes de nutrir, usando bio-ressonância e suplementação de precisão.</p>
+        <p><strong>Diferencial:</strong> Não é dieta, é <em>engenharia clínica 1:1</em>.</p>
+        <div class="tag">Mecanismo exclusivo — não replicável pela concorrência</div>
+      </div>
+
+      <h3 class="section-title">Reposicionamento (Counter-Positioning)</h3>
+
+      <div class="highlight-box">
+        <p><strong>Alvo:</strong> Mulheres que gastam com Ozempic e "Desafios de 30 dias" da Carol Faria.</p>
+        <p><strong>Argumento central:</strong> <em>"Band-aids genéricos inflamam o cortisol. O SE-360 cura a causa raiz."</em></p>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Dimensão</th>
+            <th>Mercado de Massa</th>
+            <th>Equilibre On com SE-360™</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Abordagem</td>
+            <td>Dieta genérica / desafio</td>
+            <td>Engenharia clínica personalizada</td>
+          </tr>
+          <tr>
+            <td>Profundidade</td>
+            <td>Superficial (sintoma)</td>
+            <td>Causa raiz (epigenética + celular)</td>
+          </tr>
+          <tr>
+            <td>Acompanhamento</td>
+            <td>Nenhum ou em grupo</td>
+            <td>1:1 de precisão</td>
+          </tr>
+          <tr>
+            <td>Tecnologia</td>
+            <td>Ausente</td>
+            <td>Bio-ressonância + protocolo 3 camadas</td>
+          </tr>
+          <tr>
+            <td>Resultado cortisol</td>
+            <td>Agrava (inflamação)</td>
+            <td>Regula e cura</td>
+          </tr>
+        </tbody>
+      </table>
+
+    </div>
+  </section>
+
+  <!-- ─── MÓDULO 02 ─── -->
+  <section class="module" id="avatar">
+    <div class="module-header">
+      <div class="module-num">02</div>
+      <div class="module-header-text">
+        <div class="subtitle">Módulo 02 · dossie-problemas-avatar.md</div>
+        <h2>Dossiê de Problemas do Avatar</h2>
+      </div>
+    </div>
+    <div class="module-body">
+
+      <h3 class="section-title">Os 5 Campeões de Dor (Score 0–35)</h3>
+
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Problema</th>
+            <th>Score</th>
+            <th>Descrição</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>1</strong></td>
+            <td><strong>Peso Abdominal Resistente</strong></td>
+            <td><span class="score-badge">33 pts</span></td>
+            <td>A gordura que ignora a dieta.</td>
+          </tr>
+          <tr>
+            <td><strong>2</strong></td>
+            <td><strong>Brain Fog / Névoa Mental</strong></td>
+            <td><span class="score-badge">32 pts</span></td>
+            <td>Perda de autoridade e foco no trabalho.</td>
+          </tr>
+          <tr>
+            <td><strong>3</strong></td>
+            <td><strong>Cansaço Crônico</strong></td>
+            <td><span class="score-badge">32 pts</span></td>
+            <td>Acordar mais cansada do que deitou.</td>
+          </tr>
+          <tr>
+            <td><strong>4</strong></td>
+            <td><strong>Exames "Normais" que Mentem</strong></td>
+            <td><span class="score-badge">31 pts</span></td>
+            <td>A frustração de não ser ouvida pelo médico.</td>
+          </tr>
+          <tr>
+            <td><strong>5</strong></td>
+            <td><strong>Inchaço Sistêmico</strong></td>
+            <td><span class="score-badge">30 pts</span></td>
+            <td>Inflamação visível no rosto e corpo.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 class="section-title">Biópsia Psicológica do Avatar</h3>
+
+      <div class="psych-box">
+        <div class="psych-item">
+          <div class="icon">🩸</div>
+          <div class="psych-label">Ferida Central</div>
+          <div class="psych-value">"Meu corpo me traiu."</div>
+        </div>
+        <div class="psych-item">
+          <div class="icon">🏆</div>
+          <div class="psych-label">Desejo do Ego</div>
+          <div class="psych-value">Retomar a Soberania e ser invejada pela vitalidade aos 40+.</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─── MÓDULO 03 ─── -->
+  <section class="module" id="concorrencia">
+    <div class="module-header">
+      <div class="module-num">03</div>
+      <div class="module-header-text">
+        <div class="subtitle">Módulo 03 · relatorio-concorrencia.md</div>
+        <h2>Funnel Hacking — Inteligência Competitiva</h2>
+      </div>
+    </div>
+    <div class="module-body">
+
+      <h3 class="section-title">Mapa Competitivo</h3>
+
+      <div class="competitor-grid">
+        <div class="competitor-card">
+          <h4>🎯 Carol Faria <em style="font-weight:400;color:var(--text-muted);font-size:11px;"> — Dominante</em></h4>
+          <div class="c-item">
+            <span class="c-label">Produtos</span>
+            Desafio 30 Dias (R$ 97), Manual de Ervas, Mentorias
+          </div>
+          <div class="c-item">
+            <span class="c-label">Estratégia</span>
+            Volume em massa, front-end barato
+          </div>
+          <div class="brecha">⚡ Brecha: Falta de acompanhamento 1:1 e tecnologia clínica (BodyShape)</div>
+        </div>
+
+        <div class="competitor-card">
+          <h4>🎯 Bianca Campos</h4>
+          <div class="c-item">
+            <span class="c-label">Nicho</span>
+            Endometriose
+          </div>
+          <div class="c-item">
+            <span class="c-label">Estratégia</span>
+            Foco muito restrito
+          </div>
+          <div class="brecha">⚡ Brecha: Não atende a "Executiva Exaurida" de forma 360</div>
+        </div>
+      </div>
+
+      <h3 class="section-title">Google Dorks Utilizadas na Pesquisa</h3>
+
+      <div class="dork-list">
+        <div class="dork">inurl:checkout "Carol Faria"</div>
+        <div class="dork">site:cantinhodanutri.com.br</div>
+        <div class="dork">site:kiwify.com.br "saúde hormonal"</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─── MÓDULO 04 ─── -->
+  <section class="module" id="copy">
+    <div class="module-header">
+      <div class="module-num">04</div>
+      <div class="module-header-text">
+        <div class="subtitle">Módulo 04 · manifesto-vsl-v1.md</div>
+        <h2>Copy Devastador — Roteiro VSL v1</h2>
+      </div>
+    </div>
+    <div class="module-body">
+
+      <h3 class="section-title">Manifesto de Redenção: O Fim da Surdez Metabólica</h3>
+
+      <p style="color:var(--text-muted);font-size:13px;margin-bottom:20px;">Estrutura narrativa completa · Roteiro VSL / Página de Vendas · Versão 1</p>
+
+      <div class="act-list">
+        <div class="act-item">
+          <div class="act-num">1</div>
+          <div class="act-content">
+            <strong>O Espelho da Dor</strong>
+            <em>"Você acorda, mas não desperta..."</em>
+          </div>
+        </div>
+        <div class="act-item">
+          <div class="act-num">2</div>
+          <div class="act-content">
+            <strong>A Grande Mentira</strong>
+            <em>"Seus exames normais são uma mentira técnica."</em>
+          </div>
+        </div>
+        <div class="act-item">
+          <div class="act-num">3</div>
+          <div class="act-content">
+            <strong>O Mecanismo Único</strong>
+            <em>Apresentação da Sincronia Epigenética 360™ — por que ela chega onde nenhuma dieta chega.</em>
+          </div>
+        </div>
+        <div class="act-item">
+          <div class="act-num">4</div>
+          <div class="act-content">
+            <strong>O Contraste</strong>
+            <em>Por que os desafios de R$ 97 não funcionam para você.</em>
+          </div>
+        </div>
+        <div class="act-item">
+          <div class="act-num">5</div>
+          <div class="act-content">
+            <strong>A Oferta Elite</strong>
+            <em>Scanner de Causa Raiz + Tecnologia Biofísica.</em>
+          </div>
+        </div>
+        <div class="act-item">
+          <div class="act-num">6</div>
+          <div class="act-content">
+            <strong>CTA — Chamada para Ação</strong>
+            <em>"Retome sua Soberania. Clique abaixo."</em>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─── MÓDULO 05 ─── -->
+  <section class="module" id="ads">
+    <div class="module-header">
+      <div class="module-num">05</div>
+      <div class="module-header-text">
+        <div class="subtitle">Módulo 05 · ads-scripts-v1.md</div>
+        <h2>Arsenal de Anúncios — Scripts v1</h2>
+      </div>
+    </div>
+    <div class="module-body">
+
+      <h3 class="section-title">3 Ângulos de Ataque — Scripts Completos</h3>
+
+      <div class="ad-card">
+        <div class="ad-card-header">
+          <span class="ad-tag">AD 01</span>
+          <span>O Ângulo da Raiva — A Injustiça</span>
+        </div>
+        <div class="ad-card-body">
+          <p>"Cansada de ouvir que 'está tudo normal' enquanto você mal consegue subir uma escada? O sistema de saúde tradicional está te falhando. Na Equilibre On, nós não olhamos apenas para os seus exames, nós olhamos para a sua <strong>história celular</strong>. Chega de ser tratada como uma média."</p>
+        </div>
+      </div>
+
+      <div class="ad-card">
+        <div class="ad-card-header">
+          <span class="ad-tag">AD 02</span>
+          <span>O Ângulo do Medo — Ponto de Ruptura</span>
+        </div>
+        <div class="ad-card-body">
+          <p>"O 'Brain Fog' não é cansaço, é <strong>inflamação no seu cérebro</strong>. Quanto tempo mais sua carreira aguenta você operando com 20% da sua capacidade? Descubra a causa raiz antes do colapso."</p>
+        </div>
+      </div>
+
+      <div class="ad-card">
+        <div class="ad-card-header">
+          <span class="ad-tag">AD 03</span>
+          <span>O Ângulo do Status — Soberania</span>
+        </div>
+        <div class="ad-card-body">
+          <p>"A <strong>Soberania Biológica</strong> é o novo luxo das mulheres de alta performance. Recupere o comando do seu corpo e a clareza mental que te levou ao topo."</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─── STATUS & PRÓXIMOS PASSOS ─── -->
+  <section class="module" id="status">
+    <div class="module-header">
+      <div class="module-num" style="color:rgba(114,224,138,0.3)">✓</div>
+      <div class="module-header-text">
+        <div class="subtitle">Resumo Executivo</div>
+        <h2>Status dos Entregáveis & Próximos Passos</h2>
+      </div>
+    </div>
+    <div class="module-body">
+
+      <h3 class="section-title">Resumo de Entregáveis</h3>
+
+      <table class="status-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Módulo</th>
+            <th>Arquivo</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>01</td>
+            <td>Estratégia Central</td>
+            <td><code style="color:var(--gold-light);font-size:12px">estrategia-central.md</code></td>
+            <td><span class="badge-done">✅ Concluído</span></td>
+          </tr>
+          <tr>
+            <td>02</td>
+            <td>Dossiê do Avatar</td>
+            <td><code style="color:var(--gold-light);font-size:12px">dossie-problemas-avatar.md</code></td>
+            <td><span class="badge-done">✅ Concluído</span></td>
+          </tr>
+          <tr>
+            <td>03</td>
+            <td>Funnel Hacking</td>
+            <td><code style="color:var(--gold-light);font-size:12px">relatorio-concorrencia.md</code></td>
+            <td><span class="badge-done">✅ Concluído</span></td>
+          </tr>
+          <tr>
+            <td>04</td>
+            <td>Copy / VSL</td>
+            <td><code style="color:var(--gold-light);font-size:12px">manifesto-vsl-v1.md</code></td>
+            <td><span class="badge-done">✅ Concluído</span></td>
+          </tr>
+          <tr>
+            <td>05</td>
+            <td>Arsenal de Anúncios</td>
+            <td><code style="color:var(--gold-light);font-size:12px">ads-scripts-v1.md</code></td>
+            <td><span class="badge-done">✅ Concluído</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 class="section-title">Próximos Passos</h3>
+
+      <div class="next-steps">
+        <div class="next-item">
+          <div class="next-icon">🎬</div>
+          <div class="next-text">
+            <strong>Produção da VSL</strong>
+            <span>Gravar o vídeo de vendas com base no roteiro do Módulo 04 (6 atos).</span>
+          </div>
+        </div>
+        <div class="next-item">
+          <div class="next-icon">🖥️</div>
+          <div class="next-text">
+            <strong>Criação da Landing Page</strong>
+            <span>Montar a página com o mecanismo único SE-360™ e CTA "Retome sua Soberania".</span>
+          </div>
+        </div>
+        <div class="next-item">
+          <div class="next-icon">📣</div>
+          <div class="next-text">
+            <strong>Subir os Ads</strong>
+            <span>Veicular os 3 ângulos de anúncio e testar performance (Raiva / Medo / Status).</span>
+          </div>
+        </div>
+        <div class="next-item">
+          <div class="next-icon">🔬</div>
+          <div class="next-text">
+            <strong>Desenvolvimento do Produto</strong>
+            <span>Detalhar o protocolo SE-360™: sessões, ferramentas biofísicas e entregáveis ao cliente.</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <p>Produzido por <span>Império HQ</span> · Ecossistema de Inteligência Estratégica · Março 2026</p>
+</footer>
+
+</body>
+</html>
