@@ -83,6 +83,12 @@ function trRender(state) {
       + Novo Link
     </button>
     <div style="display:flex;gap:8px">
+      <button onclick="trCopyScript()"
+        style="background:rgba(82,183,136,.12);border:1px solid rgba(82,183,136,.3);color:#52b788;
+               padding:6px 12px;border-radius:7px;font-size:11px;cursor:pointer;display:flex;align-items:center;gap:5px;font-weight:700"
+        title="Copiar script de rastreamento (Pixel + UTMs) para colar no Head do seu site">
+        🌐 Copiar Script
+      </button>
       <button onclick="trCopyFbParams()"
         style="background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--text3);
                padding:6px 12px;border-radius:7px;font-size:11px;cursor:pointer;display:flex;align-items:center;gap:5px"
@@ -414,6 +420,21 @@ function trCopyFbParams() {
     trToast('🏷️ Parâmetros do Meta Ads copiados!');
   }).catch(() => {
     prompt('Copie os parâmetros:', params);
+  });
+}
+
+function trCopyScript() {
+  const host = location.hostname === 'localhost' || location.hostname === '127.0.0.1'
+    ? location.protocol + '//' + location.host
+    : 'https://imperiohq.vercel.app'; // Fallback to production URL if needed, or dynamic
+
+  // Use dynamically generated URL based on current host
+  const scriptTag = `<script src="${location.protocol}//${location.host}/js/imptrack.js" async defer></script>`;
+
+  navigator.clipboard.writeText(scriptTag).then(() => {
+    trToast('🌐 Script copiado! Cole no <head> da sua Landing Page.');
+  }).catch(() => {
+    prompt('Copie o script de rastreamento:', scriptTag);
   });
 }
 
