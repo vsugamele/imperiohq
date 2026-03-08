@@ -1,5 +1,10 @@
 {
   "rewrites": [
-    { "source": "/", "destination": "/imperio-hq-v5.html" }
+    { "source": "/webhook/hotmart", "destination": "/api/webhook/hotmart" },
+    { "source": "/webhook/ticto",   "destination": "/api/webhook/ticto"   },
+    { "source": "/r/:slug",         "destination": "/api/r/:slug"          },
+    { "source": "/wa/qr",           "destination": "/api/wa/qr"            },
+    { "source": "/wa/status",       "destination": "/api/wa/status"        },
+    { "source": "/",                "destination": "/imperio-hq-v5.html"   }
   ]
 }

@@ -431,17 +431,24 @@ function trField(id, label, placeholder, value) {
   </div>`;
 }
 
-// ── Facebook CAPI config modal (Fase 3D) ──────────────────────────
-async function trOpenFbConfig() {
-  let cfg = { pixel_id: '', has_token: false, token_tail: '', test_event_code: '' };
+// ── Facebook CAPI config modal (Fase 3E — pixel por projeto) ─────
+async function trOpenFbConfig(initProjectId) {
+  const projects = typeof PROJECTS !== 'undefined' ? PROJECTS : [];
+  const selId    = initProjectId || '';
+
+  // Busca config inicial
+  let cfg = {};
   try {
-    const r = await fetch('/api/fb-config');
+    const qs = selId ? `?project_id=${encodeURIComponent(selId)}` : '';
+    const r  = await fetch(`/api/fb-config${qs}`);
     if (r.ok) cfg = await r.json();
   } catch (_) {}
 
-  const tokenPlaceholder = cfg.has_token
-    ? `Token atual: •••••${trEsc(cfg.token_tail)} — deixe em branco para manter`
-    : 'Cole o Access Token aqui';
+  const projOpts = [
+    `<option value="">🌐 Global (padrão de todos os projetos)</option>`,
+    ...projects.map(p =>
+      `<option value="${trEsc(p.id)}" ${selId === p.id ? 'selected' : ''}>${trEsc((p.icon || '📁') + ' ' + p.nome)}</option>`)
+  ].join('');
 
   const html = `
   <div id="tr-fb-modal" onclick="if(event.target===this)trCloseFbConfig()"
@@ -455,29 +462,20 @@ async function trOpenFbConfig() {
 
       <div style="padding:20px;display:flex;flex-direction:column;gap:14px">
         <p style="font-size:12px;color:var(--text3);margin:0;line-height:1.5">
-          Configure o Pixel e o Access Token para enviar eventos <strong style="color:var(--text2)">Purchase</strong> e <strong style="color:var(--text2)">InitiateCheckout</strong> via Conversions API. As alterações têm efeito imediato.
+          Configure Pixel e Access Token por projeto. A config do projeto tem prioridade sobre a global.
+          A config <strong style="color:var(--text2)">Global</strong> é o fallback para projetos não configurados.
         </p>
 
         <div>
-          <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:5px">PIXEL ID *</label>
-          <input id="fb-cfg-pixel" type="text" value="${trEsc(cfg.pixel_id || '')}"
-            placeholder="Ex: 523253167233774" style="${trInputStyle()}">
+          <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:5px">PROJETO</label>
+          <select id="fb-cfg-proj" onchange="trFbCfgChangeProj()"
+            style="${trInputStyle()}">
+            ${projOpts}
+          </select>
         </div>
 
-        <div>
-          <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:5px">
-            ACCESS TOKEN *
-            ${cfg.has_token ? '<span style="color:#52b788;font-size:10px;margin-left:6px">✓ já configurado</span>' : ''}
-          </label>
-          <input id="fb-cfg-token" type="password" placeholder="${tokenPlaceholder}" style="${trInputStyle()}">
-          ${cfg.has_token ? '<div style="font-size:10px;color:var(--text3);margin-top:3px">Deixe em branco para manter o token atual</div>' : ''}
-        </div>
-
-        <div>
-          <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:5px">TEST EVENT CODE <span style="font-weight:400">(opcional)</span></label>
-          <input id="fb-cfg-test" type="text" value="${trEsc(cfg.test_event_code || '')}"
-            placeholder="Ex: TEST12345" style="${trInputStyle()}">
-          <div style="font-size:10px;color:var(--text3);margin-top:3px">Use para testar no Events Manager sem afetar dados reais. Remova ao ir para produção.</div>
+        <div id="fb-cfg-fields" style="display:flex;flex-direction:column;gap:14px">
+          ${trFbCfgFields(cfg)}
         </div>
       </div>
 
@@ -497,21 +495,69 @@ async function trOpenFbConfig() {
   document.body.insertAdjacentHTML('beforeend', html);
 }
 
+// Gera HTML dos campos pixel/token a partir de uma cfg
+function trFbCfgFields(cfg = {}) {
+  const tokenPH = cfg.has_token
+    ? `Token atual: •••••${trEsc(cfg.token_tail || '')} — deixe em branco para manter`
+    : 'Cole o Access Token aqui';
+  return `
+    <div>
+      <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:5px">PIXEL ID *</label>
+      <input id="fb-cfg-pixel" type="text" value="${trEsc(cfg.pixel_id || '')}"
+        placeholder="Ex: 523253167233774" style="${trInputStyle()}">
+    </div>
+    <div>
+      <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:5px">
+        ACCESS TOKEN *
+        ${cfg.has_token ? '<span style="color:#52b788;font-size:10px;margin-left:6px">✓ já configurado</span>' : ''}
+      </label>
+      <input id="fb-cfg-token" type="password" placeholder="${tokenPH}" style="${trInputStyle()}">
+      ${cfg.has_token ? '<div style="font-size:10px;color:var(--text3);margin-top:3px">Deixe em branco para manter o token atual</div>' : ''}
+    </div>
+    <div>
+      <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:5px">TEST EVENT CODE <span style="font-weight:400">(opcional)</span></label>
+      <input id="fb-cfg-test" type="text" value="${trEsc(cfg.test_event_code || '')}"
+        placeholder="Ex: TEST12345" style="${trInputStyle()}">
+      <div style="font-size:10px;color:var(--text3);margin-top:3px">Use para testar no Events Manager. Remova ao ir para produção.</div>
+    </div>`;
+}
+
+// Chamado quando o projeto é trocado no select — recarrega campos
+async function trFbCfgChangeProj() {
+  const projId = document.getElementById('fb-cfg-proj')?.value || '';
+  const fields = document.getElementById('fb-cfg-fields');
+  if (fields) fields.innerHTML = '<div style="color:var(--text3);font-size:12px;padding:8px 0">⏳ Carregando…</div>';
+
+  let cfg = {};
+  try {
+    const qs = projId ? `?project_id=${encodeURIComponent(projId)}` : '';
+    const r  = await fetch(`/api/fb-config${qs}`);
+    if (r.ok) cfg = await r.json();
+  } catch (_) {}
+
+  if (fields) fields.innerHTML = trFbCfgFields(cfg);
+  // Atualiza hasExistingToken no botão salvar
+  const btn = document.getElementById('fb-cfg-save-btn');
+  if (btn) btn.setAttribute('onclick', `trSaveFbConfig(${!!cfg.has_token})`);
+}
+
 function trCloseFbConfig() {
   const m = document.getElementById('tr-fb-modal');
   if (m) m.remove();
 }
 
 async function trSaveFbConfig(hasExistingToken) {
-  const pixelId  = document.getElementById('fb-cfg-pixel')?.value.trim();
-  const tokenRaw = document.getElementById('fb-cfg-token')?.value.trim();
-  const testCode = document.getElementById('fb-cfg-test')?.value.trim();
+  const pixelId   = document.getElementById('fb-cfg-pixel')?.value.trim();
+  const tokenRaw  = document.getElementById('fb-cfg-token')?.value.trim();
+  const testCode  = document.getElementById('fb-cfg-test')?.value.trim();
+  const projectId = document.getElementById('fb-cfg-proj')?.value || null;
 
   if (!pixelId) { alert('Informe o Pixel ID'); return; }
   if (!tokenRaw && !hasExistingToken) { alert('Informe o Access Token'); return; }
 
   const payload = { pixel_id: pixelId, test_event_code: testCode };
-  if (tokenRaw) payload.access_token = tokenRaw; // só envia se preenchido
+  if (projectId) payload.project_id = projectId;
+  if (tokenRaw)  payload.access_token = tokenRaw; // só envia se preenchido
 
   const btn = document.getElementById('fb-cfg-save-btn');
   if (btn) { btn.textContent = '…'; btn.disabled = true; }
