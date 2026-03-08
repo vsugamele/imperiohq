@@ -36,9 +36,14 @@
       <div class="sidebar-section">
         <div class="sidebar-label" style="display:flex;justify-content:space-between;align-items:center">
           Projetos
-          <button onclick="openCreateProject()"
-            style="background:rgba(212,168,67,.15);border:1px solid rgba(212,168,67,.3);color:var(--gold);font-size:10px;padding:2px 7px;border-radius:5px;cursor:pointer;font-weight:700">+
-            Novo</button>
+          <div style="display:flex;gap:4px">
+            <button onclick="openCategoryManager()"
+              style="background:transparent;border:1px solid var(--border);color:var(--text3);font-size:10px;padding:2px 7px;border-radius:5px;cursor:pointer;font-weight:700"
+              title="Gerenciar Categorias">⚙</button>
+            <button onclick="openCreateProject()"
+              style="background:rgba(212,168,67,.15);border:1px solid rgba(212,168,67,.3);color:var(--gold);font-size:10px;padding:2px 7px;border-radius:5px;cursor:pointer;font-weight:700">+
+              Novo</button>
+          </div>
         </div>
         <div id="sidebar-projects"></div>
       </div>
@@ -52,11 +57,13 @@
         </div>
         <div class="nav-item" id="nav-funis" onclick="showFunis()">
           <span class="icon">🔀</span> Funis
-          <span id="fn-nav-badge" style="display:none;background:rgba(155,93,229,.15);color:var(--purple-bright);font-size:9px;padding:1px 6px;border-radius:8px;margin-left:auto">0</span>
+          <span id="fn-nav-badge"
+            style="display:none;background:rgba(155,93,229,.15);color:var(--purple-bright);font-size:9px;padding:1px 6px;border-radius:8px;margin-left:auto">0</span>
         </div>
         <div class="nav-item" id="nav-leads" onclick="showLeads()">
           <span class="icon">👤</span> Leads
-          <span id="ld-nav-badge" style="display:none;background:rgba(82,183,136,.15);color:#52b788;font-size:9px;padding:1px 6px;border-radius:8px;margin-left:auto">0</span>
+          <span id="ld-nav-badge"
+            style="display:none;background:rgba(82,183,136,.15);color:#52b788;font-size:9px;padding:1px 6px;border-radius:8px;margin-left:auto">0</span>
         </div>
         <div class="nav-item" id="nav-tracker" onclick="showTracker()">
           <span class="icon">🔗</span> Tracker
@@ -1292,7 +1299,8 @@
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
           <div>
             <div style="font-size:18px;font-weight:800;color:var(--text)">🔗 Tracker de Links</div>
-            <div style="font-size:12px;color:var(--text3);margin-top:2px">Crie links rastreados, capture cliques e atribua vendas por campanha</div>
+            <div style="font-size:12px;color:var(--text3);margin-top:2px">Crie links rastreados, capture cliques e
+              atribua vendas por campanha</div>
           </div>
           <button onclick="trOpenModal()"
             style="background:rgba(212,175,55,.12);border:1px solid rgba(212,175,55,.3);color:var(--gold);
@@ -1304,11 +1312,9 @@
       </div><!-- /view-tracker -->
 
       <!-- FUNIS EDIT MODAL ────────────────────────────────────── -->
-      <div id="fn-modal"
-           style="position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:3200;display:flex;
+      <div id="fn-modal" style="position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:3200;display:flex;
                   align-items:center;justify-content:center;padding:20px;
-                  opacity:0;pointer-events:none;transition:.2s"
-           onclick="if(event.target===this)closeFunilModal()">
+                  opacity:0;pointer-events:none;transition:.2s" onclick="if(event.target===this)closeFunilModal()">
         <!-- Content rendered dynamically by fnRenderModal() -->
       </div>
 
@@ -1597,14 +1603,21 @@
         </div>
         <!-- Chat -->
         <div id="mm-tab-chat" style="display:none;height:100%;flex-direction:column;gap:0">
-          <div id="mm-chat-messages" style="flex:1;overflow-y:auto;padding:8px 0;min-height:320px;max-height:420px;display:flex;flex-direction:column;gap:10px">
-            <div style="text-align:center;font-size:11px;color:var(--text3);padding:20px">Inicie uma conversa com esta mente sintética</div>
+          <div id="mm-chat-messages"
+            style="flex:1;overflow-y:auto;padding:8px 0;min-height:320px;max-height:420px;display:flex;flex-direction:column;gap:10px">
+            <div style="text-align:center;font-size:11px;color:var(--text3);padding:20px">Inicie uma conversa com esta
+              mente sintética</div>
           </div>
-          <div style="border-top:1px solid var(--border);padding-top:12px;display:flex;gap:8px;align-items:flex-end;flex-shrink:0">
-            <textarea id="mm-chat-input" rows="2" class="brief-input" placeholder="Digite sua mensagem..." style="flex:1;resize:none;font-size:12px" onkeydown="if((event.ctrlKey||event.metaKey)&&event.key==='Enter')sendMenteChat()"></textarea>
-            <button onclick="sendMenteChat()" id="mm-chat-send" style="background:var(--gold);color:#0a0a0f;border:none;padding:8px 16px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0;height:56px">Enviar</button>
+          <div
+            style="border-top:1px solid var(--border);padding-top:12px;display:flex;gap:8px;align-items:flex-end;flex-shrink:0">
+            <textarea id="mm-chat-input" rows="2" class="brief-input" placeholder="Digite sua mensagem..."
+              style="flex:1;resize:none;font-size:12px"
+              onkeydown="if((event.ctrlKey||event.metaKey)&&event.key==='Enter')sendMenteChat()"></textarea>
+            <button onclick="sendMenteChat()" id="mm-chat-send"
+              style="background:var(--gold);color:#0a0a0f;border:none;padding:8px 16px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0;height:56px">Enviar</button>
           </div>
-          <div style="font-size:10px;color:var(--text3);text-align:right;margin-top:4px">Ctrl+Enter para enviar · usa a chave OpenRouter configurada</div>
+          <div style="font-size:10px;color:var(--text3);text-align:right;margin-top:4px">Ctrl+Enter para enviar · usa a
+            chave OpenRouter configurada</div>
         </div>
       </div>
     </div>
@@ -1901,12 +1914,16 @@
         <div class="settings-group">
           <div class="settings-label">🎨 Replicate API Key</div>
           <input type="password" id="input-replicate-key" class="settings-input" placeholder="r8_...">
-          <div class="settings-desc">Gera imagens (FLUX) e vídeos (Wan, Kling) — <a href="https://replicate.com/account/api-tokens" target="_blank" style="color:var(--gold)">replicate.com/api-tokens</a></div>
+          <div class="settings-desc">Gera imagens (FLUX) e vídeos (Wan, Kling) — <a
+              href="https://replicate.com/account/api-tokens" target="_blank"
+              style="color:var(--gold)">replicate.com/api-tokens</a></div>
         </div>
         <div class="settings-group">
           <div class="settings-label">🌐 Google AI (Vertex) API Key</div>
           <input type="password" id="input-google-key" class="settings-input" placeholder="AQ...">
-          <div class="settings-desc">Gemini Pro Vision para análise e geração — <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:var(--gold)">aistudio.google.com</a></div>
+          <div class="settings-desc">Gemini Pro Vision para análise e geração — <a
+              href="https://aistudio.google.com/app/apikey" target="_blank"
+              style="color:var(--gold)">aistudio.google.com</a></div>
         </div>
         <div class="settings-group">
           <div class="settings-label">🕷️ OpenClaw Webhook URL</div>
@@ -2022,23 +2039,32 @@
   <div id="import-funnel-modal"
     style="position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;z-index:3100;padding:20px;opacity:0;pointer-events:none;transition:.2s"
     onclick="if(event.target===this)closeImportFunnelModal()">
-    <div style="background:var(--surface);border:1px solid var(--border2);border-radius:14px;width:100%;max-width:560px;max-height:90vh;display:flex;flex-direction:column">
-      <div style="padding:18px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+    <div
+      style="background:var(--surface);border:1px solid var(--border2);border-radius:14px;width:100%;max-width:560px;max-height:90vh;display:flex;flex-direction:column">
+      <div
+        style="padding:18px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
         <div id="ifm-title" style="font-size:15px;font-weight:700;color:var(--text)">📥 Importar Pesquisa</div>
-        <button onclick="closeImportFunnelModal()" style="background:transparent;border:1px solid var(--border2);color:var(--text3);padding:4px 12px;border-radius:6px;cursor:pointer">✕</button>
+        <button onclick="closeImportFunnelModal()"
+          style="background:transparent;border:1px solid var(--border2);color:var(--text3);padding:4px 12px;border-radius:6px;cursor:pointer">✕</button>
       </div>
       <div style="padding:18px 20px;display:flex;flex-direction:column;gap:12px;overflow-y:auto;flex:1">
-        <div style="font-size:11px;color:var(--text3);line-height:1.6;background:var(--surface2);border-radius:8px;padding:10px 12px">
-          <strong style="color:var(--text)">Como usar:</strong> Execute o <strong style="color:var(--gold)">Funnel Hacking Agent</strong> (OBJ 3 ou 4) para pesquisar este concorrente.
-          Depois, abra o arquivo de dossiê gerado (ex: <code style="font-size:10px;background:var(--border);border-radius:3px;padding:1px 4px">objetivo-3-escalados/dossies/dossie-nome.md</code>),
+        <div
+          style="font-size:11px;color:var(--text3);line-height:1.6;background:var(--surface2);border-radius:8px;padding:10px 12px">
+          <strong style="color:var(--text)">Como usar:</strong> Execute o <strong style="color:var(--gold)">Funnel
+            Hacking Agent</strong> (OBJ 3 ou 4) para pesquisar este concorrente.
+          Depois, abra o arquivo de dossiê gerado (ex: <code
+            style="font-size:10px;background:var(--border);border-radius:3px;padding:1px 4px">objetivo-3-escalados/dossies/dossie-nome.md</code>),
           copie o conteúdo e cole abaixo.
         </div>
         <div class="brief-field">
           <div class="brief-label">Conteúdo do Dossiê (markdown)</div>
-          <textarea id="ifm-content" class="brief-input" style="min-height:220px;resize:vertical;font-family:monospace;font-size:10px;line-height:1.5" placeholder="# Dossie: Nome do Concorrente&#10;&#10;## Score de Escala&#10;TOTAL: 12/15&#10;&#10;## Tráfego&#10;..."></textarea>
+          <textarea id="ifm-content" class="brief-input"
+            style="min-height:220px;resize:vertical;font-family:monospace;font-size:10px;line-height:1.5"
+            placeholder="# Dossie: Nome do Concorrente&#10;&#10;## Score de Escala&#10;TOTAL: 12/15&#10;&#10;## Tráfego&#10;..."></textarea>
         </div>
       </div>
-      <div style="padding:14px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px;flex-shrink:0">
+      <div
+        style="padding:14px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px;flex-shrink:0">
         <button onclick="closeImportFunnelModal()" class="btn btn-outline">Cancelar</button>
         <button onclick="importFunnelData()" class="btn btn-gold">📥 Importar Dados</button>
       </div>
@@ -2172,20 +2198,25 @@
   <!-- ═══ ESCAVADOR DE DESEJOS — VIEW MODAL ═══ -->
   <div id="escavador-modal"
     style="position:fixed;inset:0;background:rgba(0,0,0,.92);display:flex;flex-direction:column;z-index:5000;opacity:0;pointer-events:none;transition:.2s">
-    <div style="display:flex;align-items:center;padding:14px 20px;border-bottom:1px solid rgba(155,127,232,.25);background:var(--surface);flex-shrink:0;gap:12px">
+    <div
+      style="display:flex;align-items:center;padding:14px 20px;border-bottom:1px solid rgba(155,127,232,.25);background:var(--surface);flex-shrink:0;gap:12px">
       <div style="flex:1;min-width:0">
-        <div id="escavador-modal-title" style="font-size:15px;font-weight:700;color:#9b7fe8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">🧬 Escavador de Desejos</div>
+        <div id="escavador-modal-title"
+          style="font-size:15px;font-weight:700;color:#9b7fe8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+          🧬 Escavador de Desejos</div>
         <div id="escavador-modal-date" style="font-size:11px;color:var(--text3);margin-top:2px"></div>
       </div>
       <button onclick="openEscavadorImport()" class="btn btn-sm"
-        style="background:rgba(155,127,232,.12);color:#9b7fe8;border:1px solid rgba(155,127,232,.3);white-space:nowrap;flex-shrink:0">↻ Regenerar</button>
+        style="background:rgba(155,127,232,.12);color:#9b7fe8;border:1px solid rgba(155,127,232,.3);white-space:nowrap;flex-shrink:0">↻
+        Regenerar</button>
       <button onclick="closeEscavadorModal()"
         style="width:30px;height:30px;border-radius:8px;border:1px solid var(--border2);background:var(--surface2);color:var(--text2);cursor:pointer;font-size:15px;flex-shrink:0">✕</button>
     </div>
     <div id="escavador-modal-body"
       style="flex:1;overflow-y:auto;padding:24px 28px;line-height:1.7;font-size:13.5px;color:var(--text);white-space:pre-wrap;font-family:ui-monospace,SFMono-Regular,'SF Mono',monospace;background:var(--bg)">
     </div>
-    <div style="padding:12px 20px;border-top:1px solid var(--border);background:var(--surface);text-align:right;flex-shrink:0">
+    <div
+      style="padding:12px 20px;border-top:1px solid var(--border);background:var(--surface);text-align:right;flex-shrink:0">
       <button onclick="closeEscavadorModal()" class="btn btn-sm btn-outline">Fechar</button>
     </div>
   </div>
@@ -2193,18 +2224,26 @@
   <!-- ═══ ESCAVADOR DE DESEJOS — IMPORT MODAL ═══ -->
   <div id="escavador-import-modal"
     style="position:fixed;inset:0;background:rgba(0,0,0,.88);display:flex;align-items:center;justify-content:center;z-index:5100;padding:20px;opacity:0;pointer-events:none;transition:.2s">
-    <div style="background:var(--surface);border:1px solid rgba(155,127,232,.35);border-radius:14px;width:100%;max-width:700px;display:flex;flex-direction:column;max-height:90vh">
-      <div style="padding:16px 20px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;flex-shrink:0">
+    <div
+      style="background:var(--surface);border:1px solid rgba(155,127,232,.35);border-radius:14px;width:100%;max-width:700px;display:flex;flex-direction:column;max-height:90vh">
+      <div
+        style="padding:16px 20px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;flex-shrink:0">
         <div style="flex:1">
           <div style="font-size:15px;font-weight:700;color:#9b7fe8">🧬 Importar Escavador de Desejos</div>
-          <div style="font-size:11px;color:var(--text3);margin-top:3px">Cole o resultado completo gerado pela skill <code style="background:rgba(155,127,232,.12);padding:1px 5px;border-radius:4px;font-size:10px">escavador-desejos</code></div>
+          <div style="font-size:11px;color:var(--text3);margin-top:3px">Cole o resultado completo gerado pela skill
+            <code
+              style="background:rgba(155,127,232,.12);padding:1px 5px;border-radius:4px;font-size:10px">escavador-desejos</code>
+          </div>
         </div>
         <button onclick="closeEscavadorImport()"
           style="width:28px;height:28px;border-radius:7px;border:1px solid var(--border2);background:var(--surface2);color:var(--text2);cursor:pointer;font-size:15px">✕</button>
       </div>
       <div style="padding:16px 20px;flex:1;overflow:hidden;display:flex;flex-direction:column;gap:10px;min-height:0">
-        <div style="background:rgba(155,127,232,.06);border:1px solid rgba(155,127,232,.18);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--text3);line-height:1.5">
-          💡 <strong style="color:var(--text2)">Como usar:</strong> Acione a skill <code style="background:rgba(155,127,232,.15);padding:1px 5px;border-radius:4px">escavador-desejos</code> em uma conversa com o contexto do projeto, copie o markdown completo gerado e cole aqui.
+        <div
+          style="background:rgba(155,127,232,.06);border:1px solid rgba(155,127,232,.18);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--text3);line-height:1.5">
+          💡 <strong style="color:var(--text2)">Como usar:</strong> Acione a skill <code
+            style="background:rgba(155,127,232,.15);padding:1px 5px;border-radius:4px">escavador-desejos</code> em uma
+          conversa com o contexto do projeto, copie o markdown completo gerado e cole aqui.
         </div>
         <textarea id="escavador-import-text"
           placeholder="# ANÁLISE DE DESEJOS DO AVATAR: [Nome]&#10;## PERFIL PSICOLÓGICO RESUMIDO&#10;...&#10;## TOP 10 DESEJOS EXTERNOS&#10;..."
@@ -2212,10 +2251,12 @@
           style="flex:1;min-height:280px;resize:none;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:12px;font-family:ui-monospace,monospace;font-size:12px;color:var(--text);line-height:1.6;outline:none"></textarea>
         <div id="escavador-import-error" style="display:none;font-size:12px;color:#e05c5c;margin-top:-4px"></div>
       </div>
-      <div style="padding:12px 20px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end;flex-shrink:0">
+      <div
+        style="padding:12px 20px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end;flex-shrink:0">
         <button onclick="closeEscavadorImport()" class="btn btn-sm btn-outline">Cancelar</button>
         <button onclick="confirmEscavadorImport()"
-          style="background:linear-gradient(135deg,#9b7fe8,#7c5cbf);color:#fff;border:none;padding:7px 20px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">🧬 Importar e Salvar</button>
+          style="background:linear-gradient(135deg,#9b7fe8,#7c5cbf);color:#fff;border:none;padding:7px 20px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">🧬
+          Importar e Salvar</button>
       </div>
     </div>
   </div>
@@ -2230,12 +2271,16 @@
           style="width:28px;height:28px;border-radius:7px;border:1px solid var(--border2);background:var(--surface2);color:var(--text2);cursor:pointer;font-size:15px">✕</button>
       </div>
       <div style="padding:20px;display:flex;flex-direction:column;gap:14px">
-        <div style="background:rgba(224,92,92,.08);border:1px solid rgba(224,92,92,.25);border-radius:8px;padding:12px 14px;font-size:13px;color:#e05c5c;line-height:1.5">
+        <div
+          style="background:rgba(224,92,92,.08);border:1px solid rgba(224,92,92,.25);border-radius:8px;padding:12px 14px;font-size:13px;color:#e05c5c;line-height:1.5">
           ⚠️ Você está prestes a deletar <strong id="dp-project-name"></strong>.<br>
-          <span style="color:var(--text3);font-size:12px">Esta ação é irreversível — todos os dados do projeto serão removidos.</span>
+          <span style="color:var(--text3);font-size:12px">Esta ação é irreversível — todos os dados do projeto serão
+            removidos.</span>
         </div>
         <div style="display:flex;flex-direction:column;gap:6px">
-          <label style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">Senha de confirmação</label>
+          <label
+            style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">Senha
+            de confirmação</label>
           <input id="dp-senha" type="password" class="brief-input" placeholder="Digite a senha para confirmar"
             onkeydown="if(event.key==='Enter')confirmDeleteProject();if(event.key==='Escape')closeDeleteProject()">
           <div id="dp-error" style="display:none;font-size:12px;color:#e05c5c;margin-top:2px"></div>
@@ -2247,7 +2292,37 @@
         </div>
       </div>
     </div>
-  </div>
+
+    <!-- ═══ CATEGORY MANAGER MODAL ═══ -->
+    <div id="category-manager-modal"
+      style="position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;z-index:4000;padding:20px;opacity:0;pointer-events:none;transition:.2s">
+      <div
+        style="background:var(--surface);border:1px solid var(--border2);border-radius:14px;width:100%;max-width:420px;max-height:90vh;display:flex;flex-direction:column">
+        <div
+          style="padding:16px 20px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;flex-shrink:0">
+          <div style="font-size:15px;font-weight:700;flex:1;color:var(--text)">📁 Gerenciar Categorias</div>
+          <button onclick="closeCategoryManager()"
+            style="width:28px;height:28px;border-radius:7px;border:1px solid var(--border2);background:var(--surface2);color:var(--text2);cursor:pointer;font-size:15px">✕</button>
+        </div>
+        <div style="padding:20px;display:flex;flex-direction:column;gap:14px;overflow-y:auto;flex:1">
+          <div style="font-size:12px;color:var(--text3);line-height:1.5">
+            Personalize as categorias existentes. <br>Para adicionar novas categorias ou mudar o nome, basta classificar
+            um projeto no seu Briefing com o novo titulo.
+          </div>
+          <div id="category-list" style="display:flex;flex-direction:column">
+            <!-- Populated via JS -->
+          </div>
+        </div>
+        <div
+          style="padding:16px 20px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end;flex-shrink:0">
+          <button onclick="closeCategoryManager()" class="btn btn-sm btn-outline">Cancelar</button>
+          <button onclick="saveCategoryManager()"
+            style="background:var(--gold);color:#000;border:none;padding:7px 18px;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer">💾
+            Salvar Alterações</button>
+        </div>
+      </div>
+    </div>
 
 </body>
+
 </html>
