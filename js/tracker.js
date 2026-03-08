@@ -75,6 +75,21 @@ function trRender(state) {
     ${trStatCard('🏆', 'Receita Atribuída', fmtBRL(totalReceita), '#f7768e')}
   </div>`;
 
+  // ── Barra de ações ────────────────────────────────────────────
+  html += `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+    <button onclick="trOpenModal()"
+      style="background:rgba(212,175,55,.12);border:1px solid rgba(212,175,55,.3);color:var(--gold);
+             padding:6px 14px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer">
+      + Novo Link
+    </button>
+    <button onclick="trOpenFbConfig()"
+      style="background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--text3);
+             padding:6px 12px;border-radius:7px;font-size:11px;cursor:pointer;display:flex;align-items:center;gap:5px"
+      onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text3)'">
+      ⚙️ Facebook Pixel
+    </button>
+  </div>`;
+
   // ── Tabela de links ───────────────────────────────────────────
   if (trLinks.length === 0) {
     html += `<div style="text-align:center;padding:60px 20px;color:var(--text3)">
@@ -414,4 +429,104 @@ function trField(id, label, placeholder, value) {
     <input id="${id}" type="text" value="${trEsc(value)}" placeholder="${placeholder}"
       style="${trInputStyle()}">
   </div>`;
+}
+
+// ── Facebook CAPI config modal (Fase 3D) ──────────────────────────
+async function trOpenFbConfig() {
+  let cfg = { pixel_id: '', has_token: false, token_tail: '', test_event_code: '' };
+  try {
+    const r = await fetch('/api/fb-config');
+    if (r.ok) cfg = await r.json();
+  } catch (_) {}
+
+  const tokenPlaceholder = cfg.has_token
+    ? `Token atual: •••••${trEsc(cfg.token_tail)} — deixe em branco para manter`
+    : 'Cole o Access Token aqui';
+
+  const html = `
+  <div id="tr-fb-modal" onclick="if(event.target===this)trCloseFbConfig()"
+    style="position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(4px);z-index:999;display:flex;align-items:center;justify-content:center">
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;width:480px;max-width:95vw">
+
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--border)">
+        <div style="font-size:15px;font-weight:800;color:var(--text)">⚙️ Facebook CAPI</div>
+        <button onclick="trCloseFbConfig()" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:20px;line-height:1">×</button>
+      </div>
+
+      <div style="padding:20px;display:flex;flex-direction:column;gap:14px">
+        <p style="font-size:12px;color:var(--text3);margin:0;line-height:1.5">
+          Configure o Pixel e o Access Token para enviar eventos <strong style="color:var(--text2)">Purchase</strong> e <strong style="color:var(--text2)">InitiateCheckout</strong> via Conversions API. As alterações têm efeito imediato.
+        </p>
+
+        <div>
+          <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:5px">PIXEL ID *</label>
+          <input id="fb-cfg-pixel" type="text" value="${trEsc(cfg.pixel_id || '')}"
+            placeholder="Ex: 523253167233774" style="${trInputStyle()}">
+        </div>
+
+        <div>
+          <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:5px">
+            ACCESS TOKEN *
+            ${cfg.has_token ? '<span style="color:#52b788;font-size:10px;margin-left:6px">✓ já configurado</span>' : ''}
+          </label>
+          <input id="fb-cfg-token" type="password" placeholder="${tokenPlaceholder}" style="${trInputStyle()}">
+          ${cfg.has_token ? '<div style="font-size:10px;color:var(--text3);margin-top:3px">Deixe em branco para manter o token atual</div>' : ''}
+        </div>
+
+        <div>
+          <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:5px">TEST EVENT CODE <span style="font-weight:400">(opcional)</span></label>
+          <input id="fb-cfg-test" type="text" value="${trEsc(cfg.test_event_code || '')}"
+            placeholder="Ex: TEST12345" style="${trInputStyle()}">
+          <div style="font-size:10px;color:var(--text3);margin-top:3px">Use para testar no Events Manager sem afetar dados reais. Remova ao ir para produção.</div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;justify-content:flex-end;padding:14px 20px;border-top:1px solid var(--border)">
+        <button onclick="trCloseFbConfig()"
+          style="background:transparent;border:1px solid var(--border);color:var(--text2);padding:8px 18px;border-radius:8px;font-size:13px;cursor:pointer">
+          Cancelar
+        </button>
+        <button id="fb-cfg-save-btn" onclick="trSaveFbConfig(${!!cfg.has_token})"
+          style="background:rgba(212,175,55,.15);border:1px solid rgba(212,175,55,.35);color:var(--gold);padding:8px 22px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer">
+          Salvar
+        </button>
+      </div>
+    </div>
+  </div>`;
+
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
+function trCloseFbConfig() {
+  const m = document.getElementById('tr-fb-modal');
+  if (m) m.remove();
+}
+
+async function trSaveFbConfig(hasExistingToken) {
+  const pixelId  = document.getElementById('fb-cfg-pixel')?.value.trim();
+  const tokenRaw = document.getElementById('fb-cfg-token')?.value.trim();
+  const testCode = document.getElementById('fb-cfg-test')?.value.trim();
+
+  if (!pixelId) { alert('Informe o Pixel ID'); return; }
+  if (!tokenRaw && !hasExistingToken) { alert('Informe o Access Token'); return; }
+
+  const payload = { pixel_id: pixelId, test_event_code: testCode };
+  if (tokenRaw) payload.access_token = tokenRaw; // só envia se preenchido
+
+  const btn = document.getElementById('fb-cfg-save-btn');
+  if (btn) { btn.textContent = '…'; btn.disabled = true; }
+
+  try {
+    const r = await fetch('/api/fb-config', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify(payload),
+    });
+    if (!r.ok) throw new Error(await r.text());
+    trCloseFbConfig();
+    trToast('✅ Facebook CAPI configurado com sucesso');
+  } catch (err) {
+    if (btn) { btn.textContent = 'Salvar'; btn.disabled = false; }
+    alert('Erro ao salvar: ' + err.message);
+  }
 }

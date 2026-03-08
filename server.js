@@ -17,10 +17,10 @@ try {
   }
 } catch (_) {}
 
-// ── Facebook CAPI config ─────────────────────────────────────────
-const FB_PIXEL_ID        = process.env.FB_PIXEL_ID        || '';
-const FB_ACCESS_TOKEN    = process.env.FB_ACCESS_TOKEN    || '';
-const FB_TEST_EVENT_CODE = process.env.FB_TEST_EVENT_CODE || '';
+// ── Facebook CAPI config (mutável via /api/fb-config) ────────────
+let _fbPixelId        = process.env.FB_PIXEL_ID        || '';
+let _fbAccessToken    = process.env.FB_ACCESS_TOKEN    || '';
+let _fbTestEventCode  = process.env.FB_TEST_EVENT_CODE || '';
 
 // ── Supabase config (mesmas credenciais do frontend) ─────────────
 const SUPA_URL = process.env.SUPA_URL || 'https://tkbivipqiewkfnhktmqq.supabase.co';
@@ -127,6 +127,21 @@ function getProjectForProduct(produtoIdExt) {
   return _produtoMap[String(produtoIdExt || '')] || null;
 }
 
+// ── FB CAPI config: carrega do banco na inicialização ─────────────
+async function refreshFbConfig() {
+  try {
+    const rows = await sbFetch('imphq_empresa', 'id=eq.cfg_fb_capi&select=extra&limit=1');
+    const extra = rows?.[0]?.extra;
+    if (!extra || !extra.pixel_id) return;
+    _fbPixelId       = extra.pixel_id;
+    _fbAccessToken   = extra.access_token   || _fbAccessToken;
+    _fbTestEventCode = extra.test_event_code || '';
+    console.log(`[fb-config] carregado do banco: pixel ${_fbPixelId.slice(0, 8)}…`);
+  } catch (err) {
+    console.warn('[fb-config] falha ao carregar:', String(err).split('\n')[0]);
+  }
+}
+
 // ── Tracker: redirect + click logging ────────────────────────────
 async function handleTrackerRedirect(req, res, urlObj) {
   const slug = urlObj.pathname.replace(/^\/r\//, '').split('?')[0];
@@ -217,7 +232,7 @@ function sha256(str) {
 
 // Envia evento CAPI para o Facebook Pixel (fire-and-forget, não bloqueia webhook)
 function sendFBEvent(eventName, userData = {}, customData = {}) {
-  if (!FB_PIXEL_ID || !FB_ACCESS_TOKEN) return;
+  if (!_fbPixelId || !_fbAccessToken) return;
 
   const ud = {};
   if (userData.email) ud.em = [sha256(userData.email)];
@@ -233,12 +248,12 @@ function sendFBEvent(eventName, userData = {}, customData = {}) {
       custom_data:   customData,
     }],
   };
-  if (FB_TEST_EVENT_CODE) payload.test_event_code = FB_TEST_EVENT_CODE;
+  if (_fbTestEventCode) payload.test_event_code = _fbTestEventCode;
 
   const body   = JSON.stringify(payload);
   const fbReq  = https.request({
     hostname: 'graph.facebook.com',
-    path:     `/v19.0/${FB_PIXEL_ID}/events?access_token=${encodeURIComponent(FB_ACCESS_TOKEN)}`,
+    path:     `/v19.0/${_fbPixelId}/events?access_token=${encodeURIComponent(_fbAccessToken)}`,
     method:   'POST',
     headers:  { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) },
   }, fbRes => {
@@ -553,6 +568,36 @@ http.createServer(async (req, res) => {
     return sendJson(res, 200, { ok: true });
   }
 
+  // Route: Facebook CAPI config
+  if (req.method === 'GET' && urlObj.pathname === '/api/fb-config') {
+    return sendJson(res, 200, {
+      pixel_id:        _fbPixelId,
+      has_token:       !!_fbAccessToken,
+      token_tail:      _fbAccessToken ? _fbAccessToken.slice(-6) : '',
+      test_event_code: _fbTestEventCode,
+    });
+  }
+  if (req.method === 'POST' && urlObj.pathname === '/api/fb-config') {
+    return readBody(req).then(async b => {
+      _fbPixelId       = String(b.pixel_id        || '').trim();
+      if ('access_token' in b) _fbAccessToken = String(b.access_token || '').trim();
+      _fbTestEventCode = String(b.test_event_code || '').trim();
+      try {
+        await sbUpsert('imphq_empresa', {
+          id:         'cfg_fb_capi',
+          tipo:       'config',
+          nome:       'Facebook CAPI',
+          extra:      { pixel_id: _fbPixelId, access_token: _fbAccessToken, test_event_code: _fbTestEventCode },
+          updated_at: new Date().toISOString(),
+        });
+        console.log(`[fb-config] salvo: pixel ${_fbPixelId ? _fbPixelId.slice(0, 8) + '…' : '(vazio)'}`);
+        return sendJson(res, 200, { ok: true });
+      } catch (err) {
+        return sendJson(res, 500, { error: String(err) });
+      }
+    }).catch(err => sendJson(res, 400, { error: String(err) }));
+  }
+
   // Route: Webhooks de plataformas de venda
   if (req.method === 'POST' && urlObj.pathname === '/webhook/hotmart') {
     return handleHotmart(req, res).catch(err => {
@@ -591,11 +636,14 @@ http.createServer(async (req, res) => {
   console.log(`   API WhatsApp  → /wa/qr  /wa/status`);
   console.log(`   Webhook Hotmart → POST /webhook/hotmart`);
   console.log(`   Webhook Ticto   → POST /webhook/ticto`);
-  console.log(`   FB CAPI → ${FB_PIXEL_ID ? `pixel ${FB_PIXEL_ID.slice(0,8)}… ✓` : '⚠ FB_PIXEL_ID não configurado — edite .env'}`);
+  console.log(`   FB CAPI → ${_fbPixelId ? `pixel ${_fbPixelId.slice(0,8)}… ✓` : '⚠ não configurado — use ⚙️ no Tracker ou edite .env'}`);
 
   // Load produto→projeto map at startup and refresh every 5 min
   refreshProdutoMap().catch(() => {});
   setInterval(refreshProdutoMap, 5 * 60 * 1000);
+
+  // Load FB config from DB (overrides .env if previously saved via UI)
+  refreshFbConfig().catch(() => {});
 
   // Warm up the clawdbot module import in background
   getLoginQrModule()
