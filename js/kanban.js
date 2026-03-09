@@ -98,6 +98,8 @@ function knToggleColPrio(colId, prio) {
 function renderKanban() {
   const board = document.getElementById('kn-board');
   if (!board) return;
+  // 7.2 — responsivo: scroll horizontal no mobile
+  board.style.cssText = 'display:flex;gap:10px;overflow-x:auto;padding-bottom:12px;-webkit-overflow-scrolling:touch;scroll-snap-type:x mandatory';
   const isAll = knBoard === 'all';
 
   KN_BOARDS.forEach(b => {
@@ -212,7 +214,10 @@ function knRenderCard(c) {
   const assigneeMember = c.assignee ? EQUIPE.find(m => m.id === c.assignee || m.nome === c.assignee) : null;
   const assigneeHtml = assigneeMember
     ? `<span style="display:inline-flex;align-items:center;gap:4px;font-size:10px;color:var(--text2);background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:2px 7px">${assigneeMember.foto ? `<img src="${assigneeMember.foto}" style="width:14px;height:14px;border-radius:50%;object-fit:cover">` : assigneeMember.emoji || '👤'} ${assigneeMember.nome.split(' ')[0]}</span>` : '';
-  return `<div class="kn-card kp-${c.priority}" draggable="true" data-kn-id="${c.id}" onclick="openKanbanModal(null,'${c.id}')">
+  const hasPreview = !!(c.notes || c.deadline || c.blocked_by);
+  return `<div class="kn-card kp-${c.priority}" draggable="true" data-kn-id="${c.id}" onclick="openKanbanModal(null,'${c.id}')"
+    ${hasPreview ? `onmouseenter="knShowCardTooltip(event,'${c.id.replace(/'/g, "\\'")}')"
+    onmouseleave="knHideCardTooltip()"` : ''}>
     ${c.project ? `<div style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;background:rgba(212,168,67,.12);color:var(--gold);text-transform:uppercase;letter-spacing:.3px;margin-bottom:5px;display:inline-block">${c.project.slice(0, 14)}</div>` : ''}
     <div style="font-size:12px;font-weight:600;line-height:1.4;color:var(--text)">${c.title}</div>
     ${blockedHtml}
@@ -224,8 +229,43 @@ function knRenderCard(c) {
     <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:6px">
       <span style="font-size:9px;padding:2px 6px;border-radius:4px;font-weight:600;text-transform:uppercase;letter-spacing:.3px;background:${bColors[c.board]}">${bNames[c.board]}</span>
       ${c.priority === 'alta' ? `<span style="font-size:9px;padding:2px 6px;border-radius:4px;font-weight:600;background:rgba(224,92,92,.12);color:#e05c5c">ALTA</span>` : ''}
+      ${hasPreview ? `<span style="font-size:9px;color:var(--text3);margin-left:auto">💬</span>` : ''}
     </div>
   </div>`;
+}
+
+// ── 3.3 Card Preview Tooltip ─────────────────────────────────
+let _knTooltipTimer = null;
+function knShowCardTooltip(e, cardId) {
+  knHideCardTooltip();
+  _knTooltipTimer = setTimeout(() => {
+    const c = knCards.find(x => x.id === cardId);
+    if (!c) return;
+    const tip = document.createElement('div');
+    tip.id = 'kn-tooltip';
+    const today = new Date().toISOString().slice(0, 10);
+    const dlColor = c.deadline ? (c.deadline < today ? '#e05c5c' : c.deadline === today ? '#e8844a' : 'var(--text3)') : null;
+    tip.style.cssText = 'position:fixed;z-index:8888;max-width:260px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:11px 13px;box-shadow:0 12px 32px rgba(0,0,0,.45);pointer-events:none;font-size:11px;color:var(--text2);line-height:1.5;animation:fadeInUp .12s ease';
+    tip.innerHTML = `
+      <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:6px">${c.title}</div>
+      ${c.deadline ? `<div style="color:${dlColor};margin-bottom:4px">📅 Deadline: ${c.deadline}</div>` : ''}
+      ${c.notes ? `<div style="color:var(--text3);white-space:pre-wrap;max-height:80px;overflow:hidden">${c.notes.slice(0, 180)}${c.notes.length > 180 ? '…' : ''}</div>` : ''}
+      ${c.blocked_by ? `<div style="margin-top:6px;padding:5px 7px;border-radius:5px;background:rgba(224,92,92,.1);border:1px solid rgba(224,92,92,.2);color:#e05c5c">⚠ ${c.blocked_by}</div>` : ''}
+    `;
+    document.body.appendChild(tip);
+    // Position near cursor
+    const rect = e.currentTarget.getBoundingClientRect();
+    let top = rect.top + window.scrollY;
+    let left = rect.right + 10;
+    if (left + 270 > window.innerWidth) left = rect.left - 270;
+    tip.style.top = top + 'px';
+    tip.style.left = left + 'px';
+  }, 300);
+}
+function knHideCardTooltip() {
+  clearTimeout(_knTooltipTimer);
+  const t = document.getElementById('kn-tooltip');
+  if (t) t.remove();
 }
 
 function openKanbanModal(defaultStatus, cardId) {

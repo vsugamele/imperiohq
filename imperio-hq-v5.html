@@ -223,8 +223,18 @@
             </div>
             <div class="ov-metric-sep"></div>
             <div class="ov-metric">
-              <div class="ov-metric-num" style="color:var(--purple-bright)">6</div>
-              <div class="ov-metric-label">Departs.</div>
+              <div class="ov-metric-num" id="metric-tasks-abertas" style="color:var(--blue-bright)">0</div>
+              <div class="ov-metric-label">Tasks Abertas</div>
+            </div>
+            <div class="ov-metric-sep"></div>
+            <div class="ov-metric">
+              <div class="ov-metric-num" id="metric-receita" style="color:var(--gold)">—</div>
+              <div class="ov-metric-label">Receita</div>
+            </div>
+            <div class="ov-metric-sep"></div>
+            <div class="ov-metric">
+              <div class="ov-metric-num" id="metric-cliques" style="color:var(--purple-bright)">—</div>
+              <div class="ov-metric-label">Cliques</div>
             </div>
           </div>
 
@@ -1700,11 +1710,21 @@
           </div>
         </div>
         <div style="display:flex;flex-direction:column;gap:4px">
-          <label
-            style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">Conteúdo</label>
-          <textarea id="doc-f-body" class="brief-input"
-            style="resize:vertical;min-height:320px;font-family:monospace;font-size:12px;line-height:1.6"
-            placeholder="Escreva aqui... Suporte a Markdown básico."></textarea>
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <label
+              style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">Conteúdo</label>
+            <button id="doc-preview-btn" onclick="docToggleMdPreview()"
+              style="font-size:10px;font-weight:700;padding:3px 10px;border-radius:5px;border:1px solid var(--border2);background:var(--surface2);color:var(--text2);cursor:pointer">👁
+              Preview</button>
+          </div>
+          <div style="display:flex;gap:8px">
+            <textarea id="doc-f-body" class="brief-input"
+              style="resize:vertical;min-height:320px;font-family:monospace;font-size:12px;line-height:1.6;width:100%"
+              placeholder="Escreva aqui... Suporte a Markdown básico."></textarea>
+            <div id="doc-md-preview"
+              style="display:none;flex:1;min-height:320px;overflow-y:auto;padding:12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px">
+            </div>
+          </div>
         </div>
         <div style="display:flex;flex-direction:column;gap:4px">
           <label

@@ -89,6 +89,8 @@ function showOverview() {
   document.getElementById('nav-overview').classList.add('active');
   updateOverviewGreeting();
   initOverviewCanvas();
+  updateOverviewMetrics();
+  renderOverviewProjectCards();
 }
 
 // ── Overview: Greeting ──────────────────────────────────────
@@ -97,6 +99,38 @@ function updateOverviewGreeting() {
   const g = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
   const el = document.getElementById('ov-greeting');
   if (el) el.textContent = g;
+}
+
+// ── Overview: Real Metrics (Sprint 1.5) ────────────────────
+function updateOverviewMetrics() {
+  // Projetos totais e vendendo
+  const total = (window.PROJECTS || []).length;
+  const selling = (window.PROJECTS || []).filter(p => p.vende).length;
+  const el1 = document.getElementById('metric-total-projetos');
+  const el2 = document.getElementById('metric-selling');
+  if (el1) el1.textContent = total || '—';
+  if (el2) el2.textContent = selling || '—';
+
+  // Tasks abertas (kanban)
+  const tasksEl = document.getElementById('metric-tasks-abertas');
+  if (tasksEl) {
+    const open = (window.knCards || []).filter(c => c.status !== 'done').length;
+    tasksEl.textContent = open || '0';
+  }
+
+  // Receita rastreada no tracker
+  const revEl = document.getElementById('metric-receita');
+  if (revEl) {
+    const rev = typeof window._trRevenueTotal !== 'undefined' ? window._trRevenueTotal : 0;
+    revEl.textContent = rev > 0 ? 'R$' + rev.toLocaleString('pt-BR', { maximumFractionDigits: 0 }) : '—';
+  }
+
+  // Cliques total (tracker)
+  const clicksEl = document.getElementById('metric-cliques');
+  if (clicksEl) {
+    const cl = typeof window._trClicksTotal !== 'undefined' ? window._trClicksTotal : 0;
+    clicksEl.textContent = cl > 0 ? cl.toLocaleString('pt-BR') : '—';
+  }
 }
 
 // ── Overview: Particle Canvas ───────────────────────────────
@@ -176,6 +210,56 @@ function toggleOverviewProjects() {
   if (!el) return;
   const collapsed = el.classList.toggle('ov-collapsed');
   if (icon) icon.textContent = collapsed ? '▸' : '▾';
+}
+
+// ── Overview: Project Cards with Cover (Sprint 2.6) ────────────
+function renderOverviewProjectCards() {
+  const container = document.getElementById('overview-projects');
+  if (!container) return;
+  const projects = (window.PROJECTS || []).filter(p => !p.parent_id); // apenas root
+
+  if (!projects.length) {
+    container.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text3)">Nenhum projeto cadastrado</div>';
+    return;
+  }
+
+  const covGrad = [
+    'linear-gradient(135deg,#1a2a1a,#2d6a4f)',
+    'linear-gradient(135deg,#1a1a2e,#4a2c6e)',
+    'linear-gradient(135deg,#1e1000,#7a3d0a)',
+    'linear-gradient(135deg,#0a1828,#1a4a6e)',
+    'linear-gradient(135deg,#1a0a10,#6e1a2c)',
+    'linear-gradient(135deg,#101020,#2a2a5e)',
+  ];
+
+  const cards = projects.map((p, i) => {
+    const pct = Math.round(Object.values(p.pipeline || {}).reduce((a, b) => a + b, 0) / Math.max(Object.keys(p.pipeline || {}).length, 1));
+    const grad = p.coverGrad || covGrad[i % covGrad.length];
+    const statusColor = p.vende ? '#52b788' : '#888';
+    const statusLabel = p.vende ? '● SELL' : p.status;
+    const subCount = (window.PROJECTS || []).filter(sp => sp.parent_id === p.id).length;
+    return `<div onclick="openProject('${p.id}')" style="
+        cursor:pointer;border:1px solid var(--border);border-radius:12px;overflow:hidden;
+        background:var(--surface);transition:.15s;flex-shrink:0;width:200px;
+        " onmouseover="this.style.borderColor='rgba(201,168,76,.5)';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='var(--border)';this.style.transform=''">
+      <div style="height:64px;background:${grad};display:flex;align-items:center;justify-content:center;position:relative">
+        <span style="font-size:28px">${p.icon}</span>
+        <span style="position:absolute;top:6px;right:8px;font-size:9px;color:${statusColor};font-weight:700">${statusLabel}</span>
+      </div>
+      <div style="padding:10px 12px">
+        <div style="font-size:12px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.nome}</div>
+        <div style="font-size:10px;color:var(--text3);margin-top:1px">${p.categoria}${subCount ? ' · ' + subCount + ' sub' : ''}</div>
+        <div style="margin-top:8px">
+          <div style="height:3px;background:var(--surface2);border-radius:2px;overflow:hidden">
+            <div style="height:100%;width:${pct}%;background:var(--gold);border-radius:2px"></div>
+          </div>
+          <div style="font-size:9px;color:var(--text3);margin-top:3px">${pct}% pipeline</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  container.innerHTML = `<div style="display:flex;gap:12px;flex-wrap:wrap;padding:4px 0 8px">${cards}</div>`;
 }
 
 function showSection(s) {
@@ -2040,3 +2124,81 @@ document.getElementById('settings-modal').addEventListener('click', function (e)
   }
 })();
 
+// ═══════════════════════════════════════════════════════
+//  BUSCA GLOBAL (Sprint 1.3) — Ctrl+K
+// ═══════════════════════════════════════════════════════
+function globalSearch(q) {
+  if (!q) return [];
+  const qL = q.toLowerCase();
+  const results = [];
+  (window.PROJECTS || []).forEach(p => {
+    if ([p.nome, p.produto, p.categoria].some(v => (v || '').toLowerCase().includes(qL)))
+      results.push({ type: 'projeto', icon: p.icon || '📁', label: p.nome, sub: p.categoria, action: () => openProject(p.id) });
+  });
+  (typeof DOCS !== 'undefined' ? DOCS : []).forEach(d => {
+    if ([d.title, d.body, d.cat].some(v => (v || '').toLowerCase().includes(qL)))
+      results.push({ type: 'doc', icon: '📄', label: d.title, sub: (d.cat || '') + (d.project ? ' · ' + d.project : ''), action: () => { showDocsGlobal(); setTimeout(() => openDocModal(null, d.id), 100); } });
+  });
+  (typeof knCards !== 'undefined' ? knCards : []).forEach(c => {
+    if ([c.title, c.notes, c.project].some(v => (v || '').toLowerCase().includes(qL)))
+      results.push({ type: 'kanban', icon: '🗂', label: c.title, sub: (c.project || '') + ' · ' + ({ backlog: 'Backlog', doing: 'Fazendo', stuck: 'Travado', done: 'Feito' }[c.status] || c.status), action: () => { showKanban(); setTimeout(() => openKanbanModal(null, c.id), 150); } });
+  });
+  (typeof getLinks === 'function' ? getLinks() : []).forEach(l => {
+    if ([l.title, l.url].some(v => (v || '').toLowerCase().includes(qL)))
+      results.push({ type: 'link', icon: '🔗', label: l.title || l.url, sub: l.url, action: () => window.open(l.url, '_blank') });
+  });
+  return results.slice(0, 12);
+}
+
+function openGlobalSearch() {
+  if (document.getElementById('gs-modal')) { document.getElementById('gs-modal').remove(); return; }
+  const m = document.createElement('div');
+  m.id = 'gs-modal';
+  m.style.cssText = 'position:fixed;inset:0;z-index:9999;display:flex;align-items:flex-start;justify-content:center;padding-top:80px;background:rgba(0,0,0,.7);backdrop-filter:blur(6px)';
+  m.innerHTML = `<div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;width:520px;max-width:95vw;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.5)">
+    <div style="display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--border)">
+      <span style="font-size:16px;opacity:.5">🔍</span>
+      <input id="gs-input" type="text" placeholder="Buscar projetos, docs, tarefas, links…"
+        style="flex:1;background:none;border:none;outline:none;font-size:15px;color:var(--text);caret-color:var(--gold)" autocomplete="off">
+      <kbd style="font-size:10px;color:var(--text3);background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:2px 6px">ESC</kbd>
+    </div>
+    <div id="gs-results" style="max-height:380px;overflow-y:auto;padding:6px">
+      <div style="text-align:center;padding:24px;color:var(--text3);font-size:13px">Digite para buscar…</div>
+    </div>
+  </div>`;
+  m.addEventListener('click', e => { if (e.target === m) m.remove(); });
+  document.body.appendChild(m);
+  const input = document.getElementById('gs-input');
+  const resultsEl = document.getElementById('gs-results');
+  const tColor = { projeto: '#c9a84c', doc: '#7aa2f7', kanban: '#9b7fe8', link: '#52b788' };
+  const tRgb = { projeto: '201,168,76', doc: '122,162,247', kanban: '155,127,232', link: '82,183,136' };
+  const tLabel = { projeto: 'PROJ', doc: 'DOC', kanban: 'TASK', link: 'LINK' };
+  function render(q) {
+    const items = globalSearch(q);
+    window._gsAct = items.map(r => r.action);
+    if (!q) { resultsEl.innerHTML = '<div style="text-align:center;padding:24px;color:var(--text3);font-size:13px">Digite para buscar…</div>'; return; }
+    if (!items.length) { resultsEl.innerHTML = `<div style="text-align:center;padding:24px;color:var(--text3);font-size:13px">Sem resultados para "<b>${q}</b>"</div>`; return; }
+    resultsEl.innerHTML = items.map((r, i) =>
+      `<div style="display:flex;align-items:center;gap:10px;padding:9px 14px;cursor:pointer;border-radius:8px;transition:background .1s"
+        onmouseover="this.style.background='rgba(201,168,76,.08)'" onmouseout="this.style.background=''"
+        onclick="document.getElementById('gs-modal').remove();window._gsAct[${i}]()">
+        <span style="font-size:18px;width:24px;text-align:center">${r.icon}</span>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.label}</div>
+          <div style="font-size:11px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.sub || ''}</div>
+        </div>
+        <span style="font-size:9px;font-weight:700;padding:2px 7px;border-radius:4px;background:rgba(${tRgb[r.type]},.12);color:${tColor[r.type]}">${tLabel[r.type]}</span>
+      </div>`
+    ).join('');
+  }
+  input.addEventListener('input', () => render(input.value.trim()));
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Escape') m.remove();
+    if (e.key === 'Enter') { const f = resultsEl.querySelector('[onclick]'); if (f) f.click(); }
+  });
+  input.focus();
+}
+
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'k') { e.preventDefault(); openGlobalSearch(); }
+});

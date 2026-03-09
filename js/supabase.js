@@ -626,7 +626,9 @@ function showOpenFlow() {
   if (nav) nav.classList.add('active');
   if (Object.keys(OF.nodes).length === 0) ofLoadTemplate('model_product');
   ofRender();
-  // Inject Save/Load buttons next to the flow name input, if not already there
+  // Snapshot inicial para undo
+  if (OF_HISTORY.stack.length === 0) ofPushHistory();
+  // Inject Save/Load/Undo/Redo buttons next to the flow name input, if not already there
   if (!document.getElementById('of-flow-btns')) {
     const nameInput = document.getElementById('of-flow-name');
     if (nameInput) {
@@ -634,6 +636,14 @@ function showOpenFlow() {
       btns.id = 'of-flow-btns';
       btns.style.cssText = 'display:inline-flex;gap:6px;margin-left:8px;vertical-align:middle';
       btns.innerHTML = `
+        <button id="of-undo-btn" onclick="ofUndo()" disabled
+          style="background:rgba(255,255,255,.06);border:1px solid var(--border2);color:var(--text2);
+                 padding:4px 10px;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer"
+          title="Desfazer (Ctrl+Z)">↫ Undo</button>
+        <button id="of-redo-btn" onclick="ofRedo()" disabled
+          style="background:rgba(255,255,255,.06);border:1px solid var(--border2);color:var(--text2);
+                 padding:4px 10px;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer"
+          title="Refazer (Ctrl+Y)">↪ Redo</button>
         <button onclick="ofSaveFlowModal()"
           style="background:rgba(82,183,136,.15);border:1px solid rgba(82,183,136,.3);color:#52b788;
                  padding:4px 10px;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer"
@@ -644,6 +654,16 @@ function showOpenFlow() {
           title="Carregar fluxo salvo">📂 Carregar</button>`;
       nameInput.insertAdjacentElement('afterend', btns);
     }
+  }
+  // Atalho teclado Ctrl+Z / Ctrl+Y — registra uma vez
+  if (!window._ofKeyHandler) {
+    window._ofKeyHandler = (e) => {
+      const of = document.getElementById('view-openflow');
+      if (!of || !of.classList.contains('active')) return;
+      if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key === 'z') { e.preventDefault(); ofUndo(); }
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.shiftKey && e.key === 'Z'))) { e.preventDefault(); ofRedo(); }
+    };
+    document.addEventListener('keydown', window._ofKeyHandler);
   }
 }
 
@@ -779,6 +799,7 @@ async function ofDeleteFlowItem(id, rowEl) {
 
 
 function ofAddNode(type, x, y) {
+  ofPushHistory(); // ← snapshot antes de criar
   const wrap = document.getElementById('of-canvas-wrap');
   const rect = wrap.getBoundingClientRect();
   if (x == null) {
@@ -1058,7 +1079,54 @@ function ofSetRatio(nodeId, ratio) {
   btns.forEach(b => b.classList.toggle('active', b.textContent === ratio));
 }
 
+// ── 6.4 Undo / Redo ──────────────────────────────────────────────
+const OF_HISTORY = { stack: [], cursor: -1, maxSize: 50 };
+
+function ofPushHistory() {
+  // Truncate redo branch
+  OF_HISTORY.stack = OF_HISTORY.stack.slice(0, OF_HISTORY.cursor + 1);
+  const snapshot = {
+    nodes: JSON.parse(JSON.stringify(OF.nodes)),
+    connections: JSON.parse(JSON.stringify(OF.connections)),
+    nodeCounter: OF.nodeCounter,
+  };
+  OF_HISTORY.stack.push(snapshot);
+  if (OF_HISTORY.stack.length > OF_HISTORY.maxSize) OF_HISTORY.stack.shift();
+  OF_HISTORY.cursor = OF_HISTORY.stack.length - 1;
+  ofUpdateUndoRedoBtns();
+}
+
+function ofUndo() {
+  if (OF_HISTORY.cursor <= 0) return;
+  // Save current if no snapshot yet
+  if (OF_HISTORY.cursor === OF_HISTORY.stack.length - 1) ofPushHistory();
+  OF_HISTORY.cursor--;
+  ofRestoreHistory(OF_HISTORY.stack[OF_HISTORY.cursor]);
+}
+
+function ofRedo() {
+  if (OF_HISTORY.cursor >= OF_HISTORY.stack.length - 1) return;
+  OF_HISTORY.cursor++;
+  ofRestoreHistory(OF_HISTORY.stack[OF_HISTORY.cursor]);
+}
+
+function ofRestoreHistory(snapshot) {
+  OF.nodes = JSON.parse(JSON.stringify(snapshot.nodes));
+  OF.connections = JSON.parse(JSON.stringify(snapshot.connections));
+  OF.nodeCounter = snapshot.nodeCounter;
+  ofRender();
+  ofUpdateUndoRedoBtns();
+}
+
+function ofUpdateUndoRedoBtns() {
+  const undoBtn = document.getElementById('of-undo-btn');
+  const redoBtn = document.getElementById('of-redo-btn');
+  if (undoBtn) undoBtn.disabled = OF_HISTORY.cursor <= 0;
+  if (redoBtn) redoBtn.disabled = OF_HISTORY.cursor >= OF_HISTORY.stack.length - 1;
+}
+
 function ofDeleteNode(nodeId) {
+  ofPushHistory(); // ← snapshot antes de destruir
   delete OF.nodes[nodeId];
   OF.connections = OF.connections.filter(c => c.from !== nodeId && c.to !== nodeId);
   const el = document.getElementById('of-node-' + nodeId);
