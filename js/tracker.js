@@ -60,13 +60,40 @@ function trRender(state) {
   const totalLinks = trLinks.length;
   const cvr = totalCliques > 0 ? ((totalConv / totalCliques) * 100).toFixed(1) : '0.0';
 
+  // Expose globals for Overview metrics (Sprint 1.5)
+  window._trRevenueTotal = totalReceita;
+  window._trClicksTotal = totalCliques;
+
+  // Attribution: revenue with tracked link vs total
+  const trackedRev = totalReceita;
+  const totalVendasRev = trVendas.reduce((a, v) => a + Number(v.valor || 0), 0);
+  const untrackedRev = Math.max(0, totalVendasRev - trackedRev);
+  const attrPct = totalVendasRev > 0 ? Math.round((trackedRev / totalVendasRev) * 100) : 0;
+
   const baseUrl = `${location.protocol}//${location.host}`;
   const fmtBRL = v => v > 0
     ? 'R$\u00a0' + v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
     : '–';
 
+  // ── Attribution bar (Sprint 5.1) ──────────────────────────────
+  let html = `<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin-bottom:16px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <div style="font-size:12px;font-weight:700;color:var(--text)">📊 Atribuição de Receita</div>
+      <div style="font-size:11px;color:var(--text3)">${attrPct}% rastreada</div>
+    </div>
+    <div style="height:8px;background:var(--surface2);border-radius:4px;overflow:hidden;display:flex">
+      <div style="height:100%;width:${attrPct}%;background:var(--gold);border-radius:4px 0 0 4px;transition:.4s"></div>
+      <div style="height:100%;flex:1;background:rgba(224,92,92,.25)"></div>
+    </div>
+    <div style="display:flex;gap:16px;margin-top:8px;font-size:10px">
+      <span style="color:var(--gold)">🟡 Rastreada: ${fmtBRL(trackedRev)}</span>
+      <span style="color:#e05c5c">🔴 Não rastreada: ${fmtBRL(untrackedRev)}</span>
+      <span style="color:var(--text3);margin-left:auto">${totalVendasRev > 0 ? 'Total: ' + fmtBRL(totalVendasRev) : 'Sem vendas ainda'}</span>
+    </div>
+  </div>`;
+
   // ── Stats cards ───────────────────────────────────────────────
-  let html = `
+  html += `
   <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap">
     ${trStatCard('🔗', 'Links Ativos', trLinks.filter(l => l.ativo).length + ' / ' + totalLinks, 'var(--gold)')}
     ${trStatCard('👆', 'Cliques Totais', totalCliques.toLocaleString('pt-BR'), '#7aa2f7')}
@@ -127,6 +154,7 @@ function trRender(state) {
           <th style="text-align:center;padding:10px 8px;color:var(--text3);font-weight:600">Cliques</th>
           <th style="text-align:center;padding:10px 8px;color:var(--text3);font-weight:600">Conv.</th>
           <th style="text-align:center;padding:10px 8px;color:var(--text3);font-weight:600">CVR</th>
+          <th style="text-align:center;padding:10px 8px;color:var(--text3);font-weight:600">14d</th>
           <th style="text-align:right;padding:10px 8px;color:var(--text3);font-weight:600">Receita</th>
           <th style="text-align:right;padding:10px 14px;color:var(--text3);font-weight:600">Ações</th>
         </tr>
@@ -169,6 +197,7 @@ function trRender(state) {
         <strong>${conv > 0 ? conv : '–'}</strong>
       </td>
       <td style="padding:10px 8px;text-align:center;color:${cvr !== '–' ? 'var(--text2)' : 'var(--text3)'}">${cvr !== '–' ? cvr + '%' : '–'}</td>
+      <td style="padding:10px 8px;text-align:center">${trSparkline(link.id, trClicks)}</td>
       <td style="padding:10px 8px;text-align:right;color:${receita > 0 ? '#f7768e' : 'var(--text3)'};font-weight:${receita > 0 ? '700' : '400'};white-space:nowrap">${fmtBRL(receita)}</td>
       <td style="padding:10px 14px;text-align:right;white-space:nowrap">
         <button onclick="trCopyUrl('${trEsc(trackUrl)}')" title="Copiar link de rastreio"
@@ -203,6 +232,34 @@ function trStatCard(icon, label, value, color) {
     <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">${icon} ${label}</div>
     <div style="font-size:22px;font-weight:800;color:${color}">${value}</div>
   </div>`;
+}
+
+// ── Sparkline (Sprint 5.2) — mini SVG de cliques por dia ──────────
+function trSparkline(linkId, clicksArr) {
+  const W = 64, H = 20;
+  // últimos 14 dias
+  const days = [];
+  for (let i = 13; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    days.push(d.toISOString().slice(0, 10));
+  }
+  const counts = days.map(day =>
+    (clicksArr || []).filter(c => c.link_id === linkId && (c.created_at || '').slice(0, 10) === day).length
+  );
+  const maxVal = Math.max(...counts, 1);
+  if (maxVal === 0) return `<span style="color:var(--text3);font-size:11px">—</span>`;
+  const pts = counts.map((v, i) => {
+    const x = Math.round((i / (days.length - 1)) * (W - 4)) + 2;
+    const y = Math.round(H - 3 - ((v / maxVal) * (H - 6)));
+    return `${x},${y}`;
+  }).join(' ');
+  const lastIdx = counts.length - 1;
+  const lastX = Math.round((lastIdx / (days.length - 1)) * (W - 4)) + 2;
+  const lastY = Math.round(H - 3 - ((counts[lastIdx] / maxVal) * (H - 6)));
+  return `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" style="display:block;overflow:visible">
+    <polyline points="${pts}" fill="none" stroke="#7aa2f7" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="${lastX}" cy="${lastY}" r="2" fill="#7aa2f7"/>
+  </svg>`;
 }
 
 // ── Render painel de cliques ──────────────────────────────────────

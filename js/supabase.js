@@ -445,6 +445,31 @@ const SB = {
     return data || [];
   },
 
+  // ── OPEN FLOW (Sprint 6.1) ───────────────────────────────────
+  async loadFlows() {
+    const { data, error } = await _sb.from('imphq_flows').select('*').order('updated_at', { ascending: false });
+    if (error) { console.warn('[SB] loadFlows', error); return []; }
+    return data || [];
+  },
+  async upsertFlow(flow) {
+    const row = {
+      id: flow.id,
+      nome: flow.nome || 'Fluxo sem nome',
+      nodes: flow.nodes || [],
+      edges: flow.edges || [],
+      project_id: flow.project_id || null,
+      updated_at: new Date().toISOString(),
+    };
+    const { error } = await _sb.from('imphq_flows').upsert(row, { onConflict: 'id' });
+    if (error) { console.warn('[SB] upsertFlow', error); return false; }
+    return true;
+  },
+  async deleteFlow(id) {
+    const { error } = await _sb.from('imphq_flows').delete().eq('id', id);
+    if (error) { console.warn('[SB] deleteFlow', error); return false; }
+    return true;
+  },
+
   // ── BOOTSTRAP (seed inicial quando tabelas estão vazias) ──────
   async _countTable(table) {
     const { count, error } = await _sb.from(table).select('*', { count: 'exact', head: true });
@@ -601,7 +626,157 @@ function showOpenFlow() {
   if (nav) nav.classList.add('active');
   if (Object.keys(OF.nodes).length === 0) ofLoadTemplate('model_product');
   ofRender();
+  // Inject Save/Load buttons next to the flow name input, if not already there
+  if (!document.getElementById('of-flow-btns')) {
+    const nameInput = document.getElementById('of-flow-name');
+    if (nameInput) {
+      const btns = document.createElement('div');
+      btns.id = 'of-flow-btns';
+      btns.style.cssText = 'display:inline-flex;gap:6px;margin-left:8px;vertical-align:middle';
+      btns.innerHTML = `
+        <button onclick="ofSaveFlowModal()"
+          style="background:rgba(82,183,136,.15);border:1px solid rgba(82,183,136,.3);color:#52b788;
+                 padding:4px 10px;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer"
+          title="Salvar fluxo no Supabase">💾 Salvar</button>
+        <button onclick="ofLoadFlowModal()"
+          style="background:rgba(212,175,55,.12);border:1px solid rgba(212,175,55,.3);color:var(--gold);
+                 padding:4px 10px;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer"
+          title="Carregar fluxo salvo">📂 Carregar</button>`;
+      nameInput.insertAdjacentElement('afterend', btns);
+    }
+  }
 }
+
+// ── Open Flow: Salvar (Sprint 6.1) ─────────────────────────────
+function ofSaveFlowModal() {
+  const existing = document.getElementById('of-save-modal');
+  if (existing) existing.remove();
+  const projects = typeof PROJECTS !== 'undefined' ? PROJECTS : [];
+  const projOpts = projects.map(p =>
+    `<option value="${p.id}">${(p.icon || '📁')} ${p.nome}</option>`
+  ).join('');
+  const m = document.createElement('div');
+  m.id = 'of-save-modal';
+  m.style.cssText = 'position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.65);backdrop-filter:blur(4px)';
+  m.innerHTML = `
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;width:380px;max-width:95vw;padding:24px">
+      <div style="font-size:15px;font-weight:800;color:var(--text);margin-bottom:16px">💾 Salvar Fluxo</div>
+      <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:5px">NOME DO FLUXO *</label>
+      <input id="of-save-nome" type="text" placeholder="Ex: Fluxo de Criação de Criativos"
+        style="width:100%;box-sizing:border-box;background:var(--surface);border:1px solid var(--border2);
+               border-radius:7px;padding:8px 10px;font-size:12px;color:var(--text);outline:none;margin-bottom:12px">
+      ${projects.length ? `
+      <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:5px">PROJETO (opcional)</label>
+      <select id="of-save-proj"
+        style="width:100%;box-sizing:border-box;background:var(--surface);border:1px solid var(--border2);
+               border-radius:7px;padding:8px 10px;font-size:12px;color:var(--text);outline:none;margin-bottom:16px">
+        <option value="">— sem projeto —</option>
+        ${projOpts}
+      </select>` : '<div style="margin-bottom:16px"></div>'}
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button onclick="document.getElementById('of-save-modal').remove()"
+          style="background:transparent;border:1px solid var(--border);color:var(--text2);padding:8px 18px;border-radius:8px;font-size:13px;cursor:pointer">
+          Cancelar
+        </button>
+        <button onclick="ofSaveFlowConfirm()"
+          style="background:rgba(82,183,136,.15);border:1px solid rgba(82,183,136,.3);color:#52b788;padding:8px 22px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer">
+          Salvar
+        </button>
+      </div>
+    </div>`;
+  m.addEventListener('click', e => { if (e.target === m) m.remove(); });
+  document.body.appendChild(m);
+  document.getElementById('of-save-nome').focus();
+}
+
+async function ofSaveFlowConfirm() {
+  const nome = document.getElementById('of-save-nome')?.value.trim();
+  if (!nome) { alert('Informe o nome do fluxo'); return; }
+  const projId = document.getElementById('of-save-proj')?.value || null;
+  // Serializar nós (sem imagens base64 para não explodir o banco)
+  const nodes = Object.values(OF.nodes).map(n => {
+    const nd = Object.assign({}, n, { data: Object.assign({}, n.data) });
+    if (nd.data.src && nd.data.src.startsWith('data:')) nd.data.src = null; // skip base64
+    return nd;
+  });
+  const edges = OF.connections.map(c => ({ from: c.from, to: c.to }));
+  const flow = {
+    id: 'flow_' + Date.now(),
+    nome,
+    nodes,
+    edges,
+    project_id: projId,
+  };
+  const ok = await SB.upsertFlow(flow);
+  document.getElementById('of-save-modal')?.remove();
+  // Toast
+  const t = document.createElement('div');
+  t.textContent = ok ? '✅ Fluxo salvo!' : '❌ Erro ao salvar';
+  t.style.cssText = 'position:fixed;bottom:24px;right:24px;z-index:9999;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 16px;font-size:13px;color:var(--text);box-shadow:0 4px 20px rgba(0,0,0,.4)';
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2200);
+}
+
+// ── Open Flow: Carregar (Sprint 6.1) ───────────────────────────
+async function ofLoadFlowModal() {
+  const existing = document.getElementById('of-load-modal');
+  if (existing) existing.remove();
+  const flows = await SB.loadFlows();
+  const m = document.createElement('div');
+  m.id = 'of-load-modal';
+  m.style.cssText = 'position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.65);backdrop-filter:blur(4px)';
+  const rows = flows.length === 0
+    ? `<div style="text-align:center;padding:20px;color:var(--text3);font-size:13px">Nenhum fluxo salvo ainda</div>`
+    : flows.map(f => {
+      const dt = f.updated_at ? new Date(f.updated_at).toLocaleDateString('pt-BR') : '—';
+      const nodeCount = Array.isArray(f.nodes) ? f.nodes.length : 0;
+      return `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s"
+          onmouseover="this.style.background='rgba(255,255,255,.04)'" onmouseout="this.style.background=''"
+          onclick="ofLoadFlowConfirm(${JSON.stringify(f).replace(/"/g, '&quot;')})">
+          <div>
+            <div style="font-size:13px;font-weight:700;color:var(--text)">${f.nome}</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:2px">${nodeCount} nós · ${dt}</div>
+          </div>
+          <button onclick="event.stopPropagation();ofDeleteFlowItem('${f.id}',this.closest('[onclick]'))"
+            style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:16px;padding:2px 6px"
+            onmouseover="this.style.color='#e05c5c'" onmouseout="this.style.color='var(--text3)'"
+            title="Excluir fluxo">🗑</button>
+        </div>`;
+    }).join('');
+  m.innerHTML = `
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;width:440px;max-width:95vw;max-height:80vh;display:flex;flex-direction:column;overflow:hidden">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--border)">
+        <div style="font-size:15px;font-weight:800;color:var(--text)">📂 Carregar Fluxo</div>
+        <button onclick="document.getElementById('of-load-modal').remove()" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:20px;line-height:1">×</button>
+      </div>
+      <div style="overflow-y:auto;flex:1">${rows}</div>
+    </div>`;
+  m.addEventListener('click', e => { if (e.target === m) m.remove(); });
+  document.body.appendChild(m);
+}
+
+function ofLoadFlowConfirm(flow) {
+  if (!confirm(`Carregar "${flow.nome}"? O canvas atual será substituído.`)) return;
+  document.getElementById('of-load-modal')?.remove();
+  // Rebuild OF state
+  OF.nodes = {};
+  OF.connections = [];
+  OF.nodeCounter = 0;
+  (flow.nodes || []).forEach(n => {
+    OF.nodes[n.id] = n;
+    const num = parseInt((n.id || '').replace('n', ''));
+    if (!isNaN(num) && num > OF.nodeCounter) OF.nodeCounter = num;
+  });
+  OF.connections = (flow.edges || []).map(e => ({ from: e.from, to: e.to }));
+  ofRender();
+}
+
+async function ofDeleteFlowItem(id, rowEl) {
+  if (!confirm('Excluir este fluxo?')) return;
+  const ok = await SB.deleteFlow(id);
+  if (ok && rowEl) rowEl.remove();
+}
+
 
 function ofAddNode(type, x, y) {
   const wrap = document.getElementById('of-canvas-wrap');
