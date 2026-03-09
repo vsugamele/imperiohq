@@ -588,6 +588,26 @@ localStorage.setItem = function (key, value) {
     }, 600);
   }
 
+  if (key === 'imperio_projects_custom') {
+    clearTimeout(SB._projTimer);
+    SB._projTimer = setTimeout(() => {
+      try {
+        const projs = JSON.parse(value) || [];
+        projs.forEach(p => SB.upsertProject(p));
+      } catch (e) { }
+    }, 600);
+  }
+
+  if (key === 'imperio_projects_deleted') {
+    clearTimeout(SB._projDelTimer);
+    SB._projDelTimer = setTimeout(() => {
+      try {
+        const deletedIds = JSON.parse(value) || [];
+        deletedIds.forEach(id => SB.deleteProject(id));
+      } catch (e) { }
+    }, 600);
+  }
+
   if (key === 'imperio_kb') {
     try {
       const data = JSON.parse(value);
