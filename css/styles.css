@@ -204,6 +204,51 @@
       gap: 6px;
     }
 
+    /* ── Sidebar Nav Groups ── */
+    .sidebar-nav-group {
+      border-bottom: 1px solid var(--border);
+    }
+
+    .sidebar-nav-label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 14px 6px;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text3);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      cursor: pointer;
+      user-select: none;
+      transition: .15s;
+    }
+
+    .sidebar-nav-label:hover {
+      color: var(--text2);
+    }
+
+    .sidebar-nav-items {
+      overflow: hidden;
+      max-height: 600px;
+      transition: max-height .25s ease, opacity .2s ease;
+      opacity: 1;
+    }
+
+    .sidebar-nav-items.snav-collapsed {
+      max-height: 0;
+      opacity: 0;
+    }
+
+    .snav-arrow {
+      font-size: 10px;
+      transition: transform .2s ease;
+    }
+
+    .snav-arrow.snav-collapsed {
+      transform: rotate(-90deg);
+    }
+
     /* ── MAIN ── */
     #main {
       flex: 1;
@@ -252,8 +297,21 @@
       display: none;
     }
 
+    @keyframes panel-fade-in {
+      from {
+        opacity: 0;
+        transform: translateY(4px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
     .panel.active {
       display: block;
+      animation: panel-fade-in .18s ease;
     }
 
     .panel.active.flex-panel {
@@ -3814,4 +3872,65 @@
 
     .of-node-expanded .of-node-body {
       min-height: 200px;
+    }
+
+    /* ── Mobile Responsive (Sprint 7.1) ── */
+    @media (max-width: 768px) {
+      :root {
+        --sidebar-w: 240px;
+      }
+
+      #sidebar {
+        position: fixed;
+        left: 0;
+        top: var(--header-h);
+        height: calc(100vh - var(--header-h));
+        z-index: 100;
+        transform: translateX(-100%);
+        transition: transform .25s ease;
+        box-shadow: 4px 0 24px rgba(0, 0, 0, .5);
+      }
+
+      #sidebar.sidebar-mobile-open {
+        transform: translateX(0);
+      }
+
+      #sidebar-overlay {
+        z-index: 99;
+      }
+
+      #main {
+        width: 100vw;
+      }
+
+      #header .header-right .pill {
+        display: none;
+      }
+
+      #header .header-right .pill:last-child {
+        display: flex;
+      }
+
+      #global-search {
+        max-width: 180px;
+      }
+
+      /* Hamburger button for mobile */
+      #header::before {
+        content: '☰';
+        font-size: 18px;
+        color: var(--text3);
+        cursor: pointer;
+        padding: 0 8px 0 0;
+        flex-shrink: 0;
+        order: -1;
+      }
+
+      #header {
+        cursor: auto;
+      }
+
+      #header::before {
+        pointer-events: all;
+      }
     }

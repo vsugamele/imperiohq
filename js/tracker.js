@@ -174,6 +174,9 @@ function trRender(state) {
         <button onclick="trCopyUrl('${trEsc(trackUrl)}')" title="Copiar link de rastreio"
           style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:14px;padding:2px 5px"
           onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text3)'">📋</button>
+        <button onclick="trShowQR('${trEsc(trackUrl)}')" title="Ver QR Code"
+          style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:14px;padding:2px 5px"
+          onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--text3)'">◫</button>
         <button onclick="trOpenModal('${link.id}')" title="Editar"
           style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:14px;padding:2px 5px"
           onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text3)'">✏️</button>
@@ -449,6 +452,34 @@ function trToast(msg) {
     animation:fadeIn .2s ease`;
   document.body.appendChild(t);
   setTimeout(() => t.remove(), 2200);
+}
+
+// ── QR Code modal (Sprint 5.3) ────────────────────────────────────
+function trShowQR(url) {
+  let existing = document.getElementById('tr-qr-modal');
+  if (existing) existing.remove();
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(url)}&bgcolor=111111&color=d4a843&margin=12`;
+  const m = document.createElement('div');
+  m.id = 'tr-qr-modal';
+  m.style.cssText = 'position:fixed;inset:0;z-index:9998;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.7)';
+  m.innerHTML = `
+    <div style="background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:24px;text-align:center;max-width:290px;width:90%;box-shadow:0 8px 40px rgba(0,0,0,.8)">
+      <div style="font-size:12px;font-weight:700;color:var(--text3);letter-spacing:.8px;margin-bottom:14px">QR CODE — LINK DE RASTREIO</div>
+      <img src="${qrUrl}" style="width:220px;height:220px;border-radius:10px;display:block;margin:0 auto">
+      <div style="font-size:9px;color:var(--text3);margin-top:10px;word-break:break-all;padding:0 4px">${url}</div>
+      <div style="display:flex;gap:8px;margin-top:14px">
+        <button onclick="navigator.clipboard.writeText('${url}');trToast('Link copiado!')"
+          style="flex:1;background:var(--gold-dim);border:1px solid rgba(201,168,76,.3);color:var(--gold);padding:7px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer">
+          📋 Copiar Link
+        </button>
+        <button onclick="document.getElementById('tr-qr-modal').remove()"
+          style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text3);padding:7px;border-radius:8px;font-size:11px;cursor:pointer">
+          Fechar
+        </button>
+      </div>
+    </div>`;
+  m.addEventListener('click', e => { if (e.target === m) m.remove(); });
+  document.body.appendChild(m);
 }
 
 // ── Helpers ───────────────────────────────────────────────────────

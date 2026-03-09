@@ -81,3 +81,63 @@ function toggleSidebarCat(cat) {
   renderSidebar();
 }
 
+// ── Sidebar Nav Group Toggle (Sprint 1.1) ──────────────────────
+let _snavCollapsed = JSON.parse(localStorage.getItem('imperio_snav_collapsed') || '{}');
+
+function toggleSidebarGroup(group) {
+  _snavCollapsed[group] = !_snavCollapsed[group];
+  localStorage.setItem('imperio_snav_collapsed', JSON.stringify(_snavCollapsed));
+  _applySnavState();
+}
+
+function _applySnavState() {
+  ['gestao', 'ia', 'config'].forEach(g => {
+    const items = document.getElementById('snav-items-' + g);
+    const arrow = document.getElementById('snav-arrow-' + g);
+    if (!items) return;
+    if (_snavCollapsed[g]) {
+      items.classList.add('snav-collapsed');
+      if (arrow) arrow.classList.add('snav-collapsed');
+    } else {
+      items.classList.remove('snav-collapsed');
+      if (arrow) arrow.classList.remove('snav-collapsed');
+    }
+  });
+}
+
+// Apply on load
+document.addEventListener('DOMContentLoaded', () => {
+  _applySnavState();
+
+  // ── Mobile sidebar swipe-to-close (Sprint 7.1) ────────────────
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+  let _touchStartX = 0;
+
+  document.addEventListener('touchstart', e => { _touchStartX = e.touches[0].clientX; }, { passive: true });
+  document.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - _touchStartX;
+    // swipe left → close sidebar
+    if (dx < -50 && sidebar && sidebar.classList.contains('sidebar-mobile-open')) {
+      closeSidebarMobile();
+    }
+    // swipe right from left edge → open sidebar
+    if (dx > 50 && _touchStartX < 24) {
+      openSidebarMobile();
+    }
+  }, { passive: true });
+});
+
+function openSidebarMobile() {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+  if (sidebar) sidebar.classList.add('sidebar-mobile-open');
+  if (overlay) overlay.style.display = 'block';
+}
+
+function closeSidebarMobile() {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+  if (sidebar) sidebar.classList.remove('sidebar-mobile-open');
+  if (overlay) overlay.style.display = 'none';
+}

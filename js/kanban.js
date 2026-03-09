@@ -88,6 +88,13 @@ function knFilteredCards(boardFilter) {
   });
 }
 
+// ── Priority filter state per column (Sprint 3.1) ───────────
+let _knColPrioFilter = {};
+function knToggleColPrio(colId, prio) {
+  _knColPrioFilter[colId] = _knColPrioFilter[colId] === prio ? null : prio;
+  renderKanban();
+}
+
 function renderKanban() {
   const board = document.getElementById('kn-board');
   if (!board) return;
@@ -103,16 +110,30 @@ function renderKanban() {
   if (allTab) allTab.className = 'kn-btab' + (knBoard === 'all' ? ' active' : '');
 
   board.innerHTML = KN_COLS.map(col => {
-    const list = knFilteredCards(isAll ? null : knBoard).filter(c => c.status === col.id);
+    let list = knFilteredCards(isAll ? null : knBoard).filter(c => c.status === col.id);
+    // Apply priority filter if set for this column
+    const pf = _knColPrioFilter[col.id];
+    if (pf) list = list.filter(c => c.priority === pf);
     const cardsHtml = list.length
       ? list.map(c => knRenderCard(c)).join('')
       : `<div class="kn-empty">Nenhuma tarefa</div>`;
+    const prioChips = ['alta', 'media', 'baixa'].map(p => {
+      const colors = { alta: '#e05c5c', media: 'var(--gold)', baixa: '#52b788' };
+      const labels = { alta: '🔴', media: '🟡', baixa: '🟢' };
+      const active = pf === p;
+      return `<span onclick="knToggleColPrio('${col.id}','${p}')" title="Filtrar ${p}"
+        style="cursor:pointer;font-size:9px;padding:1px 5px;border-radius:8px;
+        background:${active ? `rgba(${p === 'alta' ? '224,92,92' : p === 'media' ? '201,168,76' : '82,183,136'},.2)` : 'transparent'};
+        color:${active ? colors[p] : 'var(--text3)'};border:1px solid ${active ? colors[p] : 'transparent'};
+        transition:.12s">${labels[p]}</span>`;
+    }).join('');
     return `<div class="kn-col ${col.cls}">
       <div class="kn-col-hdr">
         <div class="kn-col-hdr-title">${col.label}</div>
         <div class="kn-col-cnt">${list.length}</div>
         <button class="kn-col-add" onclick="openKanbanModal('${col.id}')">+</button>
       </div>
+      <div style="display:flex;gap:3px;padding:2px 10px 6px">${prioChips}</div>
       <div class="kn-cards">${cardsHtml}</div>
     </div>`;
   }).join('');
